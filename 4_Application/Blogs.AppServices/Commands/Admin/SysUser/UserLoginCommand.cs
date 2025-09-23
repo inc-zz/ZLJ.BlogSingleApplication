@@ -1,0 +1,29 @@
+﻿using Blogs.Core.Models;
+using Blogs.Domain.ValueValidator.User;
+using FluentValidation;
+using System;
+using System.Threading.Tasks;
+
+namespace Blogs.AppServices.Commands.Admin.SysUser
+{
+
+    /// <summary>
+    /// 用户登录命令
+    /// </summary>
+    public class UserLoginCommand : UserCommand, IRequest<TokenResult>
+    {
+
+        public UserLoginCommand(string account, string password)
+        {
+            Account = account;
+            Password = password;
+        }
+
+        public override bool IsValid()
+        {
+            ValidationResult = new UserLoginCommandValidation().Validate(this);
+            return ValidationResult.IsValid;
+        }
+
+    }
+}

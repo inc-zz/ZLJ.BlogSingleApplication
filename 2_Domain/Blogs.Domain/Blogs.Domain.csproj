@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="MediatR" Version="13.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.20" />
+    <PackageReference Include="SqlSugarCore" Version="5.1.4.200" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="IRepositorys\Blogs\" />
+  </ItemGroup>
+
+</Project>

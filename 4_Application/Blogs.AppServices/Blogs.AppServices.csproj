@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\1_Shared\Blogs.Common\Blogs.Common.csproj" />
+    <ProjectReference Include="..\..\2_Domain\Blogs.Domain\Blogs.Domain.csproj" />
+    <ProjectReference Include="..\..\3_Infrastructure\Blogs.Infrastructure\Blogs.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\Blogs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="CommandHandlers\Admin\UserLoginCommandHandler.cs" />
+  </ItemGroup>
+
+</Project>
