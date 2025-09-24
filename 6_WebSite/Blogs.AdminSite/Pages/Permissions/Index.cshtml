@@ -1,0 +1,1024 @@
+﻿@page
+@model Blogs.AdminSite.Pages.Permissions.IndexModel
+@{
+    Layout = "_layout";
+    ViewData["Title"] = "权限管理";
+}
+
+<div class="container-fluid">
+    <!-- 导航标签 -->
+    <ul class="nav nav-tabs" id="permissionTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">
+                <i class="fas fa-users me-2"></i>用户管理
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles" type="button" role="tab" aria-controls="roles" aria-selected="false">
+                <i class="fas fa-user-tag me-2"></i>角色管理
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="permissions-tab" data-bs-toggle="tab" data-bs-target="#permissions" type="button" role="tab" aria-controls="permissions" aria-selected="false">
+                <i class="fas fa-key me-2"></i>权限管理
+            </button>
+        </li>
+    </ul>
+
+    <!-- 标签内容 -->
+    <div class="tab-content" id="permissionTabsContent">
+        <!-- 用户管理 -->
+        <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+            <!-- 搜索和操作区域 -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">用户名</label>
+                            <div class="search-container">
+                                <input type="text" class="form-control" id="searchUsername" placeholder="请输入用户名">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">邮箱</label>
+                            <div class="search-container">
+                                <input type="text" class="form-control" id="searchEmail" placeholder="请输入邮箱">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">状态</label>
+                            <select class="form-select" id="searchUserStatus">
+                                <option value="">全部</option>
+                                <option value="1">启用</option>
+                                <option value="0">禁用</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-primary w-100" id="searchUserBtn">
+                                <i class="fas fa-search me-2"></i>搜索
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <div>
+                            <button class="btn btn-success" id="addUserBtn">
+                                <i class="fas fa-plus me-2"></i> 添加用户
+                            </button>
+                            <button class="btn btn-danger" id="batchDeleteUserBtn">
+                                <i class="fas fa-trash me-2"></i> 批量删除
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-secondary" id="refreshUserBtn">
+                                <i class="fas fa-refresh me-2"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 用户表格 -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="userTable">
+                            <thead>
+                                <tr>
+                                    <th width="40">
+                                        <input type="checkbox" id="checkAllUsers">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>邮箱</th>
+                                    <th>角色</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th width="280">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="user-checkbox" value="1"></td>
+                                    <td>1</td>
+                                    <td>admin</td>
+                                    <td>admin@example.com</td>
+                                    <td>
+                                        <span class="badge bg-danger role-badge">管理员</span>
+                                        <span class="badge bg-primary role-badge">编辑</span>
+                                    </td>
+                                    <td><span class="badge bg-success">启用</span></td>
+                                    <td>2023-01-15</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-user-btn btn-fixed-width" data-id="1">
+                                            <i class="fas fa-edit btn-icon"></i>编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-info assign-role-btn btn-fixed-width" data-id="1">
+                                            <i class="fas fa-user-tag btn-icon"></i>分配角色
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-user-btn btn-fixed-width" data-id="1">
+                                            <i class="fas fa-trash btn-icon"></i>删除
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="user-checkbox" value="2"></td>
+                                    <td>2</td>
+                                    <td>zhangsan</td>
+                                    <td>zhangsan@example.com</td>
+                                    <td>
+                                        <span class="badge bg-primary role-badge">编辑</span>
+                                    </td>
+                                    <td><span class="badge bg-success">启用</span></td>
+                                    <td>2023-02-20</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-user-btn btn-fixed-width" data-id="2">
+                                            <i class="fas fa-edit btn-icon"></i>编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-info assign-role-btn btn-fixed-width" data-id="2">
+                                            <i class="fas fa-user-tag btn-icon"></i>分配角色
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-user-btn btn-fixed-width" data-id="2">
+                                            <i class="fas fa-trash btn-icon"></i>删除
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>显示第 1 到 2 条，共 10 条记录</div>
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item disabled"><a class="page-link" href="#">上一页</a></li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">下一页</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 角色管理 -->
+        <div class="tab-pane fade" id="roles" role="tabpanel" aria-labelledby="roles-tab">
+            <!-- 搜索和操作区域 -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">角色名称</label>
+                            <div class="search-container">
+                                <input type="text" class="form-control" id="searchRoleName" placeholder="请输入角色名称">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">状态</label>
+                            <select class="form-select" id="searchRoleStatus">
+                                <option value="">全部</option>
+                                <option value="1">启用</option>
+                                <option value="0">禁用</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-primary w-100" id="searchRoleBtn">
+                                <i class="fas fa-search me-2"></i>搜索
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <div>
+                            <button class="btn btn-success" id="addRoleBtn">
+                                <i class="fas fa-plus me-2"></i> 添加角色
+                            </button>
+                            <button class="btn btn-danger" id="batchDeleteRoleBtn">
+                                <i class="fas fa-trash me-2"></i> 批量删除
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-secondary" id="refreshRoleBtn">
+                                <i class="fas fa-refresh me-2"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 角色表格 -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="roleTable">
+                            <thead>
+                                <tr>
+                                    <th width="40">
+                                        <input type="checkbox" id="checkAllRoles">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>角色名称</th>
+                                    <th>描述</th>
+                                    <th>权限数量</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th width="280">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="role-checkbox" value="1"></td>
+                                    <td>1</td>
+                                    <td>管理员</td>
+                                    <td>系统管理员，拥有所有权限</td>
+                                    <td>25</td>
+                                    <td><span class="badge bg-success">启用</span></td>
+                                    <td>2023-01-15</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-role-btn btn-fixed-width" data-id="1">
+                                            <i class="fas fa-edit btn-icon"></i>编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-info assign-permission-btn btn-fixed-width" data-id="1">
+                                            <i class="fas fa-key btn-icon"></i>分配权限
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-role-btn btn-fixed-width" data-id="1">
+                                            <i class="fas fa-trash btn-icon"></i>删除
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="role-checkbox" value="2"></td>
+                                    <td>2</td>
+                                    <td>编辑</td>
+                                    <td>内容编辑，拥有文章管理权限</td>
+                                    <td>12</td>
+                                    <td><span class="badge bg-success">启用</span></td>
+                                    <td>2023-02-20</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-role-btn btn-fixed-width" data-id="2">
+                                            <i class="fas fa-edit btn-icon"></i>编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-info assign-permission-btn btn-fixed-width" data-id="2">
+                                            <i class="fas fa-key btn-icon"></i>分配权限
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-role-btn btn-fixed-width" data-id="2">
+                                            <i class="fas fa-trash btn-icon"></i>删除
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>显示第 1 到 2 条，共 8 条记录</div>
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item disabled"><a class="page-link" href="#">上一页</a></li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">下一页</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 权限管理 -->
+        <div class="tab-pane fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab">
+            <!-- 搜索和操作区域 -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">权限名称</label>
+                            <div class="search-container">
+                                <input type="text" class="form-control" id="searchPermissionName" placeholder="请输入权限名称">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">资源</label>
+                            <select class="form-select" id="searchResource">
+                                <option value="">全部</option>
+                                <option value="user">用户</option>
+                                <option value="role">角色</option>
+                                <option value="permission">权限</option>
+                                <option value="article">文章</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-primary w-100" id="searchPermissionBtn">
+                                <i class="fas fa-search me-2"></i>搜索
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <div>
+                            <button class="btn btn-success" id="addPermissionBtn">
+                                <i class="fas fa-plus me-2"></i> 添加权限
+                            </button>
+                            <button class="btn btn-danger" id="batchDeletePermissionBtn">
+                                <i class="fas fa-trash me-2"></i> 批量删除
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-secondary" id="refreshPermissionBtn">
+                                <i class="fas fa-refresh me-2"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 权限表格 -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="permissionTable">
+                            <thead>
+                                <tr>
+                                    <th width="40">
+                                        <input type="checkbox" id="checkAllPermissions">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>权限名称</th>
+                                    <th>资源</th>
+                                    <th>操作</th>
+                                    <th>描述</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th width="180">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="permission-checkbox" value="1"></td>
+                                    <td>1</td>
+                                    <td>用户管理</td>
+                                    <td>user</td>
+                                    <td>read,write,delete</td>
+                                    <td>管理用户信息</td>
+                                    <td><span class="badge bg-success">启用</span></td>
+                                    <td>2023-01-15</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-permission-btn btn-fixed-width" data-id="1">
+                                            <i class="fas fa-edit btn-icon"></i>编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-permission-btn btn-fixed-width" data-id="1">
+                                            <i class="fas fa-trash btn-icon"></i>删除
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="permission-checkbox" value="2"></td>
+                                    <td>2</td>
+                                    <td>文章编辑</td>
+                                    <td>article</td>
+                                    <td>read,write</td>
+                                    <td>编辑文章内容</td>
+                                    <td><span class="badge bg-success">启用</span></td>
+                                    <td>2023-02-20</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-permission-btn btn-fixed-width" data-id="2">
+                                            <i class="fas fa-edit btn-icon"></i>编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-permission-btn btn-fixed-width" data-id="2">
+                                            <i class="fas fa-trash btn-icon"></i>删除
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>显示第 1 到 2 条，共 15 条记录</div>
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item disabled"><a class="page-link" href="#">上一页</a></li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">下一页</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 模态框区域 -->
+<!-- 添加/编辑用户模态框 -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalTitle">添加用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="layui-form" id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">用户名</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="username" name="username" lay-verify="required" placeholder="请输入用户名" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">邮箱</label>
+                        <div class="layui-input-block">
+                            <input type="email" id="email" name="email" lay-verify="required|email" placeholder="请输入邮箱" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item" id="passwordField">
+                        <label class="layui-form-label">密码</label>
+                        <div class="layui-input-block">
+                            <input type="password" id="password" name="password" lay-verify="required|pass" placeholder="请输入密码" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" id="userStatus" name="status" lay-skin="switch" lay-text="启用|禁用" checked>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveUserBtn">
+                    <i class="fas fa-save me-2"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 分配角色模态框 -->
+<div class="modal fade" id="assignRoleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">分配角色</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>为用户 <strong id="assignRoleUserName">admin</strong> 分配角色：</p>
+                <div class="permission-tree">
+                    <div class="permission-item">
+                        <input type="checkbox" id="role1" class="role-checkbox-modal" value="1">
+                        <label for="role1">管理员</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="role2" class="role-checkbox-modal" value="2">
+                        <label for="role2">编辑</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="role3" class="role-checkbox-modal" value="3">
+                        <label for="role3">普通用户</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveAssignRoleBtn">
+                    <i class="fas fa-save me-2"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑角色模态框 -->
+<div class="modal fade" id="roleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="roleModalTitle">添加角色</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="layui-form" id="roleForm">
+                    <input type="hidden" id="roleId">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">角色名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="roleName" name="roleName" lay-verify="required" placeholder="请输入角色名称" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">描述</label>
+                        <div class="layui-input-block">
+                            <textarea id="roleDescription" name="roleDescription" placeholder="请输入角色描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" id="roleStatus" name="status" lay-skin="switch" lay-text="启用|禁用" checked>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveRoleBtn">
+                    <i class="fas fa-save me-2"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 分配权限模态框 -->
+<div class="modal fade" id="assignPermissionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">分配权限</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>为角色 <strong id="assignPermissionRoleName">管理员</strong> 分配权限：</p>
+                <div class="permission-tree">
+                    <div class="permission-group">用户管理</div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm1" class="permission-checkbox-modal" value="1">
+                        <label for="perm1">查看用户</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm2" class="permission-checkbox-modal" value="2">
+                        <label for="perm2">添加用户</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm3" class="permission-checkbox-modal" value="3">
+                        <label for="perm3">编辑用户</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm4" class="permission-checkbox-modal" value="4">
+                        <label for="perm4">删除用户</label>
+                    </div>
+
+                    <div class="permission-group">文章管理</div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm5" class="permission-checkbox-modal" value="5">
+                        <label for="perm5">查看文章</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm6" class="permission-checkbox-modal" value="6">
+                        <label for="perm6">发布文章</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm7" class="permission-checkbox-modal" value="7">
+                        <label for="perm7">编辑文章</label>
+                    </div>
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm8" class="permission-checkbox-modal" value="8">
+                        <label for="perm8">删除文章</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveAssignPermissionBtn">
+                    <i class="fas fa-save me-2"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑权限模态框 -->
+<div class="modal fade" id="permissionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="permissionModalTitle">添加权限</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="layui-form" id="permissionForm">
+                    <input type="hidden" id="permissionId">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">权限名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="permissionName" name="permissionName" lay-verify="required" placeholder="请输入权限名称" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">资源</label>
+                        <div class="layui-input-block">
+                            <select id="resource" name="resource" lay-verify="required">
+                                <option value="">请选择资源</option>
+                                <option value="user">用户</option>
+                                <option value="role">角色</option>
+                                <option value="permission">权限</option>
+                                <option value="article">文章</option>
+                                <option value="category">分类</option>
+                                <option value="tag">标签</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">操作</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="action" name="action" lay-verify="required" placeholder="如: read,write,delete" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">描述</label>
+                        <div class="layui-input-block">
+                            <textarea id="permissionDescription" name="permissionDescription" placeholder="请输入权限描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" id="permissionStatus" name="status" lay-skin="switch" lay-text="启用|禁用" checked>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="savePermissionBtn">
+                    <i class="fas fa-save me-2"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Layui JS -->
+<script src="https://cdn.jsdelivr.net/npm/layui@2.8.18/dist/layui.min.js"></script>
+
+<script>
+    layui.use(['form', 'layer'], function() {
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ = layui.$;
+
+        // 设置表单验证
+        form.verify({
+            pass: [/^[\S]{6,12}$/, '密码必须6到12位，且不能出现空格']
+        });
+
+        form.render();
+
+        // 用户管理功能
+        // 全选/取消全选
+        $('#checkAllUsers').on('change', function() {
+            $('.user-checkbox').prop('checked', $(this).prop('checked'));
+        });
+
+        // 添加用户按钮点击事件
+        $('#addUserBtn').on('click', function() {
+            $('#userModalTitle').text('添加用户');
+            $('#userForm')[0].reset();
+            $('#passwordField').show();
+            $('#userId').val('');
+            form.render();
+
+            var modal = new bootstrap.Modal(document.getElementById('userModal'));
+            modal.show();
+        });
+
+        // 编辑用户按钮点击事件
+        $('.edit-user-btn').on('click', function() {
+            var userId = $(this).data('id');
+            var row = $(this).closest('tr');
+
+            // 模拟从服务器获取数据
+            $('#userModalTitle').text('编辑用户');
+            $('#userId').val(userId);
+            $('#username').val(row.find('td:eq(2)').text());
+            $('#email').val(row.find('td:eq(3)').text());
+
+            // 设置状态
+            var status = row.find('td:eq(5)').text().trim() === '启用' ? true : false;
+            $('#userStatus').prop('checked', status);
+
+            // 编辑时隐藏密码字段或设置为可选
+            $('#passwordField').hide();
+
+            form.render();
+
+            var modal = new bootstrap.Modal(document.getElementById('userModal'));
+            modal.show();
+        });
+
+        // 分配角色按钮点击事件
+        $('.assign-role-btn').on('click', function() {
+            var userId = $(this).data('id');
+            var userName = $(this).closest('tr').find('td:eq(2)').text();
+
+            $('#assignRoleUserName').text(userName);
+
+            // 模拟从服务器获取用户当前角色
+            $('.role-checkbox-modal').prop('checked', false);
+            if (userId == 1) {
+                $('#role1').prop('checked', true);
+                $('#role2').prop('checked', true);
+            } else if (userId == 2) {
+                $('#role2').prop('checked', true);
+            }
+
+            var modal = new bootstrap.Modal(document.getElementById('assignRoleModal'));
+            modal.show();
+        });
+
+        // 保存用户
+        $('#saveUserBtn').on('click', function() {
+            // 表单验证
+            if ($('#username').val().trim() === '') {
+                layer.msg('请输入用户名', {icon: 2});
+                return;
+            }
+
+            if ($('#email').val().trim() === '') {
+                layer.msg('请输入邮箱', {icon: 2});
+                return;
+            }
+
+            // 如果是添加用户，需要验证密码
+            if ($('#userId').val() === '' && $('#password').val().trim() === '') {
+                layer.msg('请输入密码', {icon: 2});
+                return;
+            }
+
+            // 模拟保存操作
+            layer.msg('保存成功', {icon: 1});
+
+            // 关闭模态框
+            var modal = bootstrap.Modal.getInstance(document.getElementById('userModal'));
+            modal.hide();
+        });
+
+        // 保存分配角色
+        $('#saveAssignRoleBtn').on('click', function() {
+            var selectedRoles = [];
+            $('.role-checkbox-modal:checked').each(function() {
+                selectedRoles.push($(this).next('label').text());
+            });
+
+            // 模拟保存操作
+            layer.msg('角色分配成功: ' + selectedRoles.join(', '), {icon: 1});
+
+            // 关闭模态框
+            var modal = bootstrap.Modal.getInstance(document.getElementById('assignRoleModal'));
+            modal.hide();
+        });
+
+        // 删除用户
+        $('.delete-user-btn').on('click', function() {
+            var userId = $(this).data('id');
+            var userName = $(this).closest('tr').find('td:eq(2)').text();
+
+            layer.confirm('确定要删除用户 "' + userName + '" 吗？', {
+                icon: 3,
+                title: '删除确认'
+            }, function(index) {
+                // 模拟删除操作
+                layer.msg('删除成功', {icon: 1});
+                layer.close(index);
+            });
+        });
+
+        // 批量删除用户
+        $('#batchDeleteUserBtn').on('click', function() {
+            var checkedBoxes = $('.user-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                layer.msg('请选择要删除的用户', {icon: 2});
+                return;
+            }
+
+            var userNames = [];
+            checkedBoxes.each(function() {
+                var userName = $(this).closest('tr').find('td:eq(2)').text();
+                userNames.push(userName);
+            });
+
+            layer.confirm('确定要删除选中的 ' + checkedBoxes.length + ' 个用户吗？<br>' + userNames.join(', '), {
+                icon: 3,
+                title: '批量删除确认'
+            }, function(index) {
+                // 模拟删除操作
+                layer.msg('删除成功', {icon: 1});
+                layer.close(index);
+            });
+        });
+
+        // 角色管理功能
+        // 全选/取消全选
+        $('#checkAllRoles').on('change', function() {
+            $('.role-checkbox').prop('checked', $(this).prop('checked'));
+        });
+
+        // 添加角色按钮点击事件
+        $('#addRoleBtn').on('click', function() {
+            $('#roleModalTitle').text('添加角色');
+            $('#roleForm')[0].reset();
+            $('#roleId').val('');
+            form.render();
+
+            var modal = new bootstrap.Modal(document.getElementById('roleModal'));
+            modal.show();
+        });
+
+        // 编辑角色按钮点击事件
+        $('.edit-role-btn').on('click', function() {
+            var roleId = $(this).data('id');
+            var row = $(this).closest('tr');
+
+            // 模拟从服务器获取数据
+            $('#roleModalTitle').text('编辑角色');
+            $('#roleId').val(roleId);
+            $('#roleName').val(row.find('td:eq(2)').text());
+            $('#roleDescription').val(row.find('td:eq(3)').text());
+
+            // 设置状态
+            var status = row.find('td:eq(5)').text().trim() === '启用' ? true : false;
+            $('#roleStatus').prop('checked', status);
+
+            form.render();
+
+            var modal = new bootstrap.Modal(document.getElementById('roleModal'));
+            modal.show();
+        });
+
+        // 分配权限按钮点击事件
+        $('.assign-permission-btn').on('click', function() {
+            var roleId = $(this).data('id');
+            var roleName = $(this).closest('tr').find('td:eq(2)').text();
+
+            $('#assignPermissionRoleName').text(roleName);
+
+            // 模拟从服务器获取角色当前权限
+            $('.permission-checkbox-modal').prop('checked', false);
+            if (roleId == 1) {
+                // 管理员拥有所有权限
+                $('.permission-checkbox-modal').prop('checked', true);
+            } else if (roleId == 2) {
+                // 编辑拥有文章相关权限
+                $('#perm5, #perm6, #perm7, #perm8').prop('checked', true);
+            }
+
+            var modal = new bootstrap.Modal(document.getElementById('assignPermissionModal'));
+            modal.show();
+        });
+
+        // 保存角色
+        $('#saveRoleBtn').on('click', function() {
+            // 表单验证
+            if ($('#roleName').val().trim() === '') {
+                layer.msg('请输入角色名称', {icon: 2});
+                return;
+            }
+
+            // 模拟保存操作
+            layer.msg('保存成功', {icon: 1});
+
+            // 关闭模态框
+            var modal = bootstrap.Modal.getInstance(document.getElementById('roleModal'));
+            modal.hide();
+        });
+
+        // 保存分配权限
+        $('#saveAssignPermissionBtn').on('click', function() {
+            var selectedPermissions = [];
+            $('.permission-checkbox-modal:checked').each(function() {
+                selectedPermissions.push($(this).next('label').text());
+            });
+
+            // 模拟保存操作
+            layer.msg('权限分配成功: ' + selectedPermissions.length + ' 个权限', {icon: 1});
+
+            // 关闭模态框
+            var modal = bootstrap.Modal.getInstance(document.getElementById('assignPermissionModal'));
+            modal.hide();
+        });
+
+        // 删除角色
+        $('.delete-role-btn').on('click', function() {
+            var roleId = $(this).data('id');
+            var roleName = $(this).closest('tr').find('td:eq(2)').text();
+
+            layer.confirm('确定要删除角色 "' + roleName + '" 吗？', {
+                icon: 3,
+                title: '删除确认'
+            }, function(index) {
+                // 模拟删除操作
+                layer.msg('删除成功', {icon: 1});
+                layer.close(index);
+            });
+        });
+
+        // 权限管理功能
+        // 全选/取消全选
+        $('#checkAllPermissions').on('change', function() {
+            $('.permission-checkbox').prop('checked', $(this).prop('checked'));
+        });
+
+        // 添加权限按钮点击事件
+        $('#addPermissionBtn').on('click', function() {
+            $('#permissionModalTitle').text('添加权限');
+            $('#permissionForm')[0].reset();
+            $('#permissionId').val('');
+            form.render();
+
+            var modal = new bootstrap.Modal(document.getElementById('permissionModal'));
+            modal.show();
+        });
+
+        // 编辑权限按钮点击事件
+        $('.edit-permission-btn').on('click', function() {
+            var permissionId = $(this).data('id');
+            var row = $(this).closest('tr');
+
+            // 模拟从服务器获取数据
+            $('#permissionModalTitle').text('编辑权限');
+            $('#permissionId').val(permissionId);
+            $('#permissionName').val(row.find('td:eq(2)').text());
+            $('#resource').val(row.find('td:eq(3)').text());
+            $('#action').val(row.find('td:eq(4)').text());
+            $('#permissionDescription').val(row.find('td:eq(5)').text());
+
+            // 设置状态
+            var status = row.find('td:eq(6)').text().trim() === '启用' ? true : false;
+            $('#permissionStatus').prop('checked', status);
+
+            form.render();
+
+            var modal = new bootstrap.Modal(document.getElementById('permissionModal'));
+            modal.show();
+        });
+
+        // 保存权限
+        $('#savePermissionBtn').on('click', function() {
+            // 表单验证
+            if ($('#permissionName').val().trim() === '') {
+                layer.msg('请输入权限名称', {icon: 2});
+                return;
+            }
+
+            if ($('#resource').val() === '') {
+                layer.msg('请选择资源', {icon: 2});
+                return;
+            }
+
+            if ($('#action').val().trim() === '') {
+                layer.msg('请输入操作', {icon: 2});
+                return;
+            }
+
+            // 模拟保存操作
+            layer.msg('保存成功', {icon: 1});
+
+            // 关闭模态框
+            var modal = bootstrap.Modal.getInstance(document.getElementById('permissionModal'));
+            modal.hide();
+        });
+
+        // 删除权限
+        $('.delete-permission-btn').on('click', function() {
+            var permissionId = $(this).data('id');
+            var permissionName = $(this).closest('tr').find('td:eq(2)').text();
+
+            layer.confirm('确定要删除权限 "' + permissionName + '" 吗？', {
+                icon: 3,
+                title: '删除确认'
+            }, function(index) {
+                // 模拟删除操作
+                layer.msg('删除成功', {icon: 1});
+                layer.close(index);
+            });
+        });
+
+        // 搜索功能
+        $('#searchUserBtn, #searchRoleBtn, #searchPermissionBtn').on('click', function() {
+            layer.msg('搜索完成', {icon: 1});
+        });
+
+        // 刷新功能
+        $('#refreshUserBtn, #refreshRoleBtn, #refreshPermissionBtn').on('click', function() {
+            layer.msg('数据已刷新', {icon: 1});
+        });
+    });
+</script>

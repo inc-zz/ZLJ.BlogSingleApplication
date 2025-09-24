@@ -1,20 +1,13 @@
 ﻿using Blogs.AppServices.CommandHandlers.Admin;
 using Blogs.AppServices.Commands.Admin.SysUser;
+using Blogs.Core;
+using Blogs.Core.DtoModel.Admin;
 using Blogs.Core.Models;
-using Blogs.Domain.EventNotices.Admin;
 using Blogs.Domain.IRepositorys.Admin;
 using Blogs.Domain.IServices;
-using Blogs.Infrastructure.JwtAuthorize;
-using Microsoft.Extensions.Caching.Distributed;
-using Blogs.Core.DtoModel.Admin;
 using Blogs.Infrastructure.OpenIdDict;
-using Blogs.Domain.UniOfWork;
-using Blogs.Core.DeoModel.Admin;
 using Blogs.Infrastructure.Services;
-using Blogs.Core;
 using Microsoft.Extensions.Logging;
-using Blogs.Domain;
-using NetTaste;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Blogs.AppServices.CommandHandlers
@@ -23,8 +16,8 @@ namespace Blogs.AppServices.CommandHandlers
     /// 用户登录命令处理器
     /// </summary>
     public class UserLoginCommandHandler : CommandHandler,
-    IRequestHandler<UserLoginCommand, TokenResult>,
-    IRequestHandler<RefreshTokenCommand, TokenResult>
+    IRequestHandler<UserLoginCommand, ResultObject>,
+    IRequestHandler<RefreshTokenCommand, ResultObject>
     {
         private readonly IUserRepository _userRepository;
         private readonly IAuthService _authService;
@@ -54,7 +47,7 @@ namespace Blogs.AppServices.CommandHandlers
         /// <param name="command"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<TokenResult> Handle(UserLoginCommand command, CancellationToken cancellationToken)
+        public async Task<ResultObject> Handle(UserLoginCommand command, CancellationToken cancellationToken)
         {
             var errorMessage = string.Empty;
             if (!command.IsValid())
@@ -63,7 +56,7 @@ namespace Blogs.AppServices.CommandHandlers
                 var errorMessage1 = command.ValidationResult.Errors.Select(e => e.ErrorMessage);
                 //发送登录失败通知
 
-                return TokenResult.Error("登录失败，参数错误");
+                return ResultObject.Error("登录失败，参数错误");
             }
 
             // 获取用户信息
@@ -72,14 +65,14 @@ namespace Blogs.AppServices.CommandHandlers
             {
                 errorMessage = "用户名或密码错误";
 
-                return TokenResult.Error("登录失败，用户名或密码错误");
+                return ResultObject.Error("登录失败，用户名或密码错误");
             }
 
             // 检查用户是否被锁定
             if (user.IsDeleted)
             {
                 errorMessage = "用户已被锁定，请稍后再试";
-                return TokenResult.Error("用户已被锁定，请稍后再试");
+                return ResultObject.Error("用户已被锁定，请稍后再试");
             }
 
             // 验证密码
@@ -101,14 +94,14 @@ namespace Blogs.AppServices.CommandHandlers
                     errorMessage = "登录失败次数过多，账户已被锁定30分钟";
                 }
                 errorMessage = $"用户名或密码错误，剩余尝试次数: {remainingAttempts}";
-                return TokenResult.Error(errorMessage);
+                return ResultObject.Error(errorMessage);
             }
 
             // 检查密码是否过期
             if (await _authService.CheckPasswordExpiredAsync(user.Id))
             {
                 errorMessage = "密码已过期，请修改密码";
-                return TokenResult.Error(errorMessage);
+                return ResultObject.Error(errorMessage);
             }
 
             // 重置登录失败次数
@@ -123,15 +116,18 @@ namespace Blogs.AppServices.CommandHandlers
             // 返回登录结果
             var loginResult = new LoginResultDto
             {
-                UserId = user.Id,
-                UserName = user.UserName,
-                RealName = user.RealName,
+                UserInfo = new AdminUserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    LastLoginDate = user.LastLoginTime,
+                },
                 AccessToken = tokenResult.AccessToken,
                 RefreshToken = tokenResult.RefreshToken,
                 ExpiresIn = tokenResult.Expiration
             };
-
-            return tokenResult;
+            return ResultObject<LoginResultDto>.Success(loginResult, "登录成功");
         }
 
         /// <summary>
@@ -140,7 +136,7 @@ namespace Blogs.AppServices.CommandHandlers
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<TokenResult> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+        public async Task<ResultObject> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             try
             {
@@ -155,7 +151,7 @@ namespace Blogs.AppServices.CommandHandlers
                 if (string.IsNullOrEmpty(userId))
                 {
                     _logger.LogWarning("无法从刷新令牌获取用户ID: {RefreshToken}", request.RefreshToken);
-                    return TokenResult.Error("刷新令牌无效或已过期");
+                    return ResultObject.Error("刷新令牌无效或已过期");
                 }
 
                 // 获取用户信息
@@ -163,34 +159,34 @@ namespace Blogs.AppServices.CommandHandlers
                 if (user == null)
                 {
                     _logger.LogWarning("用户不存在: {UserId}", userId);
-                    return TokenResult.Error("登录账号异常");
+                    return ResultObject.Error("登录账号异常");
                 }
 
                 if (user.IsDeleted)
                 {
                     _logger.LogWarning("用户已被锁定: {UserId}", userId);
-                    return TokenResult.Error("用户已被锁定，请稍后再试");
+                    return ResultObject.Error("用户已被锁定，请稍后再试");
                 }
+
+                // 使旧的令牌失效
+                await _openIddictService.RevokeJwtToken(request.AccessToken, request.RefreshToken);
 
                 // 重新生产令牌，不重置刷新令牌
                 var tokenResult = await _openIddictService.GenerateTokenAsync(user, request.RefreshToken);
                 if (!tokenResult.Result)
                 {
                     _logger.LogError("生成新令牌失败: {Error}", tokenResult.Message);
-                    return TokenResult.Error($"生成新令牌失败: {tokenResult.Message}");
+                    return ResultObject.Error($"生成新令牌失败: {tokenResult.Message}");
                 }
-
-                // 使旧的令牌失效
-                //await _openIddictService.RevokeJwtToken(request.AccessToken, request.RefreshToken);
 
                 _logger.LogInformation("令牌刷新成功，用户ID: {UserId}", userId);
 
-                return tokenResult;
+                return ResultObject<TokenResult>.Success(tokenResult, "");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "刷新令牌过程中发生错误");
-                return TokenResult.Error($"刷新令牌失败: {ex.Message}");
+                return ResultObject.Error($"刷新令牌失败: {ex.Message}");
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using Blogs.Core.Models;
+﻿using Blogs.AppServices.Responses;
+using Blogs.Core.Models;
 using Blogs.Domain.ValueValidator.User;
 using FluentValidation;
 using System;
@@ -10,7 +11,7 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
     /// <summary>
     /// 用户登录命令
     /// </summary>
-    public class UserLoginCommand : UserCommand, IRequest<TokenResult>
+    public class UserLoginCommand : UserCommand, IRequest<ResultObject>
     {
 
         public UserLoginCommand(string account, string password)

@@ -11,7 +11,7 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
     /// <summary>
     /// 刷新令牌
     /// </summary>
-    public class RefreshTokenCommand : IRequest<TokenResult>
+    public class RefreshTokenCommand : IRequest<ResultObject>
     {
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }

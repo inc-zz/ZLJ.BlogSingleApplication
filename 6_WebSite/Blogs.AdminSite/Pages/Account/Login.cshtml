@@ -4,60 +4,355 @@
     Layout = null;
     ViewData["Title"] = "登录";
 }
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - 代码生成平台</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-    <style>
-        .login-container {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f5f5f5;
-        }
-        .login-form {
-            width: 100%;
-            max-width: 400px;
-            padding: 30px;
-            background: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-    </style>
+    <title>登录 - 博客后台系统</title>
+    <!--图标相关-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/layui/layui.min.js"></script>
+    <link href="~/lib/layui/css/layui.min.css" rel="stylesheet" />
+    <link href="~/css/login.css" rel="stylesheet" />
+
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-form">
-            <h2 class="text-center mb-4">代码生成平台</h2>
-            <form asp-action="Login" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Username">用户名</label>
-                    <input asp-for="Username" class="form-control" />
-                    <span asp-validation-for="Username" class="text-danger"></span>
+    <!-- 背景装饰元素 -->
+    <div class="bg-circle circle-1"></div>
+    <div class="bg-circle circle-2"></div>
+    <div class="bg-circle circle-3"></div>
+
+    <!-- 登录卡片 -->
+    <div class="login-card">
+        <div class="logo">
+            <h1>博客后台系统</h1>
+            <p>技术积累,从博客开始</p>
+        </div>
+
+        <!-- 修改表单，添加 lay-filter 和移除 method="post" -->
+        <form class="layui-form" id="loginForm" lay-filter="loginForm">
+            <div class="form-group">
+                <label for="Username">用户名</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="Username" name="Username" lay-verify="required" placeholder="请输入用户名" class="form-control" >
                 </div>
-                <div class="form-group">
-                    <label asp-for="Password">密码</label>
-                    <input asp-for="Password" type="password" class="form-control" />
-                    <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="Password">密码</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="Password" name="Password" lay-verify="required|password" placeholder="请输入密码" class="form-control">
                 </div>
-                <div class="form-group form-check">
-                    <input asp-for="RememberMe" class="form-check-input" />
-                    <label asp-for="RememberMe" class="form-check-label">记住我</label>
+            </div>
+
+            <div class="form-group">
+                <label for="CaptchaCode">验证码</label>
+                <div class="captcha-container">
+                    <div class="input-with-icon captcha-input">
+                        <i class="fas fa-shield-alt"></i>
+                        <input type="text" id="CaptchaCode" name="CaptchaCode" lay-verify="required|captcha" placeholder="请输入验证码" class="form-control">
+                    </div>
+                    <div class="captcha-image" id="captchaImage" title="点击刷新验证码">A3B7</div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">登录</button>
-            </form>
+            </div>
+
+            <div class="remember-forgot">
+                <div class="remember-me">
+                    <input type="checkbox" id="RememberMe" name="RememberMe" title="记住我">
+                </div>
+                <a href="#" class="forgot-password">忘记密码?</a>
+            </div>
+
+            <!-- 修改按钮类型为 button，添加 lay-submit 属性 -->
+            <button type="button" class="btn-login layui-btn" lay-submit lay-filter="loginSubmit">登录</button>
+        </form>
+
+        <div class="footer">
+            <p>? 2025 INC-ZZ zhenglijun - 版权所有</p>
         </div>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        // 使用 Layui 模块
+        layui.use(['form', 'layer'], function() {
+            var form = layui.form;
+            var layer = layui.layer;
+            var $ = layui.$;
+
+            // 登录功能封装
+            class LoginManager {
+                constructor() {
+                    this.apiBaseUrl = 'http://localhost:5234/api/admin';
+                    this.loginEndpoint = '/Account/login';
+                    this.tokenKey = 'auth_token';
+                    this.refreshTokenKey = 'refresh_token';
+                    this.userInfoKey = 'user_info';
+                    this.tokenExpiryKey = 'token_expiry';
+
+                    this.init();
+                }
+
+                init() {
+                    // 设置自定义验证规则
+                    this.setupFormValidation();
+
+                    // 渲染 Layui 表单组件
+                    form.render();
+
+                    // 检查是否已登录
+                    this.checkLoginStatus();
+
+                    // 绑定事件
+                    this.bindEvents();
+
+                    // 初始生成验证码
+                    this.refreshCaptcha();
+                }
+
+                // 设置表单验证规则
+                setupFormValidation() {
+                    form.verify({
+                        // 密码验证规则
+                        password: function(value, item) {
+                            if (value.length < 6) {
+                                return '密码长度不能小于6位';
+                            }
+                            if (!/^[\S]{6,}$/.test(value)) {
+                                return '密码不能包含空格';
+                            }
+                        },
+                        // 验证码验证规则
+                        captcha: function(value, item) {
+                            var currentCaptcha = $('#captchaImage').text();
+                            if (value.toUpperCase() !== currentCaptcha) {
+                                return '验证码错误，请重新输入';
+                            }
+                        }
+                    });
+                }
+
+                // 检查登录状态
+                checkLoginStatus() {
+                    const token = this.getToken();
+                    if (token && this.isTokenValid()) {
+                        // 如果已登录且token有效，直接跳转到首页
+                        console.log('用户已登录，跳转到首页');
+                        this.redirectToHome();
+                    }
+                }
+
+                // 绑定事件
+                bindEvents() {
+                    var self = this;
+
+                    // 验证码点击刷新
+                    $('#captchaImage').on('click', function() {
+                        self.refreshCaptcha();
+                    });
+
+                    // 忘记密码
+                    $('.forgot-password').on('click', function(e) {
+                        e.preventDefault();
+                        self.handleForgotPassword();
+                    });
+
+                    // 监听表单提交
+                    form.on('submit(loginSubmit)', function(data) {
+                        self.handleLogin(data.field);
+                        return false; // 阻止表单默认提交
+                    });
+
+                    // 添加回车键提交支持
+                    $('#loginForm input').on('keypress', function(e) {
+                        if (e.which === 13) {
+                            $('.btn-login').click();
+                            return false;
+                        }
+                    });
+                }
+
+                // 刷新验证码
+                refreshCaptcha() {
+                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                    let captcha = '';
+                    for (let i = 0; i < 4; i++) {
+                        captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    $('#captchaImage').text(captcha);
+
+                    // 清空验证码输入框
+                    $('#CaptchaCode').val('');
+                }
+
+                // 处理登录
+                async handleLogin(formData) {
+                    var self = this;
+
+                    // 显示加载状态
+                    this.setButtonLoading(true);
+
+                    try {
+                        
+                        // 调用登录API
+                        const response = await this.callLoginApi(
+                            formData.Username,
+                            formData.Password,
+                            formData.CaptchaCode,
+                            formData.RememberMe === 'on'
+                        );
+
+                        if (response.success) {
+                            // 登录成功
+                            layer.msg('登录成功，正在跳转...', {icon: 1, time: 1000});
+
+                            // 存储Token和用户信息
+                            this.saveloginResult(response.data, formData.RememberMe === 'on');
+
+                            // 跳转到首页
+                            setTimeout(() => {
+                                this.redirectToHome();
+                            }, 1000);
+                        } else {
+                            // 登录失败
+                            layer.msg(response.message || '登录失败，请检查用户名和密码', {icon: 2});
+                            this.refreshCaptcha();
+                        }
+                    } catch (error) {
+                        console.error('登录错误:', error);
+                        layer.msg('网络错误，请稍后重试: ' + error.message, {icon: 5});
+                        this.refreshCaptcha();
+                    } finally {
+                        // 恢复按钮状态
+                        this.setButtonLoading(false);
+                    }
+                }
+
+                // 调用登录API
+                async callLoginApi(username, password, captcha, rememberMe) {
+                    
+                    const requestData = {
+                        account: username,
+                        password: password,
+                        captcha: captcha,
+                        rememberMe: rememberMe
+                    };
+
+                    const response = await fetch(this.apiBaseUrl + this.loginEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                    }
+
+                    return await response.json();
+                }
+
+                // 保存认证数据
+                saveloginResult(loginResult, rememberMe) {
+                    
+                    /**
+                     * 后端登录接口返还数据格式：
+                       {
+                          "data": {
+                            "userInfo": {
+                              "id": 100001,
+                              "userName": "admin",
+                              "email": "admin@sing.com",
+                              "lastLoginDate": "2025-09-24T15:03:30"
+                            },
+                            "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAwMDEiLCJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQHNpbmcuY29tIiwianRpIjoiZTU0NTcyMTgtY2ZlMC00ODEwLThmMjEtMzE3MDMwMTFiMGJmIiwiaWF0IjoxNzU4Njk4NjMxLCJyb2xlIjoiYWRtaW4iLCJuYmYiOjE3NTg2OTg2MzEsImV4cCI6MTc1ODcwMjIzMSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo1MjM0IiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo1MjM0In0.tsmnvQRc0tLXTlZogIfxKe4Nznw8bNb30KaxBakmxHg",
+                            "refreshToken": "ffdb9b3a18eb40ae9ff1290e6ac8b794",
+                            "expiresIn": "2025-09-24T08:23:51.9036243Z",
+                            "tokenType": "Bearer"
+                          },
+                          "success": true,
+                          "message": "登录成功",
+                          "code": 200
+                        }
+                     */
+                    debugger
+                    if (loginResult && loginResult.accessToken) {
+                        debugger
+
+                        // 存储Token
+                        localStorage.setItem(this.tokenKey, loginResult.accessToken);
+                       
+                        // 存储用户信息
+                        if (loginResult.userInfo) {
+                            localStorage.setItem(this.userInfoKey, JSON.stringify(loginResult.userInfo));
+                        }
+
+                        debugger
+                        // 配置Token过期时间（1天-保持与后端Token过期时间一致）
+                        const expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+                        localStorage.setItem(this.tokenExpiryKey, expiryTime.toString());
+
+                        // 存储刷新令牌，过期时间与后端一致，如果刷新令牌请求返还401则清空
+                        if (loginResult.refreshToken) {
+                            localStorage.setItem(this.refreshTokenKey, loginResult.refreshToken);
+                            const refreshExpiryTime = new Date().getTime() + (7 * 24 * 60 * 60 * 1000); // 7天
+                        }
+
+                        // 如果选择"记住我"，也存储在sessionStorage中作为备份
+                        if (rememberMe) {
+                            sessionStorage.setItem(this.tokenKey, loginResult.accessToken);
+                        }
+
+                        console.log('认证数据保存成功');
+                    } else {
+                        console.error('认证数据格式错误，无法保存');
+                    }
+                }
+
+                // 获取Token
+                getToken() {
+                    return localStorage.getItem(this.tokenKey) || sessionStorage.getItem(this.tokenKey);
+                }
+
+                // 检查Token是否有效
+                isTokenValid() {
+                    const expiryTime = localStorage.getItem(this.tokenExpiryKey);
+                    if (!expiryTime) return false;
+
+                    return new Date().getTime() < parseInt(expiryTime);
+                }
+
+                // 跳转到首页
+                redirectToHome() {
+                    // 这里根据实际路由配置修改
+                    window.location.href = '/';
+                }
+
+                // 处理忘记密码
+                handleForgotPassword() {
+                    layer.msg('请联系系统管理员重置密码', {icon: 0});
+                }
+
+                // 设置按钮加载状态
+                setButtonLoading(loading) {
+                    const button = $('.btn-login');
+                    if (loading) {
+                        button.prop('disabled', true);
+                        button.html('<i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate"></i> 登录中...');
+                    } else {
+                        button.prop('disabled', false);
+                        button.text('登录');
+                    }
+                }
+            }
+
+            // 页面加载完成后初始化登录管理器
+            window.loginManager = new LoginManager();
+        });
+    </script>
 </body>
 </html>

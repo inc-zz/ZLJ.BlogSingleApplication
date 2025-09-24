@@ -5,6 +5,10 @@
     {
       "library": "bootstrap@5.3.8",
       "destination": "wwwroot/lib/bootstrap/bootstrap/"
+    },
+    {
+      "library": "layui@2.11.6",
+      "destination": "wwwroot/lib/layui/"
     }
   ]
 }

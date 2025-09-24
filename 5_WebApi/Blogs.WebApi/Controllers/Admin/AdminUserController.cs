@@ -73,7 +73,7 @@ namespace Blogs.WebApi.Controllers
 
             if (result)
             {
-                return Ok(new ResultObject("处理成功", 200));
+                return Ok(ResultObject.Success("处理成功"));
             }
             else
             {

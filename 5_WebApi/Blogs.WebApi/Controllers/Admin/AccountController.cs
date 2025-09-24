@@ -1,5 +1,6 @@
 ﻿using Blogs.AppServices.Commands.Admin.SysUser;
 using Blogs.AppServices.Requests.Admin;
+using Blogs.AppServices.Responses;
 using Blogs.Core.Models;
 using Blogs.Infrastructure.Services;
 using Blogs.WebApi.Requests;
@@ -16,7 +17,7 @@ namespace Blogs.WebApi.Controllers.Admin
     /// 账户管理控制器
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     public class AccountController : ControllerBase
     {
         private readonly ILogger<AccountController> _logger;
@@ -44,28 +45,24 @@ namespace Blogs.WebApi.Controllers.Admin
         /// <returns></returns>
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<ActionResult<ResultToken>> LoginAsync([FromBody] LoginUserRequest request)
+        public async Task<ActionResult> LoginAsync([FromBody] LoginUserRequest request)
         {
             try
             {
                 // 创建登录命令
                 UserLoginCommand command = new UserLoginCommand(request.Account, request.Password);
                 // 发送命令并获取结果
-                var result = await _mediator.Send<TokenResult>(command);
-                if (result.Result)
+                var result = await _mediator.Send<ResultObject>(command);
+                if (result.IsSuccess())
                 {
                     _logger.LogInformation("User {Account} logged in successfully", request.Account);
-                    var tokenResult = new ResultToken
-                    {
-                        Token = result.AccessToken,
-                        RefreshToken = result.RefreshToken,
-                    };
-                    return Ok(tokenResult);
+                  
+                    return Ok(result);
                 }
                 else
                 {
-                    _logger.LogWarning("{Account}登录失败, 原因: {Message}", request.Account, result.Message);
-                    return Unauthorized(new { message = result.Message });
+                    _logger.LogWarning("{Account}登录失败, 原因: {Message}", request.Account, result.message);
+                    return Unauthorized(new { message = result.message });
                 }
             }
             catch (Exception ex)
@@ -81,7 +78,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("refresh")]
-        public async Task<ActionResult<ResultToken>> RefreshToken([FromBody] RefreshTokenRequest request)
+        public async Task<ActionResult<UserLoginDto>> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             try
             {
@@ -89,14 +86,14 @@ namespace Blogs.WebApi.Controllers.Admin
                 var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
                 RefreshTokenCommand command = new RefreshTokenCommand(token, request.RefreshToken);
                 // 发送命令并获取结果
-                var result = await _mediator.Send<TokenResult>(command);
-                if (result.Result)
+                var result = await _mediator.Send<ResultObject>(command);
+                if (result.IsSuccess())
                 {
                     return Ok(result);
                 }
                 else
                 {
-                    return Unauthorized(new { message = result.Message });
+                    return Unauthorized(new { message = result.message });
                 }
             }
             catch (SecurityTokenException)

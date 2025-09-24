@@ -19,5 +19,9 @@ namespace Blogs.AppServices.Requests.Admin
         /// 登录密码
         /// </summary>
         public string? Password { get; set; }
+        /// <summary>
+        /// 验证码
+        /// </summary>
+        public string? Captcha { get; set; }
     }
 }

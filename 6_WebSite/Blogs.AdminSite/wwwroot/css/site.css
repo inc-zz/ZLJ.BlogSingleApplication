@@ -20,3 +20,116 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+:root {
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 70px;
+    --header-height: 60px;
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --accent-color: #1abc9c;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    transition: all 0.3s;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 侧边栏样式 */
+#sidebar {
+    width: var(--sidebar-width);
+    background: var(--secondary-color);
+    color: #fff;
+    position: fixed;
+    height: 100vh;
+    transition: all 0.3s;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-height);
+}
+
+    .sidebar-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+.sidebar-menu {
+    padding: 10px 0;
+}
+
+    .sidebar-menu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-menu li a {
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        color: #fff;
+        text-decoration: none;
+        transition: all 0.3s;
+        border-left: 3px solid transparent;
+        position: relative;
+    }
+
+        .sidebar-menu li a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .sidebar-menu li a.active {
+            background: rgba(52, 152, 219, 0.2);
+            color: #fff;
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu li a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-menu li a .menu-arrow {
+            position: absolute;
+            right: 15px;
+            transition: transform 0.3s;
+        }
+
+/* 二级菜单样式 */
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+    .submenu.open {
+        max-height: 300px;
+    }
+
+    .submenu li a {
+        padding-left: 50px;
+        font-size: 0.9rem;
+    }

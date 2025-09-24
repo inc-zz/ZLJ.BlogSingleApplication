@@ -112,7 +112,6 @@ builder.Services.AddMediatR(cfg =>
 
 #endregion
 
-
 #region 数据迁移-表结构生成
 
 // 初始化数据库上下文
@@ -294,6 +293,23 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 #endregion
 
+#region CORS跨域配置
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("WebSiteCors", builder =>
+    {
+        var corsUrls = AppConfig.GetSection("CorsConfig").Value;
+        var origins = corsUrls.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+        builder.WithOrigins(origins)
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials(); // 如果前端需要发送cookies等凭证
+    });
+});
+
+#endregion
+
 var app = builder.Build();
 
 #region Openiddict初始化
@@ -313,12 +329,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//启用CORS
+app.UseCors("WebSiteCors");
+
+//app.UseHttpsRedirection();
 
 //启用认证中间件
 app.UseAuthentication();
 app.UseAuthorization();
-
-
 app.MapControllers();
 app.Run();

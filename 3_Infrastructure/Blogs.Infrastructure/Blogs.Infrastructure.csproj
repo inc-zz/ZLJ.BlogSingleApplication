@@ -31,7 +31,6 @@
   <ItemGroup>
     <Folder Include="Responses\Admin\" />
     <Folder Include="Services\Admin\" />
-    <Folder Include="新文件夹\" />
   </ItemGroup>
 
 

@@ -1,0 +1,1017 @@
+﻿@page
+@model Blogs.AdminSite.Pages.Article.IndexModel
+@{
+    ViewData["Title"] = "文章管理";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1>文章管理</h1>
+    <p class="text-muted">管理博客文章内容，包括发布、编辑、删除等操作</p>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-primary">文章总数</h5>
+                        <h3 class="mb-0" id="totalArticles">0</h3>
+                        <small class="text-muted">已发布文章数量</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-file-alt fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-success">今日发布</h5>
+                        <h3 class="mb-0" id="todayArticles">0</h3>
+                        <small class="text-muted">今天发布的文章</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-calendar-day fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-warning">草稿数量</h5>
+                        <h3 class="mb-0" id="draftArticles">0</h3>
+                        <small class="text-muted">待发布的草稿</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-edit fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-info">置顶文章</h5>
+                        <h3 class="mb-0" id="topArticles">0</h3>
+                        <small class="text-muted">置顶显示的文章</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-thumbtack fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 搜索和操作区域 -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">文章列表</h5>
+        <div>
+            <button class="btn btn-success btn-sm" id="addArticleBtn">
+                <i class="fas fa-plus me-1"></i> 新建文章
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" id="refreshBtn">
+                <i class="fas fa-refresh me-1"></i> 刷新
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- 搜索表单 -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control form-control-sm" id="searchTitle" placeholder="文章标题">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="searchCategory">
+                    <option value="">全部分类</option>
+                    <option value="technology">技术</option>
+                    <option value="life">生活</option>
+                    <option value="travel">旅行</option>
+                    <option value="study">学习</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="searchAuthor">
+                    <option value="">全部作者</option>
+                    <option value="admin">管理员</option>
+                    <option value="zhangsan">张三</option>
+                    <option value="lisi">李四</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="searchStatus">
+                    <option value="">全部状态</option>
+                    <option value="published">已发布</option>
+                    <option value="draft">草稿</option>
+                    <option value="hidden">隐藏</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group input-group-sm">
+                    <input type="date" class="form-control" id="searchStartDate" placeholder="开始日期">
+                    <span class="input-group-text">至</span>
+                    <input type="date" class="form-control" id="searchEndDate" placeholder="结束日期">
+                </div>
+            </div>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <button type="button" class="btn btn-primary btn-sm" id="searchBtn">
+                    <i class="fas fa-search me-1"></i> 搜索
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="resetBtn">
+                    <i class="fas fa-redo me-1"></i> 重置
+                </button>
+                <button type="button" class="btn btn-info btn-sm" id="exportBtn">
+                    <i class="fas fa-download me-1"></i> 导出
+                </button>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="selectAll">
+                    <label class="form-check-label" for="selectAll">全选</label>
+                </div>
+                <button class="btn btn-danger btn-sm" id="batchDeleteBtn" disabled>
+                    <i class="fas fa-trash me-1"></i> 批量删除
+                </button>
+                <button class="btn btn-warning btn-sm" id="batchTopBtn" disabled>
+                    <i class="fas fa-thumbtack me-1"></i> 批量置顶
+                </button>
+            </div>
+        </div>
+
+        <!-- 文章表格 -->
+        <div class="table-responsive">
+            <table class="table table-hover" id="articleTable">
+                <thead class="table-light">
+                    <tr>
+                        <th width="40">
+                            <input type="checkbox" id="checkAll">
+                        </th>
+                        <th>ID</th>
+                        <th>标题</th>
+                        <th>分类</th>
+                        <th>作者</th>
+                        <th>标签</th>
+                        <th>状态</th>
+                        <th>置顶</th>
+                        <th>阅读量</th>
+                        <th>评论数</th>
+                        <th>创建时间</th>
+                        <th width="150">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="articleTableBody">
+                    <!-- 文章数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div id="paginationInfo">显示第 1 到 10 条，共 0 条记录</div>
+            <nav>
+                <ul class="pagination pagination-sm" id="pagination">
+                    <!-- 分页将通过JavaScript动态生成 -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑文章弹框 -->
+<div class="modal fade" id="articleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">新建文章</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3" id="articleForm">
+                    <input type="hidden" id="articleId">
+                    
+                    <div class="col-md-8">
+                        <label for="title" class="form-label">文章标题 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                        <div class="invalid-feedback">请输入文章标题</div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="category" class="form-label">分类 <span class="text-danger">*</span></label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="">请选择分类</option>
+                            <option value="technology">技术</option>
+                            <option value="life">生活</option>
+                            <option value="travel">旅行</option>
+                            <option value="study">学习</option>
+                        </select>
+                        <div class="invalid-feedback">请选择文章分类</div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label for="content" class="form-label">文章内容 <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="content" name="content" rows="12" required></textarea>
+                        <div class="invalid-feedback">请输入文章内容</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="tags" class="form-label">标签</label>
+                        <input type="text" class="form-control" id="tags" name="tags" placeholder="多个标签用逗号分隔">
+                        <div class="form-text">例如: ASP.NET, C#, 编程</div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="author" class="form-label">作者 <span class="text-danger">*</span></label>
+                        <select class="form-select" id="author" name="author" required>
+                            <option value="">请选择作者</option>
+                            <option value="admin">管理员</option>
+                            <option value="zhangsan">张三</option>
+                            <option value="lisi">李四</option>
+                        </select>
+                        <div class="invalid-feedback">请选择文章作者</div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">状态</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="status" name="status" checked>
+                            <label class="form-check-label" for="status">立即发布</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">置顶</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="isTop" name="isTop">
+                            <label class="form-check-label" for="isTop">置顶显示</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">允许评论</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="allowComment" name="allowComment" checked>
+                            <label class="form-check-label" for="allowComment">允许评论</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label for="summary" class="form-label">文章摘要</label>
+                        <textarea class="form-control" id="summary" name="summary" rows="3" placeholder="文章摘要，如果不填将自动从内容中提取"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="saveDraftBtn">保存草稿</button>
+                <button type="button" class="btn btn-primary" id="saveArticleBtn">发布文章</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 文章详情弹框 -->
+<div class="modal fade" id="articleDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">文章详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 id="detailTitle">文章标题</h4>
+                        <div class="mb-3">
+                            <span class="badge bg-primary me-2" id="detailCategory">分类</span>
+                            <span class="badge bg-secondary me-2" id="detailAuthor">作者</span>
+                            <span class="badge bg-success me-2" id="detailStatus">状态</span>
+                            <span class="badge bg-info" id="detailTop">置顶</span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">发布时间: <span id="detailCreateTime">2023-10-20</span></small>
+                            <small class="text-muted ms-3">阅读量: <span id="detailViews">0</span></small>
+                            <small class="text-muted ms-3">评论数: <span id="detailComments">0</span></small>
+                        </div>
+                        <div class="mb-3">
+                            <strong>标签:</strong> <span id="detailTags">无</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>摘要:</strong>
+                            <p id="detailSummary" class="text-muted">文章摘要内容...</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">文章统计</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td>字数:</td>
+                                        <td id="detailWordCount">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>阅读量:</td>
+                                        <td id="detailViewCount">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>评论数:</td>
+                                        <td id="detailCommentCount">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>点赞数:</td>
+                                        <td id="detailLikeCount">0</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>文章内容预览:</h6>
+                        <div class="border p-3 bg-light rounded" id="detailContent" style="max-height: 300px; overflow-y: auto;">
+                            文章内容...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 导出选项弹框 -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">导出文章</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="exportForm">
+                    <div class="mb-3">
+                        <label class="form-label">导出格式</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="exportFormat" id="formatExcel" value="excel" checked>
+                                <label class="form-check-label" for="formatExcel">Excel</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="exportFormat" id="formatCSV" value="csv">
+                                <label class="form-check-label" for="formatCSV">CSV</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="exportFormat" id="formatPDF" value="pdf">
+                                <label class="form-check-label" for="formatPDF">PDF</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">导出范围</label>
+                        <div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="exportScope" id="scopeCurrent" value="current" checked>
+                                <label class="form-check-label" for="scopeCurrent">当前页数据</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="exportScope" id="scopeSelected" value="selected">
+                                <label class="form-check-label" for="scopeSelected">选中数据</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="exportScope" id="scopeAll" value="all">
+                                <label class="form-check-label" for="scopeAll">全部数据</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">包含字段</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="fieldTitle" checked>
+                                <label class="form-check-label" for="fieldTitle">标题</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="fieldCategory" checked>
+                                <label class="form-check-label" for="fieldCategory">分类</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="fieldAuthor" checked>
+                                <label class="form-check-label" for="fieldAuthor">作者</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="fieldStatus">
+                                <label class="form-check-label" for="fieldStatus">状态</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="fieldCreateTime" checked>
+                                <label class="form-check-label" for="fieldCreateTime">创建时间</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="confirmExportBtn">导出</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 文章管理功能
+        layui.use(['form', 'layer'], function() {
+            var form = layui.form;
+            var layer = layui.layer;
+            var $ = layui.$;
+
+            // 模拟文章数据
+            var articleData = [
+                {id: 1, title: 'ASP.NET Core 入门教程', category: 'technology', author: 'admin', tags: 'ASP.NET,教程', status: 'published', isTop: true, views: 1250, comments: 24, createTime: '2023-10-15', summary: '本文介绍ASP.NET Core的基础知识和入门方法', content: 'ASP.NET Core 是一个跨平台的高性能开源框架，用于构建现代的、基于云的互联网连接应用程序...'},
+                {id: 2, title: '前端开发最佳实践', category: 'technology', author: 'zhangsan', tags: '前端,JavaScript', status: 'published', isTop: false, views: 856, comments: 12, createTime: '2023-10-12', summary: '分享前端开发中的一些最佳实践和技巧', content: '在前端开发中，遵循最佳实践可以提高代码质量和开发效率...'},
+                {id: 3, title: '数据库优化技巧', category: 'technology', author: 'admin', tags: '数据库,SQL', status: 'draft', isTop: false, views: 0, comments: 0, createTime: '2023-10-10', summary: '介绍数据库性能优化的常用技巧', content: '数据库性能优化是系统开发中的重要环节...'},
+                {id: 4, title: '旅行日记：西藏之旅', category: 'travel', author: 'lisi', tags: '旅行,西藏', status: 'published', isTop: true, views: 642, comments: 8, createTime: '2023-10-08', summary: '记录西藏旅行的所见所闻', content: '西藏，这片神秘而美丽的土地，一直是我向往的地方...'},
+                {id: 5, title: '学习方法的总结', category: 'study', author: 'zhangsan', tags: '学习,方法', status: 'published', isTop: false, views: 324, comments: 5, createTime: '2023-10-05', summary: '分享高效学习的方法和技巧', content: '高效学习是每个人都应该掌握的技能...'}
+            ];
+
+            // 当前页和每页大小
+            var currentPage = 1;
+            var pageSize = 10;
+            var totalArticles = articleData.length;
+
+            // 初始化页面
+            function initPage() {
+                updateStats();
+                renderArticleTable();
+                bindEvents();
+                setupPagination();
+            }
+
+            // 更新统计信息
+            function updateStats() {
+                $('#totalArticles').text(articleData.filter(a => a.status === 'published').length);
+                
+                var today = new Date().toISOString().split('T')[0];
+                $('#todayArticles').text(articleData.filter(a => a.createTime === today).length);
+                
+                $('#draftArticles').text(articleData.filter(a => a.status === 'draft').length);
+                $('#topArticles').text(articleData.filter(a => a.isTop).length);
+            }
+
+            // 渲染文章表格
+            function renderArticleTable(filteredData) {
+                var data = filteredData || articleData;
+                var tbody = $('#articleTableBody');
+                tbody.empty();
+                
+                // 计算当前页的数据
+                var startIndex = (currentPage - 1) * pageSize;
+                var endIndex = Math.min(startIndex + pageSize, data.length);
+                var pageData = data.slice(startIndex, endIndex);
+                
+                if (pageData.length === 0) {
+                    tbody.append('<tr><td colspan="12" class="text-center text-muted py-4">暂无文章数据</td></tr>');
+                    return;
+                }
+                
+                pageData.forEach(function(article) {
+                    var statusText = getStatusText(article.status);
+                    var statusClass = getStatusClass(article.status);
+                    var topText = article.isTop ? 
+                        '<span class="badge bg-info">是</span>' : 
+                        '<span class="badge bg-secondary">否</span>';
+                    
+                    var row = '<tr>' +
+                        '<td><input type="checkbox" class="article-checkbox" value="' + article.id + '"></td>' +
+                        '<td>' + article.id + '</td>' +
+                        '<td><a href="javascript:void(0)" class="view-article" data-id="' + article.id + '">' + article.title + '</a></td>' +
+                        '<td><span class="badge bg-primary">' + getCategoryText(article.category) + '</span></td>' +
+                        '<td>' + getAuthorText(article.author) + '</td>' +
+                        '<td>' + (article.tags || '无') + '</td>' +
+                        '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>' +
+                        '<td>' + topText + '</td>' +
+                        '<td>' + article.views + '</td>' +
+                        '<td>' + article.comments + '</td>' +
+                        '<td>' + article.createTime + '</td>' +
+                        '<td>' +
+                        '<button class="btn btn-sm btn-outline-primary view-btn" data-id="' + article.id + '" title="查看"><i class="fas fa-eye"></i></button> ' +
+                        '<button class="btn btn-sm btn-outline-success edit-btn" data-id="' + article.id + '" title="编辑"><i class="fas fa-edit"></i></button> ' +
+                        '<button class="btn btn-sm btn-outline-warning top-btn" data-id="' + article.id + '" title="' + (article.isTop ? '取消置顶' : '置顶') + '"><i class="fas fa-thumbtack"></i></button> ' +
+                        '<button class="btn btn-sm btn-outline-danger delete-btn" data-id="' + article.id + '" title="删除"><i class="fas fa-trash"></i></button>' +
+                        '</td>' +
+                        '</tr>';
+                    
+                    tbody.append(row);
+                });
+                
+                // 更新分页信息
+                updatePaginationInfo(data.length);
+            }
+
+            // 获取分类文本
+            function getCategoryText(category) {
+                var categoryMap = {
+                    'technology': '技术',
+                    'life': '生活',
+                    'travel': '旅行',
+                    'study': '学习'
+                };
+                return categoryMap[category] || category;
+            }
+
+            // 获取作者文本
+            function getAuthorText(author) {
+                var authorMap = {
+                    'admin': '管理员',
+                    'zhangsan': '张三',
+                    'lisi': '李四'
+                };
+                return authorMap[author] || author;
+            }
+
+            // 获取状态文本
+            function getStatusText(status) {
+                var statusMap = {
+                    'published': '已发布',
+                    'draft': '草稿',
+                    'hidden': '隐藏'
+                };
+                return statusMap[status] || status;
+            }
+
+            // 获取状态样式类
+            function getStatusClass(status) {
+                var classMap = {
+                    'published': 'bg-success',
+                    'draft': 'bg-warning',
+                    'hidden': 'bg-secondary'
+                };
+                return classMap[status] || 'bg-secondary';
+            }
+
+            // 设置分页
+            function setupPagination() {
+                var totalPages = Math.ceil(totalArticles / pageSize);
+                var pagination = $('#pagination');
+                pagination.empty();
+                
+                // 上一页
+                var prevClass = currentPage === 1 ? 'disabled' : '';
+                pagination.append('<li class="page-item ' + prevClass + '"><a class="page-link" href="#" data-page="prev">上一页</a></li>');
+                
+                // 页码
+                for (var i = 1; i <= totalPages; i++) {
+                    var activeClass = i === currentPage ? 'active' : '';
+                    pagination.append('<li class="page-item ' + activeClass + '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>');
+                }
+                
+                // 下一页
+                var nextClass = currentPage === totalPages ? 'disabled' : '';
+                pagination.append('<li class="page-item ' + nextClass + '"><a class="page-link" href="#" data-page="next">下一页</a></li>');
+            }
+
+            // 更新分页信息
+            function updatePaginationInfo(total) {
+                var start = (currentPage - 1) * pageSize + 1;
+                var end = Math.min(currentPage * pageSize, total);
+                $('#paginationInfo').text('显示第 ' + start + ' 到 ' + end + ' 条，共 ' + total + ' 条记录');
+            }
+
+            // 绑定事件
+            function bindEvents() {
+                // 全选/取消全选
+                $('#checkAll').on('change', function() {
+                    $('.article-checkbox').prop('checked', this.checked);
+                    updateBatchButtons();
+                });
+
+                // 单个复选框改变
+                $(document).on('change', '.article-checkbox', function() {
+                    updateBatchButtons();
+                    // 如果所有复选框都被选中，则全选复选框也应该被选中
+                    var allChecked = $('.article-checkbox:checked').length === $('.article-checkbox').length;
+                    $('#checkAll').prop('checked', allChecked);
+                });
+
+                // 搜索按钮
+                $('#searchBtn').on('click', function() {
+                    performSearch();
+                });
+
+                // 重置按钮
+                $('#resetBtn').on('click', function() {
+                    $('#searchTitle').val('');
+                    $('#searchCategory').val('');
+                    $('#searchAuthor').val('');
+                    $('#searchStatus').val('');
+                    $('#searchStartDate').val('');
+                    $('#searchEndDate').val('');
+                    performSearch();
+                });
+
+                // 导出按钮
+                $('#exportBtn').on('click', function() {
+                    showExportModal();
+                });
+
+                // 添加文章按钮
+                $('#addArticleBtn').on('click', function() {
+                    showArticleModal('add');
+                });
+
+                // 查看文章详情
+                $(document).on('click', '.view-btn, .view-article', function() {
+                    var articleId = $(this).data('id');
+                    showArticleDetail(articleId);
+                });
+
+                // 编辑文章
+                $(document).on('click', '.edit-btn', function() {
+                    var articleId = $(this).data('id');
+                    showArticleModal('edit', articleId);
+                });
+
+                // 置顶/取消置顶
+                $(document).on('click', '.top-btn', function() {
+                    var articleId = $(this).data('id');
+                    toggleTopArticle(articleId);
+                });
+
+                // 删除文章
+                $(document).on('click', '.delete-btn', function() {
+                    var articleId = $(this).data('id');
+                    deleteArticle(articleId);
+                });
+
+                // 批量删除
+                $('#batchDeleteBtn').on('click', function() {
+                    batchDeleteArticles();
+                });
+
+                // 批量置顶
+                $('#batchTopBtn').on('click', function() {
+                    batchTopArticles();
+                });
+
+                // 刷新按钮
+                $('#refreshBtn').on('click', function() {
+                    currentPage = 1;
+                    renderArticleTable();
+                    setupPagination();
+                    layer.msg('数据已刷新', {icon: 1});
+                });
+
+                // 保存草稿
+                $('#saveDraftBtn').on('click', function() {
+                    saveArticle('draft');
+                });
+
+                // 发布文章
+                $('#saveArticleBtn').on('click', function() {
+                    saveArticle('published');
+                });
+
+                // 确认导出
+                $('#confirmExportBtn').on('click', function() {
+                    exportArticles();
+                });
+
+                // 分页点击
+                $(document).on('click', '.page-link', function(e) {
+                    e.preventDefault();
+                    var page = $(this).data('page');
+                    
+                    if (page === 'prev' && currentPage > 1) {
+                        currentPage--;
+                    } else if (page === 'next' && currentPage < Math.ceil(totalArticles / pageSize)) {
+                        currentPage++;
+                    } else if (typeof page === 'number') {
+                        currentPage = page;
+                    }
+                    
+                    renderArticleTable();
+                    setupPagination();
+                });
+            }
+
+            // 执行搜索
+            function performSearch() {
+                var title = $('#searchTitle').val().toLowerCase();
+                var category = $('#searchCategory').val();
+                var author = $('#searchAuthor').val();
+                var status = $('#searchStatus').val();
+                var startDate = $('#searchStartDate').val();
+                var endDate = $('#searchEndDate').val();
+                
+                var filteredData = articleData.filter(function(article) {
+                    var matchesTitle = !title || article.title.toLowerCase().includes(title);
+                    var matchesCategory = !category || article.category === category;
+                    var matchesAuthor = !author || article.author === author;
+                    var matchesStatus = !status || article.status === status;
+                    var matchesDate = true;
+                    
+                    if (startDate) {
+                        matchesDate = matchesDate && article.createTime >= startDate;
+                    }
+                    if (endDate) {
+                        matchesDate = matchesDate && article.createTime <= endDate;
+                    }
+                    
+                    return matchesTitle && matchesCategory && matchesAuthor && matchesStatus && matchesDate;
+                });
+                
+                currentPage = 1;
+                renderArticleTable(filteredData);
+                setupPagination();
+            }
+
+            // 显示文章模态框
+            function showArticleModal(mode, articleId) {
+                $('#articleForm')[0].reset();
+                $('#articleForm').removeClass('was-validated');
+                
+                if (mode === 'add') {
+                    $('#modalTitle').text('新建文章');
+                    $('#articleId').val('');
+                    $('#status').prop('checked', true);
+                } else {
+                    $('#modalTitle').text('编辑文章');
+                    var article = articleData.find(a => a.id == articleId);
+                    if (article) {
+                        $('#articleId').val(article.id);
+                        $('#title').val(article.title);
+                        $('#category').val(article.category);
+                        $('#content').val(article.content);
+                        $('#tags').val(article.tags || '');
+                        $('#author').val(article.author);
+                        $('#status').prop('checked', article.status === 'published');
+                        $('#isTop').prop('checked', article.isTop);
+                        $('#summary').val(article.summary || '');
+                    }
+                }
+                
+                var modal = new bootstrap.Modal(document.getElementById('articleModal'));
+                modal.show();
+            }
+
+            // 显示文章详情
+            function showArticleDetail(articleId) {
+                var article = articleData.find(a => a.id == articleId);
+                if (article) {
+                    $('#detailTitle').text(article.title);
+                    $('#detailCategory').text(getCategoryText(article.category));
+                    $('#detailAuthor').text(getAuthorText(article.author));
+                    $('#detailStatus').text(getStatusText(article.status));
+                    $('#detailTop').text(article.isTop ? '是' : '否');
+                    $('#detailCreateTime').text(article.createTime);
+                    $('#detailViews').text(article.views);
+                    $('#detailComments').text(article.comments);
+                    $('#detailTags').text(article.tags || '无');
+                    $('#detailSummary').text(article.summary || '无');
+                    $('#detailContent').text(article.content);
+                    
+                    // 计算字数
+                    var wordCount = article.content.replace(/\s/g, '').length;
+                    $('#detailWordCount').text(wordCount + '字');
+                    $('#detailViewCount').text(article.views);
+                    $('#detailCommentCount').text(article.comments);
+                    $('#detailLikeCount').text(Math.floor(article.views * 0.1)); // 模拟点赞数
+                    
+                    var modal = new bootstrap.Modal(document.getElementById('articleDetailModal'));
+                    modal.show();
+                }
+            }
+
+            // 显示导出模态框
+            function showExportModal() {
+                var modal = new bootstrap.Modal(document.getElementById('exportModal'));
+                modal.show();
+            }
+
+            // 保存文章
+            function saveArticle(status) {
+                var form = $('#articleForm')[0];
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+                
+                var articleId = $('#articleId').val();
+                var articleDataObj = {
+                    title: $('#title').val(),
+                    category: $('#category').val(),
+                    content: $('#content').val(),
+                    tags: $('#tags').val(),
+                    author: $('#author').val(),
+                    status: status,
+                    isTop: $('#isTop').prop('checked'),
+                    summary: $('#summary').val() || $('#content').val().substring(0, 100) + '...'
+                };
+                
+                if (articleId) {
+                    // 编辑文章
+                    var index = articleData.findIndex(a => a.id == articleId);
+                    if (index !== -1) {
+                        articleData[index] = {...articleData[index], ...articleDataObj};
+                        layer.msg('文章更新成功', {icon: 1});
+                    }
+                } else {
+                    // 添加文章
+                    var newId = Math.max(...articleData.map(a => a.id)) + 1;
+                    articleDataObj.id = newId;
+                    articleDataObj.views = 0;
+                    articleDataObj.comments = 0;
+                    articleDataObj.createTime = new Date().toISOString().split('T')[0];
+                    articleData.push(articleDataObj);
+                    layer.msg('文章添加成功', {icon: 1});
+                }
+                
+                $('#articleModal').modal('hide');
+                currentPage = 1;
+                renderArticleTable();
+                setupPagination();
+                updateStats();
+            }
+
+            // 删除文章
+            function deleteArticle(articleId) {
+                var article = articleData.find(a => a.id == articleId);
+                if (article) {
+                    layer.confirm('确定要删除文章 "' + article.title + '" 吗？', {
+                        icon: 3,
+                        title: '删除确认'
+                    }, function(index) {
+                        articleData = articleData.filter(a => a.id != articleId);
+                        renderArticleTable();
+                        setupPagination();
+                        updateStats();
+                        layer.msg('文章删除成功', {icon: 1});
+                        layer.close(index);
+                    });
+                }
+            }
+
+            // 置顶/取消置顶文章
+            function toggleTopArticle(articleId) {
+                var article = articleData.find(a => a.id == articleId);
+                if (article) {
+                    var newTopStatus = !article.isTop;
+                    var action = newTopStatus ? '置顶' : '取消置顶';
+                    
+                    layer.confirm('确定要' + action + '文章 "' + article.title + '" 吗？', {
+                        icon: 3,
+                        title: action + '确认'
+                    }, function(index) {
+                        article.isTop = newTopStatus;
+                        renderArticleTable();
+                        updateStats();
+                        layer.msg('文章' + action + '成功', {icon: 1});
+                        layer.close(index);
+                    });
+                }
+            }
+
+            // 批量删除文章
+            function batchDeleteArticles() {
+                var selectedIds = [];
+                $('.article-checkbox:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+                
+                if (selectedIds.length === 0) {
+                    layer.msg('请选择要删除的文章', {icon: 2});
+                    return;
+                }
+                
+                layer.confirm('确定要删除选中的 ' + selectedIds.length + ' 篇文章吗？', {
+                    icon: 3,
+                    title: '批量删除确认'
+                }, function(index) {
+                    articleData = articleData.filter(a => !selectedIds.includes(a.id.toString()));
+                    renderArticleTable();
+                    setupPagination();
+                    updateStats();
+                    $('#checkAll').prop('checked', false);
+                    updateBatchButtons();
+                    layer.msg('已成功删除 ' + selectedIds.length + ' 篇文章', {icon: 1});
+                    layer.close(index);
+                });
+            }
+
+            // 批量置顶文章
+            function batchTopArticles() {
+                var selectedIds = [];
+                $('.article-checkbox:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+                
+                if (selectedIds.length === 0) {
+                    layer.msg('请选择要置顶的文章', {icon: 2});
+                    return;
+                }
+                
+                layer.confirm('确定要置顶选中的 ' + selectedIds.length + ' 篇文章吗？', {
+                    icon: 3,
+                    title: '批量置顶确认'
+                }, function(index) {
+                    articleData.forEach(function(article) {
+                        if (selectedIds.includes(article.id.toString())) {
+                            article.isTop = true;
+                        }
+                    });
+                    
+                    renderArticleTable();
+                    updateStats();
+                    $('#checkAll').prop('checked', false);
+                    updateBatchButtons();
+                    layer.msg('已成功置顶 ' + selectedIds.length + ' 篇文章', {icon: 1});
+                    layer.close(index);
+                });
+            }
+
+            // 导出文章
+            function exportArticles() {
+                var format = $('input[name="exportFormat"]:checked').val();
+                var scope = $('input[name="exportScope"]:checked').val();
+                
+                // 根据选择的范围获取数据
+                var exportData = [];
+                if (scope === 'current') {
+                    // 当前页数据
+                    var startIndex = (currentPage - 1) * pageSize;
+                    var endIndex = Math.min(startIndex + pageSize, articleData.length);
+                    exportData = articleData.slice(startIndex, endIndex);
+                } else if (scope === 'selected') {
+                    // 选中的数据
+                    var selectedIds = [];
+                    $('.article-checkbox:checked').each(function() {
+                        selectedIds.push($(this).val());
+                    });
+                    exportData = articleData.filter(a => selectedIds.includes(a.id.toString()));
+                } else {
+                    // 全部数据
+                    exportData = articleData;
+                }
+                
+                if (exportData.length === 0) {
+                    layer.msg('没有数据可导出', {icon: 2});
+                    return;
+                }
+                
+                // 构建导出内容（这里只是模拟，实际应该调用后端API）
+                var content = "标题,分类,作者,创建时间\n";
+                exportData.forEach(function(article) {
+                    content += `"${article.title}","${getCategoryText(article.category)}","${getAuthorText(article.author)}","${article.createTime}"\n`;
+                });
+                
+                // 创建下载链接
+                var blob = new Blob([content], {type: 'text/csv;charset=utf-8;'});
+                var link = document.createElement("a");
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "文章导出_" + new Date().toISOString().split('T')[0] + ".csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                $('#exportModal').modal('hide');
+                layer.msg('导出成功，已开始下载', {icon: 1});
+            }
+
+            // 更新批量操作按钮状态
+            function updateBatchButtons() {
+                var selectedCount = $('.article-checkbox:checked').length;
+                $('#batchDeleteBtn').prop('disabled', selectedCount === 0);
+                $('#batchTopBtn').prop('disabled', selectedCount === 0);
+            }
+
+            // 初始化页面
+            initPage();
+        });
+    </script>
+}
