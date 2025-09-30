@@ -1,4 +1,5 @@
-﻿using Blogs.Domain.ModelValidator.Department;
+﻿using Blogs.AppServices.Requests.Admin;
+using Blogs.Domain.ModelValidator.Department;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,15 +16,15 @@ namespace Blogs.AppServices.Commands.Admin.SysDepartment
         /// <summary>
         /// 修改部门初始化参数
         /// </summary>
-        public UpdateDepartmentCommand(long id, long parentId, string name, string abbreviation, int sort, string remark)
+        public UpdateDepartmentCommand(UpdateDepartmentRequest request)
         {
-            Id = id;
-            ParentId = parentId;
-            Name = name;
+            Id = request.Id;
+            ParentId = request.ParentId;
+            Name = request.Name;
             //Code = code;
-            Abbreviation = abbreviation;
-            Sort = sort;
-            Remark = remark;
+            Abbreviation = request.Abbreviation;
+            Sort = request.Sort;
+            Remark = request.Summary;
         }
 
         /// <summary>

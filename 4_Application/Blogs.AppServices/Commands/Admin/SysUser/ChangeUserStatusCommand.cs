@@ -1,4 +1,5 @@
-﻿using Blogs.Core.Enums;
+﻿using Blogs.AppServices.Requests.Admin;
+using Blogs.Core.Enums;
 using Blogs.Domain.ModelValidator.User;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,10 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="status"></param>
-        public ChangeUserStatusCommand(long userId, ApproveStatusEnum status)
+        public ChangeUserStatusCommand(ChangeStatusRequest request)
         {
-            Id = userId;
-            Status = (int)status;
+            Id = request.Id;
+            Status = (int)request.Status;
         }
 
         /// <summary>

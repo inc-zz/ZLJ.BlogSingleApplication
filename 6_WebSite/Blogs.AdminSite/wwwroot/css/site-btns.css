@@ -1,0 +1,178 @@
+
+/* 按钮统一样式配置 */
+:root {
+    /* 按钮颜色变量 */
+    --btn-primary-bg: #3498db;
+    --btn-primary-hover: #2980b9;
+    --btn-success-bg: #27ae60;
+    --btn-success-hover: #229954;
+    --btn-danger-bg: #e74c3c;
+    --btn-danger-hover: #c0392b;
+    --btn-warning-bg: #f39c12;
+    --btn-warning-hover: #e67e22;
+    --btn-info-bg: #1abc9c;
+    --btn-info-hover: #16a085;
+    --btn-light-bg: #ecf0f1;
+    --btn-light-hover: #bdc3c7;
+    --btn-dark-bg: #34495e;
+    --btn-dark-hover: #2c3e50;
+    --btn-border-radius: 4px;
+    --btn-padding-sm: 4px 12px;
+    --btn-padding-md: 6px 16px;
+    --btn-padding-lg: 8px 20px;
+    --btn-font-size-sm: 12px;
+    --btn-font-size-md: 14px;
+    --btn-font-size-lg: 16px;
+    --btn-transition: all 0.2s ease;
+}
+
+/* 基础按钮样式 */
+.btn, .layui-btn {
+    border-radius: var(--btn-border-radius);
+    transition: var(--btn-transition);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* 小型按钮 */
+.btn-sm, .layui-btn-xs {
+    padding: var(--btn-padding-sm);
+    font-size: var(--btn-font-size-sm);
+}
+
+/* 中型按钮 */
+.btn-md, .layui-btn {
+    padding: var(--btn-padding-md);
+    font-size: var(--btn-font-size-md);
+}
+
+/* 大型按钮 */
+.btn-lg {
+    padding: var(--btn-padding-lg);
+    font-size: var(--btn-font-size-lg);
+}
+
+/* 主要按钮 */
+.btn-primary {
+    background-color: var(--btn-primary-bg);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-primary-hover);
+    color: white;
+}
+
+/* 成功按钮 */
+.btn-success {
+    background-color: var(--btn-success-bg);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: var(--btn-success-hover);
+    color: white;
+}
+
+/* 危险按钮 */
+.btn-danger {
+    background-color: var(--btn-danger-bg);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: var(--btn-danger-hover);
+    color: white;
+}
+
+/* 警告按钮 */
+.btn-warning {
+    background-color: var(--btn-warning-bg);
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: var(--btn-warning-hover);
+    color: white;
+}
+
+/* 信息按钮 */
+.btn-info {
+    background-color: var(--btn-info-bg);
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: var(--btn-info-hover);
+    color: white;
+}
+
+/* 次要按钮 */
+.btn-outline-secondary, .layui-btn-primary {
+    background-color: transparent;
+    border: 1px solid #ced4da;
+    color: #495057;
+}
+
+.btn-outline-secondary:hover, .layui-btn-primary:hover {
+    background-color: var(--btn-light-bg);
+    color: #495057;
+}
+
+/* 表格操作按钮样式统一 */
+.table-actions .layui-btn {
+    margin-right: 5px;
+    padding: 2px 8px;
+}
+
+/* 按钮图标间距 */
+.btn i, .layui-btn i {
+    margin-right: 4px;
+}
+
+/* 禁用状态按钮 */
+.btn:disabled, .layui-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 全宽按钮 */
+.btn-block, .w-100 {
+    width: 100%;
+    display: block;
+}
+
+/* 适配 layui 按钮样式 */
+.layui-btn-normal {
+    background-color: var(--btn-primary-bg);
+}
+
+.layui-btn-normal:hover {
+    background-color: var(--btn-primary-hover);
+}
+
+.layui-btn-warm {
+    background-color: var(--btn-warning-bg);
+}
+
+.layui-btn-warm:hover {
+    background-color: var(--btn-warning-hover);
+}
+
+.layui-btn-danger {
+    background-color: var(--btn-danger-bg);
+}
+
+.layui-btn-danger:hover {
+    background-color: var(--btn-danger-hover);
+}
+
+
+    

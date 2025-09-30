@@ -33,26 +33,11 @@ namespace Blogs.Domain.ValueValidator.User
         }
 
         /// <summary>
-        /// 用户是否存在租户
-        /// </summary>
-        protected void ValidateExistsTenant()
-        {
-            RuleFor(x => x).Must(it => _userValidatorService.ExistsTenant(it.Account)).WithMessage("租户不存在");
-        }
-
-        /// <summary>
-        /// 验证租户
-        /// </summary>
-        protected void ValidateTenantId()
-        {
-            RuleFor(x => x.TenantId).NotEqual(0).WithMessage("租户不存在");
-        }
-        /// <summary>
         /// 真实姓名
         /// </summary>
         protected void ValidateName()
         {
-            RuleFor(x => x.TrueName).NotEmpty().WithName("真实姓名");
+            RuleFor(x => x.RealName).NotEmpty().WithName("真实姓名");
         }
         /// <summary>
         /// 性别验证
@@ -66,7 +51,7 @@ namespace Blogs.Domain.ValueValidator.User
         /// </summary>
         protected void ValidateMobile()
         {
-            RuleFor(x => x.Mobile).Matches("/^1(3\\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$/").WithMessage("手机号不正确");
+            RuleFor(x => x.PhoneNumber).Matches("/^1(3\\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$/").WithMessage("手机号不正确");
         }
         /// <summary>
         /// 密码验证
@@ -111,14 +96,14 @@ namespace Blogs.Domain.ValueValidator.User
         /// </summary>
         protected void ValidateAccount()
         {
-            RuleFor(x => x.Account).NotEmpty().WithMessage("账号不能为空");
+            RuleFor(x => x.UserName).NotEmpty().WithMessage("账号不能为空");
         }
         /// <summary>
         /// 验证账号是否存在
         /// </summary>
         protected void ValidateAccountExists()
         {
-            RuleFor(x => x).Must(it => !_userValidatorService.ExistsUser(it.Account)).WithMessage("该账号已被注册");
+            RuleFor(x => x).Must(it => !_userValidatorService.ExistsUser(it.UserName)).WithMessage("该账号已被注册");
         }
 
     }

@@ -15,10 +15,8 @@ namespace Blogs.Domain.Entity.Admin
         /// 父级ID
         /// </summary>
         public long ParentId { get; set; }
-        /// <summary>
-        /// 是否删除
-        /// </summary>
-        public int IsDelete { get; set; } = 0;
+
+        public string? Description { get; set; } 
 
     }
 }

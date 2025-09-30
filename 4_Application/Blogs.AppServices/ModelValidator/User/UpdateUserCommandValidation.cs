@@ -18,7 +18,6 @@ namespace Blogs.Domain.ValueValidator.User
         public UpdateUserCommandValidation()
         {
             ValidateId();
-            //ValidateDepartmentId();
             ValidateName();
             ValidateMobile();
             ValidateSex();

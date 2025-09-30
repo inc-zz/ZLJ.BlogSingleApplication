@@ -48,18 +48,6 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             _userRepository = userRepository;
         }
 
-        ///// <summary>
-        ///// 用户登录
-        ///// </summary>
-        ///// <param name="command"></param>
-        ///// <param name="cancellationToken"></param>
-        ///// <returns></returns>
-        //public Task<bool> Handle(UserLoginCommand command, CancellationToken cancellationToken)
-        //{
-        //    Console.WriteLine("============================用户登录====================");
-        //    return Task.FromResult(false);
-        //}
-
         /// <summary>
         /// 退出登录
         /// </summary>
@@ -114,7 +102,7 @@ namespace Blogs.AppServices.CommandHandlers.Admin
         }
 
         /// <summary>
-        /// 修改
+        /// 编辑用户
         /// </summary>
         /// <param name="command"></param>
         /// <param name="cancellationToken"></param>    
@@ -131,7 +119,16 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             if (entity == null)
                 return await Task.FromResult(false);
 
-            entity = command.Adapt<SysUser>();
+            //entity = command.Adapt<SysUser>();
+
+            entity.RealName = command.RealName;
+            entity.Sex = command.Sex;
+            entity.HeadPic = command.HeadPic;
+            entity.PhoneNumber = command.PhoneNumber;
+            entity.Email = command.Email;
+            entity.Status = command.Status;
+            entity.Description = command.Description;
+
             entity.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
 
             var isUpdate = await _userRepository.UpdateAsync(entity);
@@ -202,7 +199,6 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             return await Task.FromResult(false);
 
         }
-
 
         /// <summary>
         /// 用户授权角色

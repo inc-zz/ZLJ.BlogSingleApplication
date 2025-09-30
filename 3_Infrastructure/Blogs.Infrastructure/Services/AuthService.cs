@@ -84,7 +84,7 @@ namespace Blogs.Infrastructure.Services
         }
 
         /// <summary>
-        /// 
+        /// 生成JWT令牌
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>

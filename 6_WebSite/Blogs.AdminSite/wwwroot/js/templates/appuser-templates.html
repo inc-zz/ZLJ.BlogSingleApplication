@@ -1,0 +1,211 @@
+﻿<!-- 用户表单模态框模板 -->
+<script type="text/html" id="userFormModalTpl">
+    <form class="layui-form" lay-filter="userForm">
+        <input type="hidden" name="id">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" lay-verify="required|username" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="realname" lay-verify="required" placeholder="请输入姓名" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">手机号1</label>
+            <div class="layui-input-block">
+                <input type="text" name="phoneNumber" lay-verify="required|phoneNumber" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱</label>
+            <div class="layui-input-block">
+                <input type="text" name="email" lay-verify="required|email" placeholder="请输入邮箱" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色</label>
+            <div class="layui-input-block">
+                <select name="role" lay-verify="required">
+                    <option value="">请选择角色</option>
+                    <option value="admin">管理员</option>
+                    <option value="editor">编辑</option>
+                    <option value="user">普通用户</option>
+                </select>
+            </div>
+        </div>
+
+        {{# if(!d.isEdit){ }}
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password" lay-verify="pass" placeholder="请输入密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">确认密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="confirmPassword" lay-verify="confirmPass" placeholder="请确认密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        {{# } }}
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="status" lay-skin="switch" lay-text="启用|禁用" {{# if(d.user && d.user.status == 1){ }} checked{{# } }}>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="description" placeholder="请输入备注" class="layui-textarea">{{ d.user ? d.user.description : '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="userSubmit">保存</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</script>
+
+<!-- 用户详情模态框模板 -->
+<script type="text/html" id="userDetailModalTpl">
+    <div class="layui-row">
+        <div class="layui-col-md4 layui-text-center">
+            <div class="user-avatar" style="margin: 0 auto 15px;">
+                {{ d.user.realname ? d.user.realname.charAt(0) : 'U' }}
+            </div>
+            <h3>{{ d.user.realname || '' }}</h3>
+            <span class="layui-badge {{ d.user.status == 1 ? 'layui-bg-green' : 'layui-bg-gray' }}">
+                {{ d.user.status == 1 ? '正常' : '禁用' }}
+            </span>
+        </div>
+        <div class="layui-col-md8">
+            <table class="layui-table" lay-skin="line">
+                <colgroup>
+                    <col width="100">
+                    <col>
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td><strong>用户名:</strong></td>
+                        <td>{{ d.user.username || '' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>手机号:</strong></td>
+                        <td>{{ d.user.phoneNumber || '' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>邮箱:</strong></td>
+                        <td>{{ d.user.email || '' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>角色:</strong></td>
+                        <td>
+                            <span class="layui-badge {{
+                                d.user.role == 'admin' ? 'layui-bg-red' :
+                                d.user.role == 'editor' ? 'layui-bg-orange' : 'layui-bg-blue'
+                            }}">
+                                {{
+                                    d.user.role == 'admin' ? '管理员' :
+                                    d.user.role == 'editor' ? '编辑' : '普通用户'
+                                }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>最后登录:</strong></td>
+                        <td>{{ d.user.lastLogin || '从未登录' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>注册时间:</strong></td>
+                        <td>{{ d.user.createTime || '' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>备注:</strong></td>
+                        <td>{{ d.user.description || '无' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</script>
+
+<!-- 确认删除对话框模板 -->
+<script type="text/html" id="confirmDeleteModalTpl">
+    <div class="layui-text">
+        <p style="font-size: 16px; margin-bottom: 20px;">确定要删除用户吗？</p>
+        <div class="layui-card">
+            <div class="layui-card-body">
+                <div><strong>用户名:</strong> {{ d.user.username }}</div>
+                <div><strong>姓名:</strong> {{ d.user.realname }}</div>
+                <div>
+                    <strong>角色:</strong> {{
+                    d.user.role == 'admin' ? '管理员' :
+                    d.user.role == 'editor' ? '编辑' : '普通用户'
+                    }}
+                </div>
+            </div>
+        </div>
+        <p style="margin-top: 15px; color: #ff5722;">此操作不可恢复，请谨慎操作！</p>
+    </div>
+</script>
+
+<!-- 批量删除确认模板 -->
+<script type="text/html" id="batchDeleteModalTpl">
+    <div class="layui-text">
+        <p style="font-size: 16px; margin-bottom: 20px;">
+            确定要删除选中的 <span style="color: #ff5722; font-weight: bold;">{{ d.count }}</span> 个用户吗？
+        </p>
+        <p style="color: #ff5722;">此操作不可恢复，请谨慎操作！</p>
+    </div>
+</script>
+
+<!-- 表格操作列模板 -->
+<script type="text/html" id="tableToolbarTpl">
+    <div class="table-actions">
+        <button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="view" title="查看">
+            <i class="layui-icon layui-icon-search"></i>
+        </button>
+        <button class="layui-btn layui-btn-xs layui-btn-warm" lay-event="edit" title="编辑">
+            <i class="layui-icon layui-icon-edit"></i>
+        </button>
+        <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete" title="删除">
+            <i class="layui-icon layui-icon-delete"></i>
+        </button>
+    </div>
+</script>
+
+<!-- 状态列模板 -->
+<script type="text/html" id="statusTpl">
+    {{# if(d.status == 1){ }}
+    <span class="layui-badge layui-bg-green">正常</span>
+    {{# } else { }}
+    <span class="layui-badge layui-bg-gray">禁用</span>
+    {{# } }}
+</script>
+
+<!-- 角色列模板 -->
+<script type="text/html" id="roleTpl">
+    {{# if(d.role == 'admin'){ }}
+    <span class="layui-badge layui-bg-red">管理员</span>
+    {{# } else if(d.role == 'editor'){ }}
+    <span class="layui-badge layui-bg-orange">编辑</span>
+    {{# } else { }}
+    <span class="layui-badge layui-bg-blue">普通用户</span>
+    {{# } }}
+</script>

@@ -56,7 +56,7 @@ body {
     animation: fadeIn 0.8s ease-out;
 }
 
-@@keyframes fadeIn {
+@keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateX(50px);
@@ -210,7 +210,7 @@ body {
 }
 
 /* 响应式设计 */
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
     body {
         padding-right: 5%;
         justify-content: center;
@@ -226,7 +226,7 @@ body {
     }
 }
 
-@@media (max-width: 480px) {
+@media (max-width: 480px) {
     .login-card {
         padding: 30px 25px;
     }

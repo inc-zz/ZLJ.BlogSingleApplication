@@ -26,14 +26,22 @@ namespace Blogs.Domain.Entity.Admin
         ///  名称
         ///</summary>
         public string? RealName { set; get; }
+        /// <summary>
+        /// 性别
+        /// </summary>
+        public int? Sex { get; set; }
         ///<summary>
         ///  状态
         ///</summary>
         public int?  Status { set; get; } 
+        /// <summary>
+        /// 手机号
+        /// </summary>
+        public string? PhoneNumber { get; set; }
         ///<summary>
-        ///  邮箱
+        /// 头像
         ///</summary>
-        //public string? Email { set; get; }
+        public string? HeadPic { set; get; }
         ///<summary>
         ///  描述
         ///</summary>

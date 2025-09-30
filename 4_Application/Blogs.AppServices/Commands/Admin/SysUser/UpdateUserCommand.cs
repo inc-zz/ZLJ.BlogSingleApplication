@@ -1,4 +1,5 @@
-﻿using Blogs.Domain.ValueValidator.User;
+﻿using Blogs.AppServices.Requests.Admin;
+using Blogs.Domain.ValueValidator.User;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,15 +15,16 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// <summary>
         /// 初始化编辑字段
         /// </summary>
-        public UpdateUserCommand(long id,string trueName,int sex,string headPic,string mobile,string email,string summary)
+        public UpdateUserCommand(UpdateUserRequest param)
         {
-            Id = id;
-            TrueName = trueName;
-            Sex = sex;
-            HeadPic = headPic;
-            Mobile = mobile;
-            Email = email;
-            Summary = summary;
+            Id = param.Id;
+            RealName = param.RealName;
+            Sex = param.Sex;
+            HeadPic = param.HeadPic;
+            PhoneNumber = param.PhoneNumber;
+            Email = param.Email;
+            Status = param.Status;
+            Description = param.Description;
         }
         /// <summary>
         /// 

@@ -1,0 +1,513 @@
+@page
+@model Blogs.AdminSite.Pages.Article.Create
+@{    
+    ViewData["Title"] = "发布文章";
+    Layout = "_Layout";
+}
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">发布新文章</h5>
+    </div>
+    <div class="card-body">
+        <form id="articleForm" method="post" enctype="multipart/form-data">
+            <!-- 文章标题 -->
+            <div class="mb-4">
+                <input type="text" id="title" name="title" class="form-control" placeholder="请输入文章标题" required />
+            </div>
+            <!-- 富文本编辑器 -->
+            <div class="mb-4">
+                <label for="content" class="form-label required">内容</label>
+                <div id="contentEditor"></div>
+                <input type="hidden" id="content" name="content" required />
+            </div>
+            
+            
+            <!-- 文章分类和标签 -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="categoryId" class="form-label required">文章分类</label>
+                    <select id="categoryId" name="categoryId" class="form-select" required>
+                        <option value="">请选择分类</option>
+                        <!-- 这里会通过JavaScript动态加载分类 -->
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="tagInput" class="form-label">文章标签</label>
+                    <div class="position-relative">
+                        <!-- 标签输入框 -->
+                        <input type="text" id="tagInput" class="form-control tag-input" placeholder="输入标签名称或从下拉列表中选择" autocomplete="off" />
+                        <!-- 标签下拉列表 -->
+                        <div id="tagDropdown" class="tag-dropdown d-none">
+                            <!-- 这里会通过JavaScript动态加载标签选项 -->
+                        </div>
+                    </div>
+                    <!-- 选中的标签容器 -->
+                    <div id="selectedTags" class="selected-tags mt-2">
+                        <!-- 选中的标签将在这里显示 -->
+                    </div>
+                    <input type="hidden" id="tags" name="tags" />
+                </div>
+            </div>
+            
+            <!-- 访问权限设置 -->
+            <div class="mb-4">
+                <label class="form-label">访问权限</label>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="accessPermission" id="permissionPublic" value="Public" checked>
+                        <label class="form-check-label" for="permissionPublic">
+                            <i class="fas fa-globe-asia me-1"></i> 公开
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="accessPermission" id="permissionLogin" value="Login">
+                        <label class="form-check-label" for="permissionLogin">
+                            <i class="fas fa-user-lock me-1"></i> 登录可见
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="accessPermission" id="permissionFollow" value="Follow">
+                        <label class="form-check-label" for="permissionFollow">
+                            <i class="fas fa-user-friends me-1"></i> 关注可见
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="accessPermission" id="permissionPrivate" value="Private">
+                        <label class="form-check-label" for="permissionPrivate">
+                            <i class="fas fa-user-shield me-1"></i> 仅自己可见
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 文章封面 -->
+            <div class="mb-4">
+                <label for="coverImage" class="form-label">文章封面</label>
+                <div class="input-group">
+                    <input type="file" id="coverImage" name="coverImage" class="form-control" accept="image/*" />
+                    <button type="button" class="btn btn-outline-secondary" id="previewCoverBtn">预览</button>
+                </div>
+                <div id="coverPreview" class="mt-2 d-none">
+                    <img src="" alt="封面预览" class="img-thumbnail" style="max-height: 200px;" />
+                </div>
+            </div>
+            
+            <!-- 文章状态 -->
+            <div class="mb-4">
+                <label class="form-label">文章状态</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="status" id="statusDraft" value="Draft" checked>
+                    <label class="form-check-label" for="statusDraft">保存草稿</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="status" id="statusPublish" value="Publish">
+                    <label class="form-check-label" for="statusPublish">立即发布</label>
+                </div>
+            </div>
+            <!-- 表单操作按钮 -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-md" id="submitBtn">
+                    <i class="fas fa-save me-1"></i> 保存文章
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-md ml-2" id="cancelBtn">
+                    <i class="fas fa-times me-1"></i> 取消
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- CKEditor 5 富文本编辑器 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/38.1.1/classic/ckeditor.js"></script>
+    
+    <!-- 代码块高亮插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/core.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.min.css">
+    
+    <style>
+        /* 标签输入框样式 */
+        .tag-input {
+            padding-right: 40px;
+        }
+        
+        /* 标签下拉列表样式 */
+        .tag-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .tag-dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tag-dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .tag-dropdown-item.selected {
+            background-color: #e3f2fd;
+        }
+        
+        /* 选中标签样式 */
+        .selected-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 28px;
+        }
+        
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+        
+        .tag-remove {
+            margin-left: 6px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        
+        .tag-remove:hover {
+            opacity: 0.8;
+        }
+    </style>
+    
+    <script>
+        // 初始化 CKEditor 5 富文本编辑器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化富文本编辑器
+            ClassicEditor
+                .create(document.getElementById('contentEditor'), {
+                    // 配置工具栏
+                    toolbar: [
+                        'heading', '|',
+                        'bold', 'italic', 'underline', 'strike', '|',
+                        'alignment', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'indent', 'outdent', '|',
+                        'imageUpload', 'blockQuote', 'insertTable', 'code', 'codeBlock', '|',
+                        'undo', 'redo', '|',
+                        'sourceEditing'
+                    ],
+                    // 配置图片上传
+                    image: {
+                        toolbar: [
+                            'imageTextAlternative', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side'
+                        ],
+                        upload: {
+                            // 上传URL
+                            url: '/Article/UploadImage',
+                            // 上传成功后的回调
+                            onUploaded: function(response) {
+                                return response.url;
+                            }
+                        }
+                    },
+                    // 代码块配置
+                    codeBlock: {
+                        languages: [
+                            { language: 'plaintext', label: 'Plain text' },
+                            { language: 'csharp', label: 'C#' },
+                            { language: 'css', label: 'CSS' },
+                            { language: 'html', label: 'HTML' },
+                            { language: 'javascript', label: 'JavaScript' },
+                            { language: 'json', label: 'JSON' },
+                            { language: 'markdown', label: 'Markdown' },
+                            { language: 'sql', label: 'SQL' },
+                            { language: 'xml', label: 'XML' }
+                        ]
+                    },
+                    // 高度配置
+                    height: 500
+                })
+                .then(editor => {
+                    // 监听内容变化事件
+                    editor.model.document.on('change:data', () => {
+                        document.getElementById('content').value = editor.getData();
+                    });
+                    
+                    // 保存编辑器实例，方便后续使用
+                    window.editor = editor;
+                })
+                .catch(error => {
+                    console.error('CKEditor 初始化失败:', error);
+                });
+            
+            // 加载分类数据
+            loadCategories();
+            
+            // 加载标签数据
+            loadTags();
+            
+            // 标签选择功能
+            initTagSelector();
+            
+            // 封面预览功能
+            document.getElementById('previewCoverBtn').addEventListener('click', function() {
+                var fileInput = document.getElementById('coverImage');
+                var previewContainer = document.getElementById('coverPreview');
+                var previewImage = previewContainer.querySelector('img');
+                
+                if (fileInput.files && fileInput.files[0]) {
+                    var reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewContainer.classList.remove('d-none');
+                    }
+                    
+                    reader.readAsDataURL(fileInput.files[0]);
+                }
+            });
+            
+            // 表单提交事件
+            document.getElementById('articleForm').addEventListener('submit', function(e) {
+                // 确保编辑器内容已同步到隐藏字段
+                if (window.editor) {
+                    document.getElementById('content').value = window.editor.getData();
+                }
+                
+                // 表单验证
+                var title = document.getElementById('title').value;
+                var categoryId = document.getElementById('categoryId').value;
+                var content = document.getElementById('content').value;
+                
+                if (!title || !categoryId || !content) {
+                    alert('请填写完整的文章信息');
+                    e.preventDefault();
+                    return;
+                }
+                
+                // 这里可以添加提交前的加载状态
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> 提交中...';
+            });
+            
+            // 取消按钮事件
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                if (confirm('确定要取消编辑吗？未保存的内容将丢失。')) {
+                    window.location.href = '/Article';
+                }
+            });
+        });
+        
+        // 初始化标签选择器
+        function initTagSelector() {
+            const tagInput = document.getElementById('tagInput');
+            const tagDropdown = document.getElementById('tagDropdown');
+            const selectedTags = document.getElementById('selectedTags');
+            const tagsHiddenInput = document.getElementById('tags');
+            
+            // 存储已选择的标签ID
+            let selectedTagIds = [];
+            
+            // 点击输入框显示下拉列表
+            tagInput.addEventListener('focus', function() {
+                tagDropdown.classList.remove('d-none');
+            });
+            
+            // 点击其他地方隐藏下拉列表
+            document.addEventListener('click', function(e) {
+                if (!tagInput.contains(e.target) && !tagDropdown.contains(e.target)) {
+                    tagDropdown.classList.add('d-none');
+                }
+            });
+            
+            // 输入时过滤标签
+            tagInput.addEventListener('input', function() {
+                const filterText = this.value.toLowerCase();
+                const tagItems = tagDropdown.querySelectorAll('.tag-dropdown-item');
+                
+                tagItems.forEach(item => {
+                    const tagName = item.textContent.toLowerCase();
+                    if (tagName.includes(filterText)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+            
+            // 回车时添加自定义标签
+            tagInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && this.value.trim()) {
+                    e.preventDefault();
+                    addCustomTag(this.value.trim());
+                    this.value = '';
+                }
+            });
+            
+            // 添加自定义标签
+            function addCustomTag(tagName) {
+                // 检查标签是否已存在
+                const existingTags = selectedTags.querySelectorAll('.tag');
+                for (let i = 0; i < existingTags.length; i++) {
+                    if (existingTags[i].textContent.trim().replace('×', '') === tagName) {
+                        return;
+                    }
+                }
+                
+                // 生成唯一ID
+                const tagId = 'custom_' + Date.now();
+                
+                // 创建标签元素
+                const tagElement = document.createElement('div');
+                tagElement.className = 'tag';
+                tagElement.setAttribute('data-id', tagId);
+                tagElement.innerHTML = `
+                    ${tagName}
+                    <span class="tag-remove" title="移除标签">×</span>
+                `;
+                
+                // 添加移除事件
+                const removeBtn = tagElement.querySelector('.tag-remove');
+                removeBtn.addEventListener('click', function() {
+                    removeTag(tagId, tagElement);
+                });
+                
+                // 添加到选中标签容器
+                selectedTags.appendChild(tagElement);
+                
+                // 更新隐藏输入值
+                selectedTagIds.push(`${tagId}:${tagName}`);
+                updateHiddenTagsInput();
+            }
+            
+            // 添加预定义标签
+            window.addPredefinedTag = function(tagId, tagName) {
+                // 检查标签是否已选择
+                if (selectedTagIds.includes(tagId)) {
+                    return;
+                }
+                
+                // 创建标签元素
+                const tagElement = document.createElement('div');
+                tagElement.className = 'tag';
+                tagElement.setAttribute('data-id', tagId);
+                tagElement.innerHTML = `
+                    ${tagName}
+                    <span class="tag-remove" title="移除标签">×</span>
+                `;
+                
+                // 添加移除事件
+                const removeBtn = tagElement.querySelector('.tag-remove');
+                removeBtn.addEventListener('click', function() {
+                    removeTag(tagId, tagElement);
+                });
+                
+                // 添加到选中标签容器
+                selectedTags.appendChild(tagElement);
+                
+                // 更新隐藏输入值
+                selectedTagIds.push(tagId);
+                updateHiddenTagsInput();
+                
+                // 标记为已选择
+                const tagItem = document.querySelector(`.tag-dropdown-item[data-id="${tagId}"]`);
+                if (tagItem) {
+                    tagItem.classList.add('selected');
+                }
+            };
+            
+            // 移除标签
+            function removeTag(tagId, tagElement) {
+                // 从容器中移除
+                tagElement.remove();
+                
+                // 从选中ID数组中移除
+                const index = selectedTagIds.indexOf(tagId);
+                if (index > -1) {
+                    selectedTagIds.splice(index, 1);
+                }
+                
+                // 更新隐藏输入值
+                updateHiddenTagsInput();
+                
+                // 取消选中标记
+                const tagItem = document.querySelector(`.tag-dropdown-item[data-id="${tagId}"]`);
+                if (tagItem) {
+                    tagItem.classList.remove('selected');
+                }
+            }
+            
+            // 更新隐藏输入值
+            function updateHiddenTagsInput() {
+                tagsHiddenInput.value = JSON.stringify(selectedTagIds);
+            }
+        }
+        
+        // 加载分类数据
+        function loadCategories() {
+            // 这里应该通过AJAX从服务器获取分类数据
+            // 为了演示，这里使用模拟数据
+            var categories = [
+                { id: 1, name: '技术博客' },
+                { id: 2, name: '生活随笔' },
+                { id: 3, name: '读书笔记' },
+                { id: 4, name: '教程分享' }
+            ];
+            
+            var categorySelect = document.getElementById('categoryId');
+            categories.forEach(function(category) {
+                var option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+        }
+        
+        // 加载标签数据
+        function loadTags() {
+            // 这里应该通过AJAX从服务器获取标签数据
+            // 为了演示，这里使用模拟数据
+            var tags = [
+                { id: 1, name: 'JavaScript' },
+                { id: 2, name: 'C#' },
+                { id: 3, name: 'ASP.NET' },
+                { id: 4, name: '前端开发' },
+                { id: 5, name: '后端开发' },
+                { id: 6, name: '数据库' },
+                { id: 7, name: '设计模式' },
+                { id: 8, name: '算法' },
+                { id: 9, name: '性能优化' },
+                { id: 10, name: '架构设计' }
+            ];
+            
+            var tagDropdown = document.getElementById('tagDropdown');
+            tags.forEach(function(tag) {
+                var tagItem = document.createElement('div');
+                tagItem.className = 'tag-dropdown-item';
+                tagItem.setAttribute('data-id', tag.id);
+                tagItem.textContent = tag.name;
+                
+                // 添加点击事件
+                tagItem.addEventListener('click', function() {
+                    window.addPredefinedTag(tag.id, tag.name);
+                    document.getElementById('tagInput').value = '';
+                });
+                
+                tagDropdown.appendChild(tagItem);
+            });
+        }
+    </script>
+}

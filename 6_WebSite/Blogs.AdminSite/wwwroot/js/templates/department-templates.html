@@ -1,0 +1,170 @@
+<!-- 左侧部门树模板 -->
+<div class="col-md-2 nav-left-main">
+    <div class="card nav-left-content">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">部门信息</h5>
+            <button class="btn btn-sm btn-outline-primary" id="expandAllBtn">
+                <i class="fas fa-expand me-1"></i>全部展开
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="department-tree" id="departmentTree">
+                <!-- 部门树数据将通过JavaScript动态加载 -->
+                <div class="loading-tree">
+                    <i class="fas fa-spinner fa-spin me-2"></i>加载部门树中...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 右侧部门列表模板 -->
+<div class="col-md-10">
+    <!-- 搜索和操作区域 -->
+    <div class="card">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">部门名称</label>
+                    <div class="search-container">
+                        <input type="text" class="form-control" id="searchDepartmentName" placeholder="请输入部门名称">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">状态</label>
+                    <select class="form-select" id="searchDepartmentStatus">
+                        <option value="">全部</option>
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary w-100" id="searchDepartmentBtn">
+                        <i class="fas fa-search me-2"></i>搜索
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-3">
+                <div>
+                    <button class="btn btn-success" id="addDepartmentBtn">
+                        <i class="fas fa-plus me-2"></i> 添加部门
+                    </button>
+                    <button class="btn btn-info" id="addSubDepartmentBtn">
+                        <i class="fas fa-folder-plus me-2"></i> 添加子部门
+                    </button>
+                    <button class="btn btn-danger" id="batchDeleteDepartmentBtn">
+                        <i class="fas fa-trash me-2"></i> 批量删除
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-outline-secondary" id="refreshDepartmentBtn">
+                        <i class="fas fa-refresh me-2"></i> 刷新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 部门表格 -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="departmentTable">
+                    <thead>
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" id="checkAllDepartments">
+                            </th>
+                            <th>ID</th>
+                            <th>部门名称</th>
+                            <th>部门代码</th>
+                            <th>负责人</th>
+                            <th>用户数量</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th width="180">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="departmentTableBody">
+                        <!-- 数据将通过JavaScript动态加载 -->
+                        <tr>
+                            <td colspan="9" class="data-loading">
+                                <i class="fas fa-spinner fa-spin me-2"></i>数据加载中...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Layui分页 -->
+            <div id="departmentPage" class="d-flex justify-content-center"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑部门模态框模板 -->
+<div class="modal fade" id="departmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="departmentModalTitle">添加部门</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="layui-form" id="departmentForm">
+                    <input type="hidden" id="departmentId">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">上级部门</label>
+                        <div class="layui-input-block">
+                            <select id="parentDepartment" name="parentDepartment" class="layui-select">
+                                <option value="0">无上级部门</option>
+                                <!-- 上级部门选项将通过JavaScript动态加载 -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">部门名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="departmentName" name="departmentName" lay-verify="required" placeholder="请输入部门名称" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">部门代码</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="departmentCode" name="departmentCode" lay-verify="required" placeholder="请输入部门代码" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">负责人</label>
+                        <div class="layui-input-block">
+                            <select id="departmentManager" name="departmentManager" class="layui-select">
+                                <option value="">请选择负责人</option>
+                                <!-- 负责人选项将通过JavaScript动态加载 -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">描述</label>
+                        <div class="layui-input-block">
+                            <textarea id="departmentDescription" name="departmentDescription" placeholder="请输入部门描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" id="departmentStatus" name="status" lay-skin="switch" lay-text="启用|禁用" checked>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveDepartmentBtn">
+                    <i class="fas fa-save me-2"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

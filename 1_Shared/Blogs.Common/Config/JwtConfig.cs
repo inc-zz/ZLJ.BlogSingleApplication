@@ -33,5 +33,5 @@ public class JwtConfig
     /// <summary>
     /// 刷新令牌过期时间(天)
     /// </summary>
-    public int RefreshTokenExpires { get; set; } = 7;
+    public int RefreshTokenExpires { get; set; } = 10080;
 }

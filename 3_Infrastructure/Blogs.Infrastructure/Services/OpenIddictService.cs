@@ -315,13 +315,14 @@ namespace Blogs.Infrastructure.Services
             // 使用 JSON 序列化确保类型安全
             var jsonData = JsonConvert.SerializeObject(userData);
 
-            // 存储到 Redis（使用 Hash 结构）
+            // 存储到 Redis（使用 Hash 结构） 
+            var refreshTokenExpires = _jwtConfig.RefreshTokenExpires;
             var userTokenKey = $"user_tokens:{userId}";
             await _redisDb.HashSetAsync(userTokenKey,
             [
                 new HashEntry("data", jsonData),
                 new HashEntry("refresh_token", refreshToken),
-                new HashEntry("expires_at", DateTime.UtcNow.AddDays(7).ToString("o"))
+                new HashEntry("expires_at", DateTime.UtcNow.AddMinutes(refreshTokenExpires).ToString("o"))
             ]);
 
             // 设置整体过期时间

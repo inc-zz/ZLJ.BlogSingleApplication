@@ -1,0 +1,293 @@
+@page
+@model Blogs.AdminSite.Pages.Permissions.RoleAuth
+@{    
+    ViewData["Title"] = "角色授权管理";
+    Layout = "_Layout";
+}
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">角色授权</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- 左侧角色列表 -->
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        系统角色
+                    </div>
+                    <div class="card-body p-0 h-100 d-flex flex-column">
+                        <div class="list-group role-list flex-grow-1">
+                            <label class="list-group-item role-item">
+                                <input type="radio" class="form-check-input role-radio" name="roleId" value="admin" checked disabled>
+                                <span class="ms-2">超级管理员</span>
+                                <span class="badge float-end">系统</span>
+                            </label>
+                            <label class="list-group-item role-item">
+                                <input type="radio" class="form-check-input role-radio" name="roleId" value="operator">
+                                <span class="ms-2">操作员</span>
+                            </label>
+                            <label class="list-group-item role-item">
+                                <input type="radio" class="form-check-input role-radio" name="roleId" value="auditor">
+                                <span class="ms-2">审核员</span>
+                            </label>
+                            <label class="list-group-item role-item">
+                                <input type="radio" class="form-check-input role-radio" name="roleId" value="siteadmin">
+                                <span class="ms-2">站点管理员</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧权限配置 -->
+            <div class="col-md-9">
+                <div class="card h-100">
+                    <div class="card-header">
+                        权限配置
+                    </div>
+                    <div class="card-body">
+                        <div class="permission-tree">
+                            <!-- 用户管理模块 -->
+                            <div class="permission-group mb-5">
+                                <label class="permission-group-label">
+                                    <input type="checkbox" class="form-check-input module-checkbox" data-module="user">
+                                    <span class="ms-2">用户管理</span>
+                                </label>
+                                <div class="permission-item ml-4 row">
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="User.Delete" data-module="user">
+                                        <span class="ms-2">删除 (Delete)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="User.Create" data-module="user">
+                                        <span class="ms-2">创建 (Create)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="User.Edit" data-module="user">
+                                        <span class="ms-2">编辑 (Edit)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="User.Auth" data-module="user">
+                                        <span class="ms-2">授权 (Auth)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="User.SetRole" data-module="user">
+                                        <span class="ms-2">分配角色 (SetRole)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="User.View" data-module="user">
+                                        <span class="ms-2">查看 (View)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- 内容管理模块 -->
+                            <div class="permission-group mb-5">
+                                <label class="permission-group-label">
+                                    <input type="checkbox" class="form-check-input module-checkbox" data-module="content">
+                                    <span class="ms-2">内容管理</span>
+                                </label>
+                                <div class="permission-item ml-4 row">
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="Content.Delete" data-module="content">
+                                        <span class="ms-2">删除 (Delete)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="Content.Create" data-module="content">
+                                        <span class="ms-2">创建 (Create)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="Content.Edit" data-module="content">
+                                        <span class="ms-2">编辑 (Edit)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="Content.Publish" data-module="content">
+                                        <span class="ms-2">发布 (Publish)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="Content.View" data-module="content">
+                                        <span class="ms-2">查看 (View)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- 系统设置模块 -->
+                            <div class="permission-group mb-5">
+                                <label class="permission-group-label">
+                                    <input type="checkbox" class="form-check-input module-checkbox" data-module="system">
+                                    <span class="ms-2">系统设置</span>
+                                </label>
+                                <div class="permission-item ml-4 row">
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="System.Edit" data-module="system">
+                                        <span class="ms-2">编辑 (Edit)</span>
+                                    </label>
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="System.View" data-module="system">
+                                        <span class="ms-2">查看 (View)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- 数据统计模块 -->
+                            <div class="permission-group mb-5">
+                                <label class="permission-group-label">
+                                    <input type="checkbox" class="form-check-input module-checkbox" data-module="statistics">
+                                    <span class="ms-2">数据统计</span>
+                                </label>
+                                <div class="permission-item ml-4 row">
+                                    <label class="col-md-2">
+                                        <input type="checkbox" class="form-check-input permission-checkbox" name="permissions" value="Statistics.View" data-module="statistics">
+                                        <span class="ms-2">查看 (View)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 表单操作按钮 -->
+                        <div class="mt-4 text-center">
+                            <button type="button" class="btn btn-primary btn-md" id="saveBtn">
+                                <i class="fas fa-save me-1"></i> 保存设置
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-md ml-2" id="cancelBtn">
+                                <i class="fas fa-times me-1"></i> 取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 模块全选功能
+        document.querySelectorAll('.module-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const module = this.getAttribute('data-module');
+                const isChecked = this.checked;
+                
+                document.querySelectorAll(`.permission-checkbox[data-module="${module}"]`).forEach(permCheckbox => {
+                    permCheckbox.checked = isChecked;
+                });
+            });
+        });
+        
+        // 监听权限复选框变化，更新模块复选框状态
+        document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const module = this.getAttribute('data-module');
+                const moduleCheckbox = document.querySelector(`.module-checkbox[data-module="${module}"]`);
+                const permissionCheckboxes = document.querySelectorAll(`.permission-checkbox[data-module="${module}"]`);
+                
+                // 检查该模块下的所有权限是否都被选中
+                const allChecked = Array.from(permissionCheckboxes).every(cb => cb.checked);
+                moduleCheckbox.checked = allChecked;
+            });
+        });
+        
+        // 保存按钮点击事件
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            // 校验左侧是否勾选了角色
+            const selectedRoles = Array.from(document.querySelectorAll('.role-radio:not(:disabled):checked'))
+                .map(cb => cb.value);
+            
+            if (selectedRoles.length === 0) {
+                alert('请至少选择一个角色进行授权');
+                return;
+            }
+            
+            // 校验右侧是否选择了权限
+            const selectedPermissions = Array.from(document.querySelectorAll('.permission-checkbox:checked'))
+                .map(cb => cb.value);
+            
+            if (selectedPermissions.length === 0) {
+                alert('请至少选择一个权限');
+                return;
+            }
+            
+            // 构建提交数据
+            const submitData = {
+                roles: selectedRoles,
+                permissions: selectedPermissions
+            };
+            
+            // 这里应该有AJAX请求发送到服务器保存数据
+            console.log('提交数据:', submitData);
+            
+            // 模拟保存成功
+            alert('角色权限设置已成功保存！');
+        });
+        
+        // 取消按钮点击事件
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            // 这里可以实现取消逻辑，比如重置表单或返回上一页
+            if (confirm('确定要取消当前设置吗？未保存的更改将丢失。')) {
+                // 重置表单（这里可以根据实际需求实现）
+                location.reload();
+            }
+        });
+        
+        // 超级管理员不能变更权限的提示
+        const superAdminItem = document.querySelector('.role-item:has(.role-radio[value="admin"])');
+        superAdminItem.classList.add('opacity-75');
+        superAdminItem.title = '超级管理员拥有所有权限，不能变更';
+    });
+</script>
+
+<style>
+    /* 角色列表样式 */
+    .role-item {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .role-item:hover:not(:has(.role-radio:disabled)) {
+        border-color: #007bff;
+    }
+    
+    /* 权限组样式 */
+    .permission-group {
+        margin-bottom: 20px;
+    }
+    
+    .permission-group-label {
+        cursor: pointer;
+        font-weight: bold;
+        margin-bottom: 12px;
+        display: block;
+    }
+    
+    .permission-item {
+        margin-bottom: 15px;
+    }
+    
+    .permission-item label {
+        cursor: pointer;
+        display: block;
+        padding: 4px 0;
+        margin-bottom: 4px;
+    }
+    
+    /* 滚动条样式 */
+    .permission-tree::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .permission-tree::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .permission-tree::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    
+    .permission-tree::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+</style>

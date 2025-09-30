@@ -1,5 +1,6 @@
 ﻿using Blogs.AppServices.CommandHandlers.Admin;
 using Blogs.AppServices.Commands.Admin.SysUser;
+using Blogs.Common.DtoModel.Admin;
 using Blogs.Core;
 using Blogs.Core.DtoModel.Admin;
 using Blogs.Core.Models;
@@ -60,7 +61,7 @@ namespace Blogs.AppServices.CommandHandlers
             }
 
             // 获取用户信息
-            var user = await _userRepository.GetByUserNameAsync(command.Account);
+            var user = await _userRepository.GetByUserNameAsync(command.UserName);
             if (user == null)
             {
                 errorMessage = "用户名或密码错误";
@@ -77,7 +78,7 @@ namespace Blogs.AppServices.CommandHandlers
 
             // 验证密码
             var pwd = AESCryptHelper.Encrypt(command.Password);
-            var isPasswordValid = await _authService.ValidateCredentialsAsync(command.Account, command.Password);
+            var isPasswordValid = await _authService.ValidateCredentialsAsync(command.UserName, command.Password);
             if (!isPasswordValid)
             {
                 // 增加登录失败次数
@@ -116,13 +117,7 @@ namespace Blogs.AppServices.CommandHandlers
             // 返回登录结果
             var loginResult = new LoginResultDto
             {
-                UserInfo = new AdminUserDto
-                {
-                    Id = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    LastLoginDate = user.LastLoginTime,
-                },
+                UserInfo = user.Adapt<AdminLoginUserDto>(),
                 AccessToken = tokenResult.AccessToken,
                 RefreshToken = tokenResult.RefreshToken,
                 ExpiresIn = tokenResult.Expiration

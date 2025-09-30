@@ -1,4 +1,5 @@
-﻿using Blogs.Domain.ModelValidator.Department;
+﻿using Blogs.AppServices.Requests.Admin;
+using Blogs.Domain.ModelValidator.Department;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,13 +16,13 @@ namespace Blogs.AppServices.Commands.Admin.SysDepartment
         /// <summary>
         /// 初始化部门
         /// </summary>
-        public CreateDepartmentCommand(long parentId,string name,string abbreviation,int sort ,string remark)
+        public CreateDepartmentCommand(AddDepartmentRequest param)
         {
-            ParentId = parentId;
-            Name = name;
-            Abbreviation = abbreviation;
-            Sort = sort;
-            Remark = remark;
+            ParentId = param.ParentId;
+            Name = param.Name;
+            Abbreviation = param.Abbreviation;
+            Sort = param.Sort;
+            Remark = param.Summary;
         }
 
         /// <summary>

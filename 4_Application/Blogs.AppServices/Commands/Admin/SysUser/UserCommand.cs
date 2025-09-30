@@ -16,29 +16,23 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// </summary>
         public long Id { get; protected set; }
         /// <summary>
-        /// 租户
-        /// </summary>
-        public long TenantId { get; protected set; }
-        /// <summary>
-        /// 租户名称
-        /// </summary>
-        public string? TenantName { get; protected set; }
-        /// <summary>
         /// 角色ID
         /// </summary>
         public long RoleId { get; protected set; }
         /// <summary>
         /// 账号
         /// </summary>
-        public string? Account { get; protected set; }
+        public string? UserName { get; protected set; }
+
+        public string? OldPassword { get; protected set; }
         /// <summary>
         /// 密码
         /// </summary>
         public string Password { get; protected set; }
         /// <summary>
-        /// TrueName
+        /// 名称
         /// </summary>
-        public string TrueName { get; protected set; }
+        public string RealName { get; protected set; }
         /// <summary>
         /// Sex
         /// </summary>
@@ -54,7 +48,7 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// <summary>
         /// Mobile
         /// </summary>
-        public string? Mobile { get; protected set; }
+        public string? PhoneNumber { get; protected set; }
         /// <summary>
         /// Email
         /// </summary>
@@ -62,15 +56,8 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// <summary>
         /// 备注
         /// </summary>
-        public string? Summary { get; protected set; }
-        /// <summary>
-        /// 修改人
-        /// </summary>
-        public string? UpdateUser { get; protected set; }
-        /// <summary>
-        /// 修改时间
-        /// </summary>
-        public string? UpdateUserName { get; protected set; }
+        public string? Description { get; protected set; }
+
         /// <summary>
         /// 用户角色菜单权限
         /// 1角色-多菜单

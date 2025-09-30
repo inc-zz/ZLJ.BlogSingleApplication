@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blogs.Common.DtoModel.Admin;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Blogs.Core.DtoModel.Admin
     /// </summary>
     public class LoginResultDto
     {
-        public AdminUserDto UserInfo { get; set; }
+        public AdminLoginUserDto UserInfo { get; set; }
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? ExpiresIn { get; set; }

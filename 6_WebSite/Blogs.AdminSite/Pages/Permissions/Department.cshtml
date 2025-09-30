@@ -1,0 +1,27 @@
+﻿@page
+@model Blogs.AdminSite.Pages.Permissions.DepartmentModel
+@{    
+    Layout = "_layout";
+    ViewData["Title"] = "部门管理";
+}
+<div class="container-fluid">
+    <div class="row" id="department-container">
+        <!-- 部门管理内容将通过JavaScript动态加载 -->
+        <div class="loading-container">
+            <i class="fas fa-spinner fa-spin me-2"></i>正在加载部门管理模块...
+        </div>
+    </div>
+</div> 
+
+<script>
+    // 初始化部门管理模块
+     $(function(){
+         // 配置layui的基础路径
+        layui.config({
+            base: '/js/modules/'
+        }).use('department', function() {
+            var departmentManager = layui.department;
+            departmentManager.init();
+        });
+    })
+</script>

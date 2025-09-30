@@ -14,9 +14,9 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
     public class UserLoginCommand : UserCommand, IRequest<ResultObject>
     {
 
-        public UserLoginCommand(string account, string password)
+        public UserLoginCommand(string userName, string password)
         {
-            Account = account;
+            UserName = userName;
             Password = password;
         }
 

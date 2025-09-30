@@ -1,4 +1,5 @@
-﻿using Blogs.Domain.ValueValidator.User;
+﻿using Blogs.AppServices.Requests.Admin;
+using Blogs.Domain.ValueValidator.User;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,12 +15,10 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// <summary>
         /// 
         /// </summary>
-        public UserRoleAuthCommand(long userId, long roleId)
+        public UserRoleAuthCommand(SetUserRolesRequest request)
         {
-            Id = userId;
-            RoleId = roleId;
-            //this.UpdateUser = CurrentUserContext.Instance.Account;
-            //this.UpdateUserName = CurrentUserContext.Instance.TrueName;
+            Id = request.UserId;
+            RoleId = request.RoleId;
         }
 
         /// <summary>

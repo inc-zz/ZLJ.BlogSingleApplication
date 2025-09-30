@@ -6,7 +6,7 @@ namespace Blogs.AppServices.Requests.Admin
 {
 
     /// <summary>
-    /// 完善用户资料
+    /// 编辑管理员
     /// </summary>
     public class UpdateUserRequest
     {
@@ -18,35 +18,40 @@ namespace Blogs.AppServices.Requests.Admin
         ///<summary>
         ///  角色Id
         ///</summary>
-        public string RoleIds { set; get; } 
+        public string? RoleIds { set; get; } 
         ///<summary>
         ///  部门Id
         ///</summary>
-        public string DepartmentId { set; get; }  
+        public string? DepartmentId { set; get; }  
         ///<summary>
         ///  真实姓名
         ///</summary>
-        public string TrueName { set; get; } 
+        public string? RealName { set; get; }
         ///<summary>
         ///  性别
         ///</summary>
-        public int Sex { set; get; }
+        public int Sex { set; get; } = 1;
         ///<summary>
         ///  头像
         ///</summary>
-        public string HeadPic { set; get; }
+        public string? HeadPic { set; get; }
         ///<summary>
         ///  手机号码
         ///</summary>
-        public string Mobile { set; get; }
+        public string? PhoneNumber { set; get; }
         ///<summary>
         ///  邮箱
         ///</summary>
-        public string Email { set; get; }
+        public string? Email { set; get; }
         ///<summary>
         ///  描述
         ///</summary>
-        public string Summary { set; get; } 
+        public string? Description { set; get; }
+        /// <summary>
+        /// 状态
+        /// </summary>
+        public int Status { get; set; } = 1;
 
     }
 }
+    

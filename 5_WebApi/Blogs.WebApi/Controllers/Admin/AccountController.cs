@@ -23,19 +23,16 @@ namespace Blogs.WebApi.Controllers.Admin
         private readonly ILogger<AccountController> _logger;
         private readonly IMediator _mediator;
 
-        private readonly IOpenIddictService _tokenService;
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="notification"></param>
-        public AccountController(ILogger<AccountController> logger, IOpenIddictService openIddictService,
+        public AccountController(ILogger<AccountController> logger,
             IMediator mediator)
         {
             _logger = logger;
             _mediator = mediator;
-            _tokenService = openIddictService;
         }
 
         /// <summary>
@@ -56,7 +53,7 @@ namespace Blogs.WebApi.Controllers.Admin
                 if (result.IsSuccess())
                 {
                     _logger.LogInformation("User {Account} logged in successfully", request.Account);
-                  
+
                     return Ok(result);
                 }
                 else
@@ -78,6 +75,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("refresh")]
+        [AllowAnonymous]
         public async Task<ActionResult<UserLoginDto>> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             try
@@ -93,7 +91,9 @@ namespace Blogs.WebApi.Controllers.Admin
                 }
                 else
                 {
-                    return Unauthorized(new { message = result.message });
+                    result.code = 401;
+                    result.message = "令牌无效或已过期";
+                    return Unauthorized(result);
                 }
             }
             catch (SecurityTokenException)

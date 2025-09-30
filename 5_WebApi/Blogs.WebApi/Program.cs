@@ -29,6 +29,10 @@ using Serilog;
 using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Blogs.AppServices.AppServices.Interface;
+using Blogs.AppServices.AppServices.implement;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -100,7 +104,7 @@ builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
 // 方法1: 使用MediatR自动注册（推荐）
 builder.Services.AddMediatR(cfg =>
 {
-    cfg.RegisterServicesFromAssembly(typeof(GetUserListQueryHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(GetUserQueryHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(UserCommandHandler).Assembly);
 });
 
@@ -306,6 +310,28 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader()
                .AllowCredentials(); // 如果前端需要发送cookies等凭证
     });
+});
+
+#endregion
+
+#region 文件存储
+builder.Services.AddScoped<IAppFileService, AppFileService>();
+// 配置 Kestrel 服务器请求体大小限制（针对自宿主情况）
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 1024 * 1024 * 1024; // 例如：设置为 1GB
+});
+// 配置 IIS 服务器选项（针对部署到 IIS 的情况）
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 1024 * 1024 * 1024; // 例如：设置为 1GB
+});
+// 配置表单选项，解除 Multipart  Body 长度限制
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = long.MaxValue; // 取消限制，或设置为一个很大的值
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
 });
 
 #endregion

@@ -45,7 +45,7 @@ body {
     flex-direction: column;
 }
 
-/* ²à±ßÀ¸ÑùÊ½ */
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ */
 #sidebar {
     width: var(--sidebar-width);
     background: var(--secondary-color);
@@ -117,7 +117,7 @@ body {
             transition: transform 0.3s;
         }
 
-/* ¶ş¼¶²Ëµ¥ÑùÊ½ */
+/* äºŒçº§èœå• */
 .submenu {
     max-height: 0;
     overflow: hidden;
@@ -133,3 +133,15 @@ body {
         padding-left: 50px;
         font-size: 0.9rem;
     }
+
+
+/**
+ * éƒ¨é—¨ç®¡ç†é¡µé¢æ ·å¼
+ */
+ .nav-left-main {
+    padding: 0px;
+ }
+.nav-left-main .nav-left-content {
+    cursor: pointer;
+    height: 100%;
+}

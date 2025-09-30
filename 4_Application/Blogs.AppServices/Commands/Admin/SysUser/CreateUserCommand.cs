@@ -1,4 +1,5 @@
-﻿using Blogs.Core;
+﻿using Blogs.AppServices.Requests.Admin;
+using Blogs.Core;
 using Blogs.Domain.ValueValidator.User;
 using NCD.Common;
 using System;
@@ -18,12 +19,15 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// <summary>
         /// 初始化新增用户
         /// </summary>
-        public CreateUserCommand(long departmentId, string account, string password, string trueName)
+        public CreateUserCommand(AddUserRequest param)
         {
             Id =  new IdWorkerUtils().NextId();
-            Account = account;
-            Password =  AESCryptHelper.Encrypt(password); //可选择非对称加密
-            TrueName = trueName;
+            UserName = param.UserName;
+            Password =  AESCryptHelper.Encrypt(param.Password); //可选择非对称加密
+            RealName = param.RealName;
+            Description = param.Description;
+            Email = param.Email;
+            
         }
 
         /// <summary>
