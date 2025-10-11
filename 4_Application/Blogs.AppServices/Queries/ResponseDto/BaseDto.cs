@@ -9,27 +9,25 @@ namespace Blogs.Core.DtoModel.ResponseDto
     /// </summary>
     public class BaseDto
     {
-
         /// <summary>
         /// 菜单Id
         /// </summary>
         public long Id { get; set; }
+        public DateTime? CreatedAt { get; set; }
+
+        public string? CreatedBy { get; set; }
         /// <summary>
-        /// 创建时间
+        /// 最后修改时间
         /// </summary>
-        public DateTime? CreateTime { get; set; }
+        public DateTime? ModifiedAt { get; protected set; }
         /// <summary>
-        /// 创建人
+        /// 最后修改人
         /// </summary>
-        public string CreateUser { get; set; }
+        public string? ModifiedBy { get; protected set; }
         /// <summary>
-        /// 修改时间
+        /// 是否删除
         /// </summary>
-        public DateTime? UpdateTime { get; set; }
-        /// <summary>
-        /// 修改人
-        /// </summary>
-        public string UpdateUser { get; set; }
+        public bool IsDeleted { get; protected set; }
 
     }
 }

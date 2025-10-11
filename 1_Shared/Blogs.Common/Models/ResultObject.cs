@@ -67,12 +67,12 @@ namespace Blogs.Core.Models
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        public static ResultObject Success(T data, string? message)
+        public static ResultObject<T> Success(T data, string? message)
         {
             return new ResultObject<T>
             {
                 code = 200,
-                message = message ?? "处理成功",
+                message = string.IsNullOrWhiteSpace(message) ? "处理成功" : message,
                 data = data,
                 success = true
             };

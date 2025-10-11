@@ -1,4 +1,4 @@
-﻿using Blogs.Domain.ModelValidator.Menu;
+﻿using Blogs.AppServices.ModelValidator.Admin.Menu;
 using System;
 using System.Collections.Generic;
 using System.Text;

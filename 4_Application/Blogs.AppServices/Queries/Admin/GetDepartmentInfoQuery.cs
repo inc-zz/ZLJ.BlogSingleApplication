@@ -1,5 +1,5 @@
-﻿using Blogs.Core.DtoModel.Admin;
-using Blogs.Core.DtoModel.ResponseDto;
+﻿using Blogs.AppServices.Queries.ResponseDto.Admin;
+using Blogs.Core.DtoModel.Admin;
 using Blogs.Core.Models;
 using System;
 using System.Collections.Generic;

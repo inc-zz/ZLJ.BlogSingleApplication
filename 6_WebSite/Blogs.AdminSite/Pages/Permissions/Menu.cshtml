@@ -1,0 +1,78 @@
+@page
+@model Blogs.AdminSite.Pages.Permissions.MenuModel
+@{    
+    Layout = "_layout";
+    ViewData["Title"] = "菜单管理";
+}
+<div class="container-fluid">
+    <div class="row" id="menu-container">
+        <!-- 菜单管理内容将通过JavaScript动态加载 -->
+        <div class="loading-container">
+            <i class="fas fa-spinner fa-spin me-2"></i>正在加载菜单管理模块...
+        </div>
+    </div>
+</div> 
+
+<script>
+    // 初始化菜单管理模块
+     $(function(){
+         // 配置layui的基础路径
+        layui.config({
+            base: '/js/modules/'
+        }).use('menu', function() {
+            var menuManager = layui.menu;
+            menuManager.init();
+        });
+    })
+</script>
+<style>
+    .tree-cell-content {
+        display: inline-flex;
+        align-items: center;
+        min-width: 100%;
+    }
+    
+    .tree-icon {
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .tree-icon-placeholder {
+        width: 16px;
+        display: inline-block;
+    }
+    
+    /* 展开/折叠动画 */
+    .tree-node {
+        transition: all 0.3s ease;
+    }
+    
+    /* 权限选择样式 */
+    .permission-item {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .permission-label {
+        display: flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .permission-label:hover {
+        background-color: #e9ecef;
+    }
+    
+    .permission-label input[type="checkbox"] {
+        margin-right: 5px;
+    }
+</style>

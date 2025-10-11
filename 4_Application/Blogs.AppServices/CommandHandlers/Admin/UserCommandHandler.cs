@@ -19,7 +19,7 @@ namespace Blogs.AppServices.CommandHandlers.Admin
     /// <summary>
     /// 用户模块相关命令处理
     /// </summary>
-    public class UserCommandHandler : CommandHandler,
+    public class AppUserCommandHandler : CommandHandler,
         //IRequestHandler<UserLoginCommand, bool>,
         IRequestHandler<LoginOutCommand, bool>,
         IRequestHandler<CreateUserCommand, bool>,
@@ -38,7 +38,7 @@ namespace Blogs.AppServices.CommandHandlers.Admin
         /// <param name="eventBus"></param>
         /// <param name="httpContext"></param>
         /// <param name="userRepository"></param>
-        public UserCommandHandler(IMediatorHandler eventBus, 
+        public AppUserCommandHandler(IMediatorHandler eventBus, 
             IHttpContextAccessor httpContext, 
             IUserRepository userRepository)
             : base(eventBus)
@@ -92,7 +92,7 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             var user = command.Adapt<SysUser>();
 
             //创建人信息
-            //user.MarkAsCreated(CurrentUser.Instance.Account);
+            user.MarkAsCreated(CurrentUser.Instance.UserInfo.UserName);
             user.Status = (int)ApproveStatusEnum.Normal;
 
             var isTrue = await _userRepository.InsertAsync(user);

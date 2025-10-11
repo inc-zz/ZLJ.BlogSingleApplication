@@ -1,38 +1,37 @@
+using Blogs.AppServices.AppServices.implement;
+using Blogs.AppServices.AppServices.Interface;
 using Blogs.AppServices.CommandHandlers.Admin;
 using Blogs.AppServices.QueryHandlers.Admin;
 using Blogs.Core;
 using Blogs.Core.Config;
-using Blogs.Domain;
-using Blogs.Domain.Entity.Admin;
 using Blogs.Domain.EventBus;
 using Blogs.Domain.EventNotices;
 using Blogs.Domain.IRepositorys.Admin;
+using Blogs.Domain.IRepositorys.Blogs;
 using Blogs.Domain.IServices;
 using Blogs.Domain.Notices;
 using Blogs.Infrastructure;
 using Blogs.Infrastructure.Context;
-using Blogs.Infrastructure.JwtAuthorize;
 using Blogs.Infrastructure.OpenIdDict;
 using Blogs.Infrastructure.Repositorys.Admin;
+using Blogs.Infrastructure.Repositorys.Blogs;
 using Blogs.Infrastructure.Services;
+using Blogs.Infrastructure.Services.Admin;
+using Blogs.Infrastructure.Services.App;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using OpenIddict.Abstractions;
-using OpenIddict.Validation.AspNetCore;
-using Serilog.Events;
 using Serilog;
+using Serilog.Events;
 using StackExchange.Redis;
-using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Text;
-using Blogs.AppServices.AppServices.Interface;
-using Blogs.AppServices.AppServices.implement;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,9 +44,9 @@ builder.Services.AddEndpointsApiExplorer();
 
 #region 配置Swagger并开启认证
 
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
 
     // 添加JWT安全方案
     var securityScheme = new OpenApiSecurityScheme
@@ -61,11 +60,25 @@ builder.Services.AddSwaggerGen(c =>
         Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
     };
 
-    c.AddSecurityDefinition("Bearer", securityScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityDefinition("Bearer", securityScheme);
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         { securityScheme, Array.Empty<string>() }
     });
+    //添加JWT注释
+    var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+    var xmlFile = $"{assemblyName}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath, true);
+    }
+    else
+    {
+        // 可选：记录警告日志
+        Console.WriteLine($"XML文档文件未找到: {xmlPath}");
+    }
 });
 
 #endregion
@@ -91,9 +104,24 @@ Console.WriteLine(JsonConvert.SerializeObject(jwtConfig));
 #endregion
 
 #region 注册仓储
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IMenuRepository, MenuRepository>();
-// 注册其他仓储...
+//builder.Services.AddScoped<IUserRepository, UserRepository>();
+//builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+//builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+//builder.Services.AddScoped<IPermissionsRepository, PermissionsRepository>();
+//builder.Services.AddScoped<ISysLogRepository, SysLogRepository>();
+//builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+
+builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
+
+var domainAssembly = typeof(IUserRepository).Assembly;
+var infrastructureAssembly = typeof(UserRepository).Assembly;
+
+builder.Services.Scan(scan => scan
+    .FromAssemblies(infrastructureAssembly) // 从实现层扫描
+    .AddClasses(classes => classes.Where(t => t.Name.EndsWith("Repository")))
+    .AsImplementedInterfaces()
+    .WithScopedLifetime());
+
 #endregion
 
 #region 注册事件总线处理程序
@@ -105,15 +133,10 @@ builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(GetUserQueryHandler).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(UserCommandHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(AppUserCommandHandler).Assembly);
+    //cfg.RegisterServicesFromAssembly(typeof(RoleQueryHandler).Assembly);
 });
-
-// 方法2: 手动批量注册
-// builder.Services.AddAllCommandAndQueryHandlers();
-
-// 方法3: 按命名空间注册
-// builder.Services.AddHandlersByNamespace();
-
+ 
 #endregion
 
 #region 数据迁移-表结构生成
@@ -132,6 +155,9 @@ builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotif
 builder.Services.AddScoped<IOpenIddictService, OpenIddictService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
+
+builder.Services.AddScoped<IAppOpenIddictService, AppOpenIddictService>();
+builder.Services.AddScoped<IAppAuthService, AppAuthService>();
 
 // 配置EF Core上下文
 builder.Services.AddDbContext<OpenIddictDbContext>(options =>

@@ -10,22 +10,18 @@ namespace Blogs.Domain.Entity.Blogs
     /// <summary>
     /// 
     /// </summary>
+    [SugarTable("blogs_article_tag")]
     public class BlogsArticleTag : BaseEntity
     {
 
-        public long ArticleId { get; private set; }
-        public long TagId { get; private set; }
+        public long Id { get; private set; }
 
-        // 导航属性
-        public virtual BlogsArticle Article { get; private set; }
-        public virtual BlogsTag Tag { get; private set; }
+        public string Name { get; set; }
+
+        public int Sort { get; private set; }
 
         protected BlogsArticleTag() { }
 
-        public BlogsArticleTag(long articleId, long tagId)
-        {
-            ArticleId = articleId;
-            TagId = tagId;
-        }
+     
     }
 }

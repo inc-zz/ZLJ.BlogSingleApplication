@@ -1,5 +1,5 @@
-﻿using Blogs.Core.DtoModel.Admin;
-using Blogs.Core.DtoModel.ResponseDto;
+﻿using Blogs.AppServices.Queries.ResponseDto.Admin;
+using Blogs.Core.DtoModel.Admin;
 using Blogs.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -16,10 +16,6 @@ namespace Blogs.AppServices.Queries.Admin
     {
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
-        public string SearchTerm { get; set; }
-        public bool? IsActive { get; set; }
-        public long? RoleId { get; set; }
-        public string SortBy { get; set; }
-        public bool SortDescending { get; set; }
+        public long? DepId { get; set; }
     }
 }

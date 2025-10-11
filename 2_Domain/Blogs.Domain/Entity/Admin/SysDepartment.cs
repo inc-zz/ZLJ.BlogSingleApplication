@@ -15,8 +15,15 @@ namespace Blogs.Domain.Entity.Admin
         /// 父级ID
         /// </summary>
         public long ParentId { get; set; }
-
-        public string? Description { get; set; } 
+        /// <summary>
+        /// 
+        /// </summary>
+        public string? Description { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        [SugarColumn(IsIgnore = true)]
+        public List<SysDepartment> Children { get; set; }
 
     }
 }

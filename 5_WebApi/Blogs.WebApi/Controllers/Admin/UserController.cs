@@ -49,10 +49,7 @@ namespace Blogs.WebApi.Controllers.Admin
             var query = new GetUserListQuery
             {
                 PageIndex = param.PageIndex,
-                PageSize = param.PageSize,
-                SearchTerm = null,
-                IsActive = false,
-                RoleId = 0
+                PageSize = param.PageSize 
             };
 
             // 通过中介者发送查询请求

@@ -1,4 +1,5 @@
-﻿using Blogs.Domain.ValueValidator.Role;
+﻿using Blogs.AppServices.ModelValidator.Admin.Role;
+using Blogs.AppServices.Requests.Admin;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,15 +15,11 @@ namespace Blogs.AppServices.Commands.Admin.SysRole
         /// <summary>
         /// 
         /// </summary>
-        public CreateRoleCommand(long tenantId,int isSystem, long departmentId, string name, string code,int sort,string summary)
+        public CreateRoleCommand(AddRoleRequest request )
         {
-            TenantId = tenantId;
-            IsSystem = isSystem;
-            DepartmentId = departmentId;
-            Name = name;
-            Code = code;
-            Sort = sort;
-            Summary = summary;
+            IsSystem = request.IsSystem;
+            Name = request.Name;
+            Code = request.Code;
         }
 
         /// <summary>

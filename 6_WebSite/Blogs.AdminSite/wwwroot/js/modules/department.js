@@ -13,7 +13,7 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
     var DepartmentManager = {
         // 配置参数
         config: {
-            baseUrl: '/api/departments',
+            baseUrl: '/admin/department',
             pageSize: 10,
             currentDepartmentId: null // 当前选中的部门ID
         },
@@ -26,7 +26,6 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
             templateManager.waitForTemplates(function() {
                 self.bindEvents();
                 self.loadDepartmentTree();
-                self.loadDepartmentData();
             });
         },
 
@@ -36,34 +35,14 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
             
             http.get(self.config.baseUrl + '/tree')
                 .then(function (res) {
+                    
                     if (res.code === 200 && res.data) {
                         self.renderDepartmentTree(res.data);
-                    } else {
-                        // 使用模拟数据
-                        self.renderDepartmentTree(self.getMockDepartmentTree());
-                    }
+                    } 
                 })
                 .catch(function (error) {
                     console.error('加载部门树失败:', error);
-                    // 使用模拟数据
-                    self.renderDepartmentTree(self.getMockDepartmentTree());
                 });
-        },
-
-        // 获取模拟部门树数据
-        getMockDepartmentTree: function() {
-            return [
-                {id: 1, name: '总公司', userCount: 156, children: [
-                    {id: 2, name: '技术部', userCount: 42, children: [
-                        {id: 3, name: '前端开发组', userCount: 15},
-                        {id: 4, name: '后端开发组', userCount: 20}
-                    ]},
-                    {id: 5, name: '内容部', userCount: 35, children: [
-                        {id: 6, name: '编辑组', userCount: 25}
-                    ]},
-                    {id: 7, name: '市场部', userCount: 28}
-                ]}
-            ];
         },
 
         // 渲染部门树
@@ -71,7 +50,7 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
             var self = this;
             var treeContainer = $('#departmentTree');
             treeContainer.empty();
-            
+                
             // 递归渲染部门树
             function renderNode(nodes, level = 0) {
                 nodes.forEach(function (node) {
@@ -98,16 +77,17 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
             renderNode(treeData);
             
             // 默认选中第一个部门
-            if (treeData && treeData.length > 0) {
-                self.selectDepartment(treeData[0].id);
-            }
-            
+            // if (treeData && treeData.length > 0) {
+            //     self.selectDepartment(treeData[0].id);
+            // }
+            self.selectDepartment(1);
             // 绑定部门点击事件
             self.bindDepartmentTreeEvents();
         },
 
         // 选择部门
         selectDepartment: function (departmentId) {
+            debugger
             this.config.currentDepartmentId = departmentId;
             $('.department-item').removeClass('active');
             $('.department-item[data-id="' + departmentId + '"]').addClass('active');
@@ -145,43 +125,152 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
             var params = {
                 page: page,
                 limit: limit,
-                departmentId: self.config.currentDepartmentId,
+                depId: 0,// self.config.currentDepartmentId,
                 ...searchParams
             };
             
-            http.get(self.config.baseUrl, params)
+            http.get(self.config.baseUrl+'/list', params)
                 .then(function (res) {
                     if (res.code === 200 && res.data) {
-                        self.renderDepartmentTable(res.data.items || []);
+                        // 直接传递完整的响应数据，renderDepartmentTable方法会处理items数组
+                        self.renderDepartmentTable(res.data);
                         self.initPagination(res.data.total, page, limit);
                     } else {
                         // 使用模拟数据
-                        self.renderDepartmentTable(self.getMockDepartmentData());
+                        const mockData = {
+                            items: self.getMockDepartmentData()
+                        };
+                        self.renderDepartmentTable(mockData);
                         self.initPagination(20, page, limit);
                     }
                 })
                 .catch(function (error) {
                     console.error('加载部门数据失败:', error);
                     // 使用模拟数据
-                    self.renderDepartmentTable(self.getMockDepartmentData());
+                    const mockData = {
+                        items: self.getMockDepartmentData()
+                    };
+                    self.renderDepartmentTable(mockData);
                     self.initPagination(20, page, limit);
                 });
         },
 
         // 获取模拟部门数据
         getMockDepartmentData: function() {
-            return [
-                {id: 1, name: '总公司', code: 'HEAD', manager: '张总', userCount: 156, status: '启用', createTime: '2023-01-15'},
-                {id: 2, name: '技术部', code: 'TECH', manager: '李经理', userCount: 42, status: '启用', createTime: '2023-02-20'},
-                {id: 3, name: '前端开发组', code: 'FRONTEND', manager: '王组长', userCount: 15, status: '启用', createTime: '2023-03-10'},
-                {id: 4, name: '后端开发组', code: 'BACKEND', manager: '赵组长', userCount: 20, status: '启用', createTime: '2023-03-15'},
-                {id: 5, name: '内容部', code: 'CONTENT', manager: '钱经理', userCount: 35, status: '启用', createTime: '2023-04-01'},
-                {id: 6, name: '编辑组', code: 'EDIT', manager: '孙组长', userCount: 25, status: '启用', createTime: '2023-04-10'},
-                {id: 7, name: '市场部', code: 'MARKET', manager: '周经理', userCount: 28, status: '启用', createTime: '2023-04-15'},
-                {id: 8, name: '销售部', code: 'SALES', manager: '吴经理', userCount: 32, status: '启用', createTime: '2023-05-01'},
-                {id: 9, name: '客服部', code: 'SERVICE', manager: '郑经理', userCount: 18, status: '启用', createTime: '2023-05-10'},
-                {id: 10, name: '财务部', code: 'FINANCE', manager: '王总监', userCount: 12, status: '启用', createTime: '2023-05-15'}
-            ];
+            return   [
+            {
+                "id": 1,
+                "name": "销售部",
+                "parentName": "顶级部门",
+                "description": "1121",
+                "createdAt": "2025-09-29T23:59:09",
+                "createdBy": "admin",
+                "modifiedAt": "2025-09-29T23:59:14",
+                "modifiedBy": "admin",
+                "isDeleted": false,
+                "children": [
+                    {
+                        "id": 101,
+                        "name": "华东销售部",
+                        "parentName": null,
+                        "description": "111",
+                        "createdAt": "2025-10-01T01:34:40",
+                        "createdBy": "admin",
+                        "modifiedAt": "2025-10-01T01:34:46",
+                        "modifiedBy": null,
+                        "isDeleted": false,
+                        "children": null
+                    },
+                    {
+                        "id": 102,
+                        "name": "华南销售部",
+                        "parentName": null,
+                        "description": "111",
+                        "createdAt": "2025-10-01T01:34:40",
+                        "createdBy": "admin",
+                        "modifiedAt": "2025-10-01T01:34:46",
+                        "modifiedBy": null,
+                        "isDeleted": false,
+                        "children": [
+                            {
+                                "id": 103,
+                                "name": "广东省销售部",
+                                "parentName": null,
+                                "description": "111",
+                                "createdAt": "2025-10-01T01:34:40",
+                                "createdBy": "admin",
+                                "modifiedAt": "2025-10-01T01:34:46",
+                                "modifiedBy": null,
+                                "isDeleted": false,
+                                "children": [
+                                    {
+                                        "id": 104,
+                                        "name": "深圳销售部",
+                                        "parentName": null,
+                                        "description": "111",
+                                        "createdAt": "2025-10-01T01:34:40",
+                                        "createdBy": "admin",
+                                        "modifiedAt": "2025-10-01T01:34:46",
+                                        "modifiedBy": null,
+                                        "isDeleted": false,
+                                        "children": null
+                                    },
+                                    {
+                                        "id": 105,
+                                        "name": "汕头销售部",
+                                        "parentName": null,
+                                        "description": "111",
+                                        "createdAt": "2025-10-01T01:34:40",
+                                        "createdBy": "admin",
+                                        "modifiedAt": "2025-10-01T01:34:46",
+                                        "modifiedBy": null,
+                                        "isDeleted": false,
+                                        "children": null
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "name": "实施部",
+                "parentName": "顶级部门",
+                "description": null,
+                "createdAt": "2025-10-01T01:32:56",
+                "createdBy": "admin",
+                "modifiedAt": "2025-10-01T01:33:02",
+                "modifiedBy": "admin",
+                "isDeleted": false,
+                "children": [
+                    {
+                        "id": 201,
+                        "name": "华南实施部",
+                        "parentName": null,
+                        "description": "111",
+                        "createdAt": "2025-10-01T01:34:40",
+                        "createdBy": "admin",
+                        "modifiedAt": "2025-10-01T01:34:46",
+                        "modifiedBy": null,
+                        "isDeleted": false,
+                        "children": null
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "name": "研发部",
+                "parentName": "顶级部门",
+                "description": "111",
+                "createdAt": "2025-10-01T01:34:40",
+                "createdBy": "admin",
+                "modifiedAt": "2025-10-01T01:34:46",
+                "modifiedBy": null,
+                "isDeleted": false,
+                "children": null
+            }
+        ]
         },
 
         // 渲染部门表格
@@ -194,38 +283,143 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
                 return;
             }
             
+            // 准备树形数据（用户提供的数据已经是树形结构，这里只需要处理数据转换）
             let html = '';
-            data.forEach(function (dept) {
-                const statusBadge = dept.status === '启用' ?
-                    '<span class="badge bg-success">启用</span>' :
-                    '<span class="badge bg-secondary">禁用</span>';
-                
-                html += `
-                    <tr>
-                        <td><input type="checkbox" class="department-checkbox" value="${dept.id}"></td>
-                        <td>${dept.id}</td>
-                        <td>${dept.name}</td>
-                        <td>${dept.code}</td>
-                        <td>${dept.manager}</td>
-                        <td>${dept.userCount}</td>
-                        <td>${statusBadge}</td>
-                        <td>${dept.createTime}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary edit-department-btn btn-fixed-width" data-id="${dept.id}">
-                                <i class="fas fa-edit btn-icon"></i>编辑
-                            </button>
-                            <button class="btn btn-sm btn-danger delete-department-btn btn-fixed-width" data-id="${dept.id}">
-                                <i class="fas fa-trash btn-icon"></i>删除
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
             
+            // 递归渲染树形表格
+            function renderTreeNode(nodes, level = 0, parentIds = []) {
+                nodes.forEach(function (dept) {
+                    const currentParentIds = [...parentIds, dept.id];
+                    
+                    // 格式化创建时间
+                    const formattedCreateTime = dept.createdAt ? new Date(dept.createdAt).toLocaleString('zh-CN') : '';
+                    const formattedModifyTime = dept.modifiedAt ? new Date(dept.modifiedAt).toLocaleString('zh-CN') : '';
+                    
+                    // 状态显示
+                    const statusBadge = dept.isDeleted ?
+                        '<span class="badge bg-danger">已删除</span>' :
+                        '<span class="badge bg-success">正常</span>';
+                    
+                    // 树形结构缩进
+                    const indentStyle = level > 0 ? `style="padding-left: ${level * 20}px;"` : '';
+                    
+                    // 展开/折叠图标
+                    const hasChildren = dept.children && dept.children.length > 0;
+                    const treeIcon = hasChildren ? 
+                        `<i class="fas fa-chevron-down tree-icon mr-1"></i>` : 
+                        `<i class="tree-icon-placeholder mr-1"></i>`;
+                    
+                    html += `
+                        <tr class="tree-node" data-id="${dept.id}" data-level="${level}" data-parent-ids="${currentParentIds.join(',')}">
+                            <td><input type="checkbox" class="department-checkbox" value="${dept.id}"></td>
+                            <td>${dept.id}</td>
+                            <td ${indentStyle}>
+                                <div class="tree-cell-content">
+                                    ${treeIcon}
+                                    ${dept.name}
+                                </div>
+                            </td>
+                            <td>${dept.description || ''}</td>
+                            <td>${formattedCreateTime}</td>
+                            <td>${formattedModifyTime}</td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-department-btn btn-fixed-width" data-id="${dept.id}">
+                                    <i class="fas fa-edit btn-icon"></i>编辑
+                                </button>
+                                <button class="btn btn-sm btn-danger delete-department-btn btn-fixed-width" data-id="${dept.id}">
+                                    <i class="fas fa-trash btn-icon"></i>删除
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // 递归渲染子节点
+                    if (hasChildren) {
+                        renderTreeNode(dept.children, level + 1, currentParentIds);
+                    }
+                });
+            }
+            
+            // 根据用户提供的数据结构，直接渲染items数组
+            renderTreeNode(data.items || data);
             tbody.html(html);
             
-            // 重新绑定事件
-            self.bindTableEvents();
+            // 绑定树形表格事件
+            this.bindTreeTableEvents();
+            
+            // 绑定普通表格事件
+            this.bindTableEvents();
+        },
+
+        // 绑定树形表格事件
+        bindTreeTableEvents: function() {
+            var self = this;
+            
+            // 点击展开/折叠图标
+            $('.tree-icon').on('click', function(e) {
+                e.stopPropagation();
+                const $icon = $(this);
+                const $currentRow = $icon.closest('tr');
+                const currentId = $currentRow.data('id');
+                const currentLevel = $currentRow.data('level');
+                
+                // 切换图标
+                if ($icon.hasClass('fa-chevron-down')) {
+                    $icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+                    // 隐藏所有子节点（包括子节点的子节点）
+                    $(`tr.tree-node`).each(function() {
+                        const $childRow = $(this);
+                        const childLevel = $childRow.data('level');
+                        // 确保parentIds是字符串类型后再调用split
+                        const parentIdsStr = String($childRow.data('parent-ids'));
+                        const parentIds = parentIdsStr ? parentIdsStr.split(',') : [];
+                        
+                        if (childLevel > currentLevel && parentIds.includes(currentId.toString())) {
+                            $childRow.hide();
+                        }
+                    });
+                } else {
+                    $icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+                    // 显示所有子节点
+                    $(`tr.tree-node`).each(function() {
+                        const $childRow = $(this);
+                        const childLevel = $childRow.data('level');
+                        // 确保parentIds是字符串类型后再调用split
+                        const parentIdsStr = String($childRow.data('parent-ids'));
+                        const parentIds = parentIdsStr ? parentIdsStr.split(',') : [];
+                        
+                        if (childLevel > currentLevel && parentIds.includes(currentId.toString())) {
+                            $childRow.show();
+                            // 同时展开直接子节点的图标（如果已展开）
+                            const childIcon = $childRow.find('.tree-icon');
+                            if (childIcon.hasClass('fa-chevron-right')) {
+                                childIcon.click();
+                            }
+                        }
+                    });
+                }
+            });
+        },
+
+        // 检查节点是否是指定父节点的后代
+        isDescendantOf: function($row, parentId) {
+            // 确保parentIds是字符串类型后再调用split
+            const parentIdsStr = String($row.data('parent-ids'));
+            const parentIds = parentIdsStr ? parentIdsStr.split(',') : [];
+            return parentIds.includes(parentId.toString());
+        },
+
+        // 检查节点是否是指定父节点的直接子节点
+        isDirectChildOf: function($row, parentId) {
+            // 确保parentIds是字符串类型后再调用split
+            const parentIdsStr = String($row.data('parent-ids'));
+            const parentIds = parentIdsStr ? parentIdsStr.split(',') : [];
+            const currentLevel = $row.data('level');
+            const parentElement = $(`[data-id="${parentId}"]`);
+            const parentLevel = parentElement.data('level');
+            
+            return parentIds.includes(parentId.toString()) && currentLevel === parentLevel + 1;
         },
 
         // 初始化分页
@@ -241,7 +435,7 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
                 theme: '#3498db',
                 jump: function(obj, first) {
                     if (!first) {
-                        self.loadDepartmentData(obj.curr, obj.limit);
+                        // self.loadDepartmentData(obj.curr, obj.limit);
                     }
                 }
             });
@@ -341,6 +535,7 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
 
         // 刷新部门数据
         refreshDepartmentData: function () {
+            debugger
             $('#searchDepartmentName').val('');
             $('#searchDepartmentStatus').val('');
             this.loadDepartmentData();
@@ -365,13 +560,7 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
             if (parentDepartmentId) {
                 $('#parentDepartment').val(parentDepartmentId);
             }
-            
-            // 加载上级部门选项
-            self.loadParentDepartmentOptions(isEdit ? departmentId : null);
-            
-            // 加载负责人选项
-            self.loadManagerOptions();
-            
+             
             // 预加载部门数据（如果是编辑模式）
             if (isEdit && departmentId) {
                 self.loadDepartmentDetail(departmentId, function (department) {
@@ -381,76 +570,7 @@ layui.define(['layer', 'form', 'laypage', 'department-template', 'core'], functi
             } else {
                 self.openDepartmentModal();
             }
-        },
-
-        // 加载上级部门选项
-        loadParentDepartmentOptions: function (currentDepartmentId = null) {
-            var self = this;
-            var parentDepartmentSelect = $('#parentDepartment');
-            
-            http.get(self.config.baseUrl + '/tree')
-                .then(function (res) {
-                    if (res.code === 200 && res.data) {
-                        self.renderParentDepartmentOptions(res.data, parentDepartmentSelect, currentDepartmentId);
-                    } else {
-                        // 使用模拟数据
-                        self.renderParentDepartmentOptions(self.getMockDepartmentTree(), parentDepartmentSelect, currentDepartmentId);
-                    }
-                })
-                .catch(function (error) {
-                    console.error('加载上级部门选项失败:', error);
-                    // 使用模拟数据
-                    self.renderParentDepartmentOptions(self.getMockDepartmentTree(), parentDepartmentSelect, currentDepartmentId);
-                });
-        },
-
-        // 渲染上级部门选项
-        renderParentDepartmentOptions: function (treeData, selectElement, currentDepartmentId) {
-            var options = '';
-            
-            // 递归构建部门选项
-            function buildOptions(nodes, level = 0) {
-                nodes.forEach(function (node) {
-                    // 排除当前编辑的部门
-                    if (node.id !== currentDepartmentId) {
-                        var indent = level > 0 ? Array(level + 1).join('&nbsp;&nbsp;&nbsp;') : '';
-                        options += `<option value="${node.id}">${indent}${node.name}</option>`;
-                        
-                        if (node.children && node.children.length > 0) {
-                            buildOptions(node.children, level + 1);
-                        }
-                    }
-                });
-            }
-            
-            buildOptions(treeData);
-            
-            // 插入选项
-            selectElement.html('<option value="0">无上级部门</option>' + options);
-            form.render('select');
-        },
-
-        // 加载负责人选项
-        loadManagerOptions: function () {
-            var self = this;
-            var managerSelect = $('#departmentManager');
-            
-            http.get('/api/users/managers')
-                .then(function (res) {
-                    if (res.code === 200 && res.data) {
-                        self.renderManagerOptions(res.data, managerSelect);
-                    } else {
-                        // 使用模拟数据
-                        self.renderManagerOptions(self.getMockManagers(), managerSelect);
-                    }
-                })
-                .catch(function (error) {
-                    console.error('加载负责人选项失败:', error);
-                    // 使用模拟数据
-                    self.renderManagerOptions(self.getMockManagers(), managerSelect);
-                });
-        },
-
+        }, 
         // 获取模拟负责人数据
         getMockManagers: function() {
             return [

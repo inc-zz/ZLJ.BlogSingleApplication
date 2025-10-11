@@ -1,5 +1,6 @@
 ﻿using Blogs.Core.Entity.Admin;
 using Blogs.Domain.Entity.Admin;
+using Blogs.Domain.IRepositorys.Admin;
 using System.Collections.Generic;
 
 namespace Blogs.Infrastructure.Repositorys.Admin
@@ -8,7 +9,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
     /// <summary>
     /// 角色仓储层
     /// </summary>
-    public class RoleRepository : SimpleClient<SysRole>
+    public class RoleRepository : SimpleClient<SysRole>, IRoleRepository
     {
 
     }

@@ -22,19 +22,15 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         /// <summary>
         /// 父级Id
         /// </summary>
-        public long ParentId { get; protected set; }
-        /// <summary>
-        /// 父级Id集合
-        /// </summary>
-        public string ParentIdList { get; protected set; }
+        public long ParentId { get; protected set; } 
         /// <summary>
         /// 菜单名称
         /// </summary>
         public string Name { get; protected set; }
         /// <summary>
-        /// 菜单Code
+        /// 菜单类型 1菜单，2页面，3外部链接
         /// </summary>
-        public string Code { get; protected set; }
+        public string Type { get; protected set; }
         /// <summary>
         /// 菜单Url
         /// </summary>

@@ -4,8 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blogs.Core.Entity.Blogs
+namespace Blogs.Domain.Entity.Blogs
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarTable("blogs_tag")]
     public class BlogsTag : BaseEntity
     {
         public string Name { get; private set; }

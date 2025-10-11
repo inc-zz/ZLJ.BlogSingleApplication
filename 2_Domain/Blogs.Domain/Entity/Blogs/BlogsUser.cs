@@ -8,6 +8,10 @@ using System.Xml.Linq;
 
 namespace Blogs.Core.Entity.Blogs
 {
+    /// <summary>
+    /// 博客用户
+    /// </summary>
+    [SugarTable("blogs_user")]
     public class BlogsUser : BaseEntity
     {
         /// <summary>
@@ -23,6 +27,8 @@ namespace Blogs.Core.Entity.Blogs
         /// </summary>
         public string Email { get; set; }
 
+        public DateTime? LastLoginTime { get; set; } // 最后登录时间
+        public string LastLoginIp { get; set; } // 最后登录IP
 
 
         // 博客相关属性
@@ -35,11 +41,23 @@ namespace Blogs.Core.Entity.Blogs
         public int FollowerCount { get; private set; } // 粉丝数量
         public int FollowingCount { get; private set; } // 关注数量
 
-        // 导航属性
-        private readonly List<BlogsArticle> _articles = new();
-        public virtual IReadOnlyCollection<BlogsArticle> Articles => _articles.AsReadOnly();
-        private readonly List<BlogsComment> _comments = new();
-        public virtual IReadOnlyCollection<BlogsComment> Comments => _comments.AsReadOnly();
+        public string Description { get; set; }
+
+        public void SetAvatar(string avatar)
+        {
+            Avatar = avatar;
+        }   
+
+        public void SetEmail(string email)
+        {
+            Email = email;
+        }
+
+        //// 导航属性
+        //private readonly List<BlogsArticle> _articles = new();
+        //public virtual IReadOnlyCollection<BlogsArticle> Articles => _articles.AsReadOnly();
+        //private readonly List<BlogsComment> _comments = new();
+        //public virtual IReadOnlyCollection<BlogsComment> Comments => _comments.AsReadOnly();
 
         // 博客相关领域方法
         public void UpdateProfile(string bio, string avatar, string website)
@@ -47,8 +65,6 @@ namespace Blogs.Core.Entity.Blogs
             Bio = bio;
             Avatar = avatar;
             Website = website;
-
-            //AddDomainEvent(new UserProfileUpdatedEvent(Id));
         }
 
         public void IncreaseArticleCount()

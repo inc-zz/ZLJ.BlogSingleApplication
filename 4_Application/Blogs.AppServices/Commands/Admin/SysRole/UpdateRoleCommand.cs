@@ -1,4 +1,5 @@
-﻿using Blogs.Domain.ValueValidator.Role;
+﻿using Blogs.AppServices.ModelValidator.Admin.Role;
+using Blogs.AppServices.Requests.Admin;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,13 +16,13 @@ namespace Blogs.AppServices.Commands.Admin.SysRole
         /// <summary>
         /// 
         /// </summary>
-        public UpdateRoleCommand(long id, string name,string code,int sort,string summary)
+        public UpdateRoleCommand(UpdateSysRoleParam request)
         {
-            Id = id;
-            Name = name;
-            Code = code;
-            Sort = sort;
-            Summary = summary;
+            Id = request.Id;
+            Name = request.Name;
+            Code = request.Code;
+            Sort = request.Sort;
+            Remark = request.Remark;
         }
 
         /// <summary>

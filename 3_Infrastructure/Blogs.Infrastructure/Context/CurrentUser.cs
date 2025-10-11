@@ -1,6 +1,6 @@
 ﻿using Blogs.Domain;
 using Blogs.Infrastructure.JwtAuthorize;
-using Blogs.Infrastructure.Services;
+using Blogs.Infrastructure.Services.Admin;
 using System;
 using System.Collections.Generic;
 using System.Linq;

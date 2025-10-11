@@ -25,27 +25,28 @@ namespace Blogs.Core.Entity
         /// <summary>
         /// 主键
         /// </summary>
+        [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public long Id { get; set; }
         /// <summary>
         /// 创建时间
         /// </summary>
-        public DateTime CreatedAt { get; protected set; }
+        public DateTime CreatedAt { get;  set; }
         /// <summary>
         /// 创建人
         /// </summary>
-        public string? CreatedBy { get; protected set; }
+        public string? CreatedBy { get; set; }
         /// <summary>
         /// 最后修改时间
         /// </summary>
-        public DateTime? ModifiedAt { get; protected set; }
+        public DateTime? ModifiedAt { get;  set; }
         /// <summary>
         /// 最后修改人
         /// </summary>
-        public string? ModifiedBy { get; protected set; }
+        public string? ModifiedBy { get;  set; }
         /// <summary>
         /// 是否删除
         /// </summary>
-        public bool IsDeleted { get; protected set; }
+        public int IsDeleted { get; protected set; } = 0;
 
         /// <summary>
         /// 创建信息
@@ -55,7 +56,7 @@ namespace Blogs.Core.Entity
         {
             CreatedAt = DateTime.Now;
             CreatedBy = byUser;
-            IsDeleted = false;
+            IsDeleted = 0;
         }
         /// <summary>
         /// 修改信息
@@ -71,7 +72,7 @@ namespace Blogs.Core.Entity
         /// </summary>
         public void SoftDelete()
         {
-            IsDeleted = true;
+            IsDeleted = 1;
         }
     }
 }

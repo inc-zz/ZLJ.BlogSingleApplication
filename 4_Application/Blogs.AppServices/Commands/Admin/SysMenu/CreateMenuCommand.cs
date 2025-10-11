@@ -1,4 +1,5 @@
-﻿using Blogs.Core.Enums;
+﻿using Blogs.AppServices.Requests.Admin;
+using Blogs.Core.Enums;
 using NCD.Common;
 using System;
 using System.Collections.Generic;
@@ -15,15 +16,13 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         /// <summary>
         /// 菜单对象初始化
         /// </summary>
-        public CreateMenuCommand(long parentId, string name, string code, string url, string icon, List<MenuButtonCommand> buttons)
+        public CreateMenuCommand(AddMenuRequest request)
         {
-            Id = IdWorkerUtils.Instance.NextId();
-            ParentId = parentId;
-            Name = name;
-            Code = code;
-            Url = url;
-            Icon = icon;
-            Buttons = buttons;
+            ParentId = request.ParentId;
+            Name = request.Name;
+            this.Type = request.Type;
+            Url = request.Url;
+            Icon = request.Icon;
             Status = (int)ApproveStatusEnum.Normal;
            
         }

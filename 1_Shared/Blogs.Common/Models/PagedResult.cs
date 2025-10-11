@@ -11,10 +11,7 @@ namespace Blogs.Core.Models
     {
         public int PageIndex { get; set; }
         public int PageSize { get; set; }
-        public int TotalCount { get; set; }
-        public int TotalPages { get; set; }
-        public bool HasPreviousPage => PageIndex > 1;
-        public bool HasNextPage => PageIndex < TotalPages;
+        public int Total { get; set; }
         public List<T> Items { get; set; }
 
         public PagedResult()
@@ -29,8 +26,7 @@ namespace Blogs.Core.Models
             this.message = StatusCodes.Status200OK.ToString();
             PageIndex = pageIndex;
             PageSize = pageSize;
-            TotalCount = totalCount;
-            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            Total = totalCount;
             Items = items;
         }
     }

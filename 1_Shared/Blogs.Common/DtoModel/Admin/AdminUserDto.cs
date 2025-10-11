@@ -47,5 +47,7 @@ namespace Blogs.Core.DtoModel.Admin
         /// 注册时间
         /// </summary>
         public DateTime? CreatedAt { get; set; }
+
+        public string? Description { get; set; }
     }
 }

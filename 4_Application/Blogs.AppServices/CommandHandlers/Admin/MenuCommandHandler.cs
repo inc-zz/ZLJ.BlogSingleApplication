@@ -51,9 +51,9 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 entity.Buttons = string.Join(",", command.Buttons.Select(x => x.ButtonId).ToList());
             else
                 entity.Buttons = string.Empty;
-            //发送创建菜单命令
+            var result = await DbContext.Insertable(entity).ExecuteCommandAsync();
 
-            return await Task.FromResult(false);
+            return result > 0;
         }
 
         /// <summary>
@@ -76,10 +76,10 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 entity.Buttons = string.Join(",", command.Buttons.Select(x => x.ButtonId).ToList());
             else
                 entity.Buttons = string.Empty;
-            //执行修改菜单命令，调用
 
+            var result = await DbContext.Updateable(entity).ExecuteCommandAsync();
 
-            return await Task.FromResult(false);
+            return result > 0;
         }
 
         /// <summary>
@@ -116,11 +116,18 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 NotifyValidationErrors(command);
                 return await Task.FromResult(false);
             }
-
+            var menuInfo = await DbContext.Queryable<SysMenu>().Where(it => it.Id == command.Id).FirstAsync();
+            if (menuInfo == null)
+                return false;
+            
             var menuIdList = command.Buttons.Select(x => x.ButtonId).ToList();
             var menuButtons = string.Join(",", menuIdList);
-            //TODO 设置菜单按钮
-            return await Task.FromResult(false);
+
+            menuInfo.Buttons = menuButtons;
+            menuInfo.MarkAsModified(CurrentUser.Instance.UserId.ToString());
+            var result = await DbContext.Updateable(menuInfo).ExecuteCommandAsync();
+
+            return result > 0;
         }
 
     }

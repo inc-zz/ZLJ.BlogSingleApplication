@@ -25,3 +25,29 @@
         });
     })
 </script>
+<style>
+    .tree-cell-content {
+        display: inline-flex;
+        align-items: center;
+        min-width: 100%;
+    }
+    
+    .tree-icon {
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .tree-icon-placeholder {
+        width: 16px;
+        display: inline-block;
+    }
+    
+    /* 展开/折叠动画 */
+    .tree-node {
+        transition: all 0.3s ease;
+    }
+</style>

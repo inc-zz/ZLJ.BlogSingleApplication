@@ -1,9 +1,11 @@
 ﻿using Blogs.Domain;
+using Blogs.Domain.IRepositorys.Blogs;
 using Blogs.Infrastructure;
 using Blogs.Infrastructure.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NCD.Common;
+using Newtonsoft.Json;
 using SQLitePCL;
 
 namespace Blogs.WebApi.Controllers
@@ -16,9 +18,11 @@ namespace Blogs.WebApi.Controllers
     public class TestController : ControllerBase
     {
         private ILogger<TestController> _logger;
-        public TestController(ILogger<TestController> logger)
+        private readonly IAppUserRepository _appUserRepository;
+        public TestController(ILogger<TestController> logger,IAppUserRepository appUserRepository)
         {
             _logger = logger;
+            _appUserRepository = appUserRepository;
         }
 
         /// <summary>
@@ -59,6 +63,26 @@ namespace Blogs.WebApi.Controllers
             var id = CurrentUser.Instance.UserId;
             var userInfo = CurrentUser.Instance;
             return userInfo;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("user1")]
+        public string GetUser()
+        {
+            try
+            {
+
+                var user = _appUserRepository.GetById(string.IsNullOrEmpty("1") ? 0 : long.Parse("1"));
+                return JsonConvert.SerializeObject(user);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
         }
 
 

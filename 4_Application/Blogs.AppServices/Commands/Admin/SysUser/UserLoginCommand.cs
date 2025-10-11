@@ -1,6 +1,6 @@
-﻿using Blogs.AppServices.Responses;
+﻿using Blogs.AppServices.ModelValidator.Admin.User;
+using Blogs.AppServices.Responses;
 using Blogs.Core.Models;
-using Blogs.Domain.ValueValidator.User;
 using FluentValidation;
 using System;
 using System.Threading.Tasks;

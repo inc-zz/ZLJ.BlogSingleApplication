@@ -68,40 +68,39 @@
     </div>
 
     <!-- 部门表格 -->
-    <div class="card mt-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover" id="departmentTable">
-                    <thead>
-                        <tr>
-                            <th width="40">
-                                <input type="checkbox" id="checkAllDepartments">
-                            </th>
-                            <th>ID</th>
-                            <th>部门名称</th>
-                            <th>部门代码</th>
-                            <th>负责人</th>
-                            <th>用户数量</th>
-                            <th>状态</th>
-                            <th>创建时间</th>
-                            <th width="180">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="departmentTableBody">
-                        <!-- 数据将通过JavaScript动态加载 -->
-                        <tr>
-                            <td colspan="9" class="data-loading">
-                                <i class="fas fa-spinner fa-spin me-2"></i>数据加载中...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Layui分页 -->
-            <div id="departmentPage" class="d-flex justify-content-center"></div>
+  <div class="card mt-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="departmentTable">
+                <thead>
+                    <tr>
+                        <th width="40">
+                            <input type="checkbox" id="checkAllDepartments">
+                        </th>
+                        <th>ID</th>
+                        <th>部门名称</th>
+                        <th>部门描述</th>
+                        <th>创建时间</th>
+                        <th>修改时间</th>
+                        <th>状态</th>
+                        <th width="180">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="departmentTableBody">
+                    <!-- 数据将通过JavaScript动态加载 -->
+                    <tr>
+                        <td colspan="9" class="data-loading">
+                            <i class="fas fa-spinner fa-spin me-2"></i>数据加载中...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+
+        <!-- Layui分页 -->
+        <div id="departmentPage" class="d-flex justify-content-center"></div>
     </div>
+</div>
 </div>
 
 <!-- 添加/编辑部门模态框模板 -->

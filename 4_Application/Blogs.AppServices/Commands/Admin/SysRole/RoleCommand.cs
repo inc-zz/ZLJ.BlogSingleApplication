@@ -14,10 +14,6 @@ namespace Blogs.AppServices.Commands.Admin.SysRole
         /// 角色
         /// </summary>
         public long Id { get; set; }
-        /// <summary>
-        /// 租户Id
-        /// </summary>
-        public long TenantId { get; set; }
         ///<summary>
         /// 角色组Id
         /// </summary>
@@ -25,19 +21,11 @@ namespace Blogs.AppServices.Commands.Admin.SysRole
         ///<summary>
         ///  角色名称
         ///</summary>
-        public string Name { set; get; }
-        ///<summary>
-        ///  部门Id
-        ///</summary>
-        public long DepartmentId { set; get; }
-        ///<summary>
-        ///  部门名称
-        ///</summary>
-        public string DepartmentName { set; get; }
+        public string? Name { set; get; }
         ///<summary>
         ///  角色编号
         ///</summary>
-        public string Code { set; get; }
+        public string? Code { set; get; }
         ///<summary>
         ///  是否超管员
         ///</summary>
@@ -49,7 +37,20 @@ namespace Blogs.AppServices.Commands.Admin.SysRole
         ///<summary>
         ///  描述
         ///</summary>
-        public string Summary { set; get; }
+        public string? Remark { set; get; }
+        /// <summary>
+        /// 角色菜单
+        /// </summary>
+        public List<RoleMenu>? RoleMenus { get; set; }
+        /// <summary>
+        /// 状态
+        /// </summary>
+        public int Status { get; set; }
+
+    }
+
+    public class RoleMenu
+    {
         /// <summary>
         /// 菜单
         /// </summary>
@@ -62,10 +63,5 @@ namespace Blogs.AppServices.Commands.Admin.SysRole
         /// 菜单按钮
         /// </summary>
         public string ButtonCodes { get; set; }
-        /// <summary>
-        /// 状态
-        /// </summary>
-        public int Status { get; set; }
-
     }
 }

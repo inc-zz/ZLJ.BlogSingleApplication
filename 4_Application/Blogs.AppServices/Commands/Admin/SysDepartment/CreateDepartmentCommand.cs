@@ -1,5 +1,5 @@
-﻿using Blogs.AppServices.Requests.Admin;
-using Blogs.Domain.ModelValidator.Department;
+﻿using Blogs.AppServices.ModelValidator.Admin.Department;
+using Blogs.AppServices.Requests.Admin;
 using System;
 using System.Collections.Generic;
 using System.Text;

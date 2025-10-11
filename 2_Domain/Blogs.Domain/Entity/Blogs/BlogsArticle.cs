@@ -7,6 +7,7 @@ namespace Blogs.Domain.Entity.Blogs
     /// <summary>
     /// 文章聚合根
     /// </summary>
+    [SugarTable("blogs_article")]
     public class BlogsArticle : BaseEntity
     {
         // 基本属性
@@ -43,7 +44,7 @@ namespace Blogs.Domain.Entity.Blogs
         public virtual IReadOnlyCollection<BlogsComment> Comments => _comments.AsReadOnly();
 
         // 构造函数
-        protected BlogsArticle() { } // 为ORM保留
+        public BlogsArticle() { } // 为ORM保留
 
         /// <summary>
         /// 

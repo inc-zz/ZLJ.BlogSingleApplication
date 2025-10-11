@@ -9,48 +9,47 @@ namespace Blogs.Domain.Entity.Blogs
     /// <summary>
     /// 文章分类
     /// </summary>
+    [SugarTable("blogs_category")]
     public class BlogsCategory : BaseEntity
     {
-        public string Name { get; private set; }
+        public string Name { get; private set; } 
         public string Description { get; private set; }
         public string Slug { get; private set; } // URL友好名称
-        public int DisplayOrder { get; private set; }
-        public bool IsEnabled { get; private set; }
+        public int Sort { get; private set; }
 
         // 导航属性
         private readonly List<BlogsArticle> _articles = new();
         public virtual IReadOnlyCollection<BlogsArticle> Articles => _articles.AsReadOnly();
 
-        protected BlogsCategory() { }
+        public BlogsCategory() { }
 
         public BlogsCategory(long id, string name, string slug, string description = null,
-            int displayOrder = 0)
+            int sort = 0)
         {
             Name = name;
             Slug = slug;
             Description = description;
-            DisplayOrder = displayOrder;
-            IsEnabled = true;
+            Sort = sort;
         }
 
-        public void Update(string name, string slug, string description = null, int? displayOrder = null)
+        public void Update(string name, string slug, string description = null, int? sort = null)
         {
             Name = name;
             Slug = slug;
             Description = description;
 
-            if (displayOrder.HasValue)
-                DisplayOrder = displayOrder.Value;
+            if (sort.HasValue)
+                Sort = sort.Value;
         }
 
         public void Enable()
         {
-            IsEnabled = true;
+            IsDeleted = 0;
         }
 
         public void Disable()
         {
-            IsEnabled = false;
+            IsDeleted = 1;
         }
     }
 }

@@ -80,20 +80,6 @@ namespace NCD.Common
             }
         }
 
-        /// <summary>
-        /// 获取ID生成器实例（必须先调用Initialize）
-        /// </summary>
-        public static IdWorkerUtils Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    throw new InvalidOperationException("请先调用IdWorkerUtils.Initialize()方法初始化");
-
-                return _instance;
-            }
-        }
-
         // ====================== 核心方法 ======================
         /// <summary>
         /// 生成下一个唯一 ID

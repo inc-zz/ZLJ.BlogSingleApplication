@@ -1,6 +1,6 @@
 ﻿using Blogs.AppServices.Requests.Admin;
 using Blogs.Core;
-using Blogs.Domain.ValueValidator.User;
+using Blogs.AppServices.ModelValidator.Admin.User;
 using NCD.Common;
 using System;
 using System.Collections.Generic;

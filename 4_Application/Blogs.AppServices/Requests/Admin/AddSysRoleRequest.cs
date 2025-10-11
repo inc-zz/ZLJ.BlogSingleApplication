@@ -21,10 +21,6 @@ namespace Blogs.AppServices.Requests.Admin
         ///</summary>
         public string Name { set; get; }
         ///<summary>
-        ///  部门Id
-        ///</summary>
-        public long DepartmentId { set; get; }
-        ///<summary>
         ///  角色编号
         ///</summary>
         public string Code { set; get; }
@@ -39,7 +35,7 @@ namespace Blogs.AppServices.Requests.Admin
         ///<summary>
         ///  描述
         ///</summary>
-        public string Summary { set; get; }
+        public string Remark { set; get; }
 
 
     }

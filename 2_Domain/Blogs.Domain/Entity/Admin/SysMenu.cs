@@ -17,10 +17,6 @@ namespace Blogs.Domain.Entity.Admin
         ///  菜单名称
         ///</summary>
         public string? Name { set; get; }
-        ///<summary>
-        ///  菜单名称标识
-        ///</summary>
-        public string? Code { set; get; }
         /// <summary>
         /// 菜单图标
         /// </summary>
@@ -29,6 +25,10 @@ namespace Blogs.Domain.Entity.Admin
         /// 菜单类型：1目录，2:地址，3：外部链接
         /// </summary>
         public string? Type { get; set; }
+        /// <summary>
+        /// 菜单地址
+        /// </summary>
+        public string? Url { get; set; }
         ///<summary>
         ///  菜单排序   
         ///</summary>

@@ -12,7 +12,10 @@ namespace Blogs.AppServices.Queries.Admin
     /// </summary>
     public class GetDepartmentTreeQuery : IRequest<List<DepartmentTreeDto>>
     {
-
+        /// <summary>
+        /// 部门名称
+        /// </summary>
+        public string? Name { get; set; }
 
 
     }

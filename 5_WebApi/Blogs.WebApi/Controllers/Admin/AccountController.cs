@@ -75,7 +75,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("refresh")]
-        [AllowAnonymous]
+        [AllowAnonymous] 
         public async Task<ActionResult<UserLoginDto>> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             try

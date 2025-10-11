@@ -7,7 +7,7 @@ using Blogs.Core.Models;
 using Blogs.Domain.IRepositorys.Admin;
 using Blogs.Domain.IServices;
 using Blogs.Infrastructure.OpenIdDict;
-using Blogs.Infrastructure.Services;
+using Blogs.Infrastructure.Services.Admin;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 

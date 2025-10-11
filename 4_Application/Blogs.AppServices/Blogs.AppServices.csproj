@@ -18,11 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\Blogs\" />
+    <None Include="CommandHandlers\Admin\UserLoginCommandHandler.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="CommandHandlers\Admin\UserLoginCommandHandler.cs" />
+    <Folder Include="ModelValidator\App\Article\" />
   </ItemGroup>
 
 </Project>

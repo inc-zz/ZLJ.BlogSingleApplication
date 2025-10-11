@@ -1,9 +1,11 @@
 ﻿using Blogs.AppServices.Commands.Admin.SysDepartment;
 using Blogs.AppServices.Queries.Admin;
 using Blogs.AppServices.Requests.Admin;
+using Blogs.AppServices.Responses;
 using Blogs.Core.Models;
 using Blogs.Domain.EventNotices;
 using Blogs.Domain.Notices;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,17 +36,11 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <returns></returns>
         [HttpGet("list")]
-        public async Task<ActionResult> GetDepartmentTreeAsync([FromQuery] PageParam param)
+        public async Task<ActionResult> GetDepartmentListAsync([FromQuery] GetDepartmentRequest request)
         {
             // 创建查询对象
-            var query = new GetUserListQuery
-            {
-                PageIndex = param.PageIndex,
-                PageSize = param.PageSize,
-                SearchTerm = null,
-                IsActive = false,
-                RoleId = 0
-            };
+            var query = request.Adapt<GetDepartmentListQuery>();
+           
             // 通过中介者发送查询请求
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
@@ -58,7 +54,8 @@ namespace Blogs.WebApi.Controllers.Admin
         public async Task<ActionResult> GetDepartmentTreeAsync()
         {
             var query = new GetDepartmentTreeQuery();
-            var result = await _mediator.Send(query);
+            var list = await _mediator.Send(query);
+            var result = ResultObject<List<DepartmentTreeDto>>.Success(list, "获取成功");
             return Ok(result);
         }
 

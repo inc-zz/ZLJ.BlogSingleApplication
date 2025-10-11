@@ -1,4 +1,4 @@
-﻿using Blogs.Domain.ModelValidator.Department;
+﻿using Blogs.AppServices.ModelValidator.Admin.Department;
 using System;
 using System.Collections.Generic;
 using System.Text;

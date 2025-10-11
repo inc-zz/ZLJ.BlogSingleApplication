@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blogs.AppServices.Requests.Admin;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,19 +14,14 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         /// <summary>
         /// 菜单对象初始化
         /// </summary>
-        public UpdateMenuCommand(long id, long parentId, string name, string code, string url, string icon, List<MenuButtonCommand> buttons)
+        public UpdateMenuCommand(UpdateMenuRequest request)
         {
-            Id = id;
-            ParentId = parentId;
-            Name = name;
-            Code = code;
-            Url = url;
-            Icon = icon;
-            Buttons = buttons;
-            //if (this.ParentId > 0)
-            //{
-            //    this.ParentIdList = 0;
-            //}
+            Id = request.Id;
+            ParentId = request.ParentId;
+            Name = request.Name;
+            Type = request.Type;
+            Url = request.Url;
+            Icon = request.Icon;
         }
 
         /// <summary>

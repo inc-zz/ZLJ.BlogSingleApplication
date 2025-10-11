@@ -163,7 +163,9 @@ layui.define(['layer', 'form', 'table', 'laypage', 'adminuser-template', 'core']
             // 查看用户详情
             $(document).on('click', '.view-user-btn', function () {
                 var userId = $(this).data('id');
-                self.showUserDetail(userId);
+                self.loadUserDetail(userId, function (user) {
+                    self.openUserFormModal('查看用户', false, user);
+                });
             });
 
             // 编辑用户
@@ -363,6 +365,7 @@ layui.define(['layer', 'form', 'table', 'laypage', 'adminuser-template', 'core']
             var self = this;
             http.get(this.config.baseUrl + '/info?id=' + userId)
                 .then(function (res/** @type {UserResponse} */) {
+                    debugger
                     if (res.code === 200 && callback) {
                         callback(res.data);
                     } else {
