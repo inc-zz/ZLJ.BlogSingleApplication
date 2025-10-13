@@ -1,4 +1,5 @@
 ﻿using Blogs.Domain;
+using Blogs.Domain.Entity.Blogs;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -67,5 +68,8 @@ namespace Blogs.AppServices.Commands.Blogs.Article
         /// 分类ID
         /// </summary>
         public long? CategoryId { get; private set; }
+
+
+        public List<BlogsComment>? Comments { get; set; }
     }
 }

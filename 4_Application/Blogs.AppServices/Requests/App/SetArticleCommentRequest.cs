@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Requests.App
 {
-    public class HotArticlesRequest
+    public class SetArticleCommentRequest
     {
-        public int TopCount { get; set; } = 4;
+        public long ArticleId { get; set; }
+
+        public string Content { get; set; }
+
     }
 }

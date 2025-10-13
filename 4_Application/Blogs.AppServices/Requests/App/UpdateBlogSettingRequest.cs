@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Requests.App
 {
-    public class HotArticlesRequest
+    public class UpdateBlogSettingRequest: CreateBlogSettingRequest
     {
-        public int TopCount { get; set; } = 4;
+        public long Id { get; set; }
+
     }
 }

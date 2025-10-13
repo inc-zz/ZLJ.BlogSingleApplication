@@ -11,16 +11,15 @@ namespace Blogs.AppServices.Queries.App
     /// <summary>
     /// 
     /// </summary>
-    public class GetArticleRecommendationsQuery : IRequest<ResultObject<List<ArticleTagDto>>>
+    public class GetArticleListQuery : PagedRequest, IRequest<ResultObject<List<ArticleDto>>>
     {
-        public GetArticleRecommendationsQuery()
-        {
-            
-        }
 
-        public int TopCount { get; set; }
+        public int? CategoryId {  get; set; }  
 
-        public int RecommendationType { get; set; }
+        public int? TagId { get; set; } 
+
+        public string? Keyword { get; set; }
+
 
     }
 }

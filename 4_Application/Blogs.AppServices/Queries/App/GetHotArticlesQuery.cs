@@ -8,15 +8,12 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Queries.App
 {
-    public class GetArticleDetailQuery : IRequest<ResultObject<ArticleInfoDto>>
+    /// <summary>
+    /// 获取热门文章
+    /// </summary>
+    public class GetHotArticlesQuery : IRequest<ResultObject<List<ArticleCategoryDto>>>
     {
-        public GetArticleDetailQuery(long id)
-        {
-            this.ArticleId = id;    
-        }
-
-        public long ArticleId { get; set; }
-
+        public int TopCount { get; set; } = 4;
 
     }
 }

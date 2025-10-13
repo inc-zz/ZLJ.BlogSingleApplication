@@ -12,7 +12,11 @@ namespace Blogs.Domain.Entity.Blogs
     [SugarTable("blogs_category")]
     public class BlogsCategory : BaseEntity
     {
-        public string Name { get; private set; } 
+        public string Name { get; private set; }
+        /// <summary>
+        /// 模块类型：1分类，2板块
+        /// </summary>
+        public string BusType { get; private set; }
         public string Description { get; private set; }
         public string Slug { get; private set; } // URL友好名称
         public int Sort { get; private set; }

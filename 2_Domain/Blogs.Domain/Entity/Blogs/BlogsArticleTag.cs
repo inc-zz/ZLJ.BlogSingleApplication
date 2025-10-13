@@ -14,13 +14,19 @@ namespace Blogs.Domain.Entity.Blogs
     public class BlogsArticleTag : BaseEntity
     {
 
-        public long Id { get; private set; }
+        public long Id { get;  set; }
 
         public string Name { get; set; }
 
-        public int Sort { get; private set; }
+        public int Sort { get;  set; }
 
-        protected BlogsArticleTag() { }
+        public string Color { get; set; }
+
+        public string LinkUrl { get; set; }
+
+        public int UsageCount { get; set;}
+
+        public BlogsArticleTag() { }
 
      
     }

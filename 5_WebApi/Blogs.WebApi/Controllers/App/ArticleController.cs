@@ -1,4 +1,6 @@
-﻿using Blogs.AppServices.Queries.App;
+﻿using Azure.Core;
+using Blogs.AppServices.Commands.Blogs.Article;
+using Blogs.AppServices.Queries.App;
 using Blogs.AppServices.Requests.App;
 using Blogs.Core.Models;
 using Blogs.Domain.EventNotices;
@@ -99,44 +101,44 @@ namespace Blogs.WebApi.Controllers.App
             return new OkObjectResult(result);
         }
 
-        ///// <summary>
-        ///// 获取热门文章
-        ///// </summary>
-        ///// <param name="param"></param>
-        ///// <returns></returns>
-        //[HttpGet("hot")]
-        //public async Task<ActionResult> GetHotArticlesAsync([FromQuery] HotArticlesRequest param)
-        //{
-        //    var query = new GetHotArticlesQuery
-        //    {
-        //        TopCount = param.TopCount
-        //    };
+        /// <summary>
+        /// 获取技术板块
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet("hot")]
+        public async Task<ActionResult> GetHotArticlesAsync([FromQuery] HotArticlesRequest param)
+        {
+            var query = new GetHotArticlesQuery
+            {
+                TopCount = param.TopCount
+            };
 
-        //    var result = await _mediator.Send(query);
-        //    return new OkObjectResult(result);
-        //}
+            var result = await _mediator.Send(query);
+            return new OkObjectResult(result);
+        }
 
-        ///// <summary>
-        ///// 获取文章列表（支持分类筛选）
-        ///// </summary>
-        ///// <param name="param"></param>
-        ///// <returns></returns>
-        //[HttpGet("list")]
-        //public async Task<ActionResult> GetArticleListAsync([FromQuery] ArticleListRequest param)
-        //{
-        //    var query = new GetArticleListQuery
-        //    {
-        //        PageIndex = param.PageIndex,
-        //        PageSize = param.PageSize,
-        //        CategoryId = param.CategoryId,
-        //        TagId = param.TagId,
-        //        Keyword = param.Keyword,
-        //        SortBy = param.SortBy
-        //    };
+        /// <summary>
+        /// 获取文章列表（支持分类筛选）
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet("list")]
+        public async Task<ActionResult> GetArticleListAsync([FromQuery] ArticleListRequest param)
+        {
+            var query = new GetArticleListQuery
+            {
+                PageIndex = param.PageIndex,
+                PageSize = param.PageSize,
+                CategoryId = param.CategoryId,
+                TagId = param.TagId,
+                Keyword = param.Keyword,
+                SortBy = param.SortBy
+            };
 
-        //    var result = await _mediator.Send(query);
-        //    return new OkObjectResult(result);
-        //}
+            var result = await _mediator.Send(query);
+            return new OkObjectResult(result);
+        }
 
         ///// <summary>
         ///// 文章搜索
@@ -256,5 +258,66 @@ namespace Blogs.WebApi.Controllers.App
         //    var result = await _mediator.Send(query);
         //    return new OkObjectResult(result);
         //}
+
+
+
+        /// <summary>
+        /// 获取评论列表
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet("comments")]
+        public async Task<ActionResult> GetArticleCommentListAsync([FromQuery] GetArticleCommentsRequest param)
+        {
+            var query = new GetArticleCommentsQuery
+            {
+                ArticleId = param.ArticleId,
+                PageIndex = param.PageIndex,
+                PageSize = param.PageSize
+            };
+            var result = await _mediator.Send(query);
+            return new OkObjectResult(result);
+        }
+
+
+        /// <summary>
+        /// 提交评论
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost("setcomment")]
+        public async Task<ActionResult> SetArticleCommentAsync([FromBody] SetArticleCommentRequest param)
+        {
+            CreateArticleCommentCommand command = new CreateArticleCommentCommand(param.ArticleId, param.Content);
+            // 发送命令并获取结果
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(ResultObject.Success("评论成功！"));
+            }
+            return BadRequest(ResultObject.Success("提交失败！"));
+
+        }
+
+        /// <summary>
+        /// 删除评论
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpDelete("comment")]
+        public async Task<ActionResult> DeleteArticleCommentAsync([FromBody] IdParam param)
+        {
+
+            DeleteArticleCommentCommand command = new DeleteArticleCommentCommand(param.Id);
+            // 发送命令并获取结果
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(ResultObject.Success("删除成功！"));
+            }
+            return BadRequest(ResultObject.Success("删除失败！"));
+        }
+
+
     }
 }

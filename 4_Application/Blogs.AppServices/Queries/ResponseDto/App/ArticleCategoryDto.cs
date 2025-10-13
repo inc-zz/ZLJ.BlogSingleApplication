@@ -21,6 +21,9 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
         /// </summary>
         public int ArticleCount { get; set; }
 
+        public string? Description { get; set; }
+
+        public string Slug { get; set; }
 
     }
 }

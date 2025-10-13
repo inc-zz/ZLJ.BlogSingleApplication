@@ -15,5 +15,7 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
 
         public int UsageCount { get; set; }
 
+        public string StyleColor { get; set; }
+
     }
 }
