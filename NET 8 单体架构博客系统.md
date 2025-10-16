@@ -92,7 +92,7 @@ BlogMonolith/
 1. 克隆项目
 
 ```shell
-git clone <repository-url>
+git clone https://gitee.com/inc-zz/AbpMicroserviceProjectDemo.git
 cd BlogMonolith
 ```
 

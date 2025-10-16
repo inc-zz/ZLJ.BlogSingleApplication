@@ -22,5 +22,16 @@ namespace Blogs.Domain.Entity.Blogs
         public string? Content { get; private set; }
         public int Status { get; private set; }
 
+        public void SetEntity(string title, string summary, string url, string tags, string busType, string content, int status)
+        {
+            this.Title = title;
+            this.Summary = summary;
+            this.Url = url;
+            this.Tags = tags;
+            this.BusType = busType;
+            this.Content = content;
+            this.Status = status;
+        }
+
     }
 }

@@ -23,6 +23,10 @@ namespace Blogs.Infrastructure.Constant
         /// 开源书籍
         /// </summary>
         public const string OpenSourceBook = "OpenSourceBook";
+        /// <summary>
+        /// 存储目录
+        /// </summary>
+        public const string StorageDirectory = "FileStorage";
 
     }
 }

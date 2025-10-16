@@ -14,11 +14,6 @@ namespace Blogs.AppServices.QueryHandlers.App
         IRequestHandler<GetBlogsSettingsQuery, ResultObject<List<BlogsSettingDto>>>
     {
 
-        public BlogsSettingQueryHandler()
-        {
-
-        }
-
         /// <summary>
         /// 查看配置列表
         /// </summary>
@@ -28,9 +23,8 @@ namespace Blogs.AppServices.QueryHandlers.App
         public async Task<ResultObject<List<BlogsSettingDto>>> Handle(GetBlogsSettingsQuery request, CancellationToken cancellationToken)
         {
             var list = await DbContext.Queryable<BlogsSettings>()
-                .WhereIF(!string.IsNullOrEmpty(request.SearchTerm), it => it.Url == request.SearchTerm
-                || it.Title == request.SearchTerm || it.Summary == request.SearchTerm
-                || it.Content == request.SearchTerm)
+                .WhereIF(!string.IsNullOrEmpty(request.SearchTerm), it => it.BusType == request.SearchTerm
+                || it.Title == request.SearchTerm )
                 .Where(it => it.IsDeleted == 0)
                 .Select(it => new BlogsSettingDto
                 {
