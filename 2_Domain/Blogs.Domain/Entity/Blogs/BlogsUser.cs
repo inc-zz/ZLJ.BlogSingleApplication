@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -14,6 +15,12 @@ namespace Blogs.Core.Entity.Blogs
     [SugarTable("blogs_user")]
     public class BlogsUser : BaseEntity
     {
+
+        /// <summary>
+        /// 主键
+        /// </summary>
+        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        public override long Id { get; set; }
         /// <summary>
         /// 账号
         /// </summary>
@@ -28,20 +35,25 @@ namespace Blogs.Core.Entity.Blogs
         public string Email { get; set; }
 
         public DateTime? LastLoginTime { get; set; } // 最后登录时间
-        public string LastLoginIp { get; set; } // 最后登录IP
+        public string? LastLoginIp { get; set; } // 最后登录IP
 
 
         // 博客相关属性
-        public string Bio { get; private set; } // 个人简介
-        public string Avatar { get; private set; } // 头像
-        public string Website { get; private set; } // 个人网站
+        public string? Bio { get; private set; } // 个人简介
+        public string? Avatar { get; private set; } // 头像
+        public string? Website { get; private set; } // 个人网站
 
         // 统计属性
         public int ArticleCount { get; private set; } // 文章数量
         public int FollowerCount { get; private set; } // 粉丝数量
         public int FollowingCount { get; private set; } // 关注数量
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// 个人标签
+        /// </summary>
+        public string? Tags { get; set; }
 
         public void SetAvatar(string avatar)
         {

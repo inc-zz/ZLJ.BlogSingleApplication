@@ -20,6 +20,8 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
         public DateTime? CreatedAt { get; set; }
 
         public string? CreatedBy { get; set; }
+
+        public string? Tags { get; set; }
         /// <summary>
         /// 简介
         /// </summary>
@@ -34,5 +36,7 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
         public int ViewCount { get; set; }
 
         public int LikeCount { get; set; }
+
+        public int CommentCount { get; set; }
     }
 }

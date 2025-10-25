@@ -96,7 +96,7 @@ namespace Blogs.Infrastructure.Services.App
                 var userId = user.Id.ToString();
                 await StoreTokensInRedisAsync(principal, userId, accessToken, refreshToken);
 
-                return TokenResult.Success(accessToken, refreshToken, DateTime.UtcNow.AddHours(1));
+                return TokenResult.Success(accessToken, refreshToken, DateTime.Now.AddHours(24));
             }
             catch (Exception ex)
             {
@@ -371,10 +371,15 @@ namespace Blogs.Infrastructure.Services.App
                 var userCacheKey = $"appuser_caches:{userTokenModel.Id}";
 
                 var userInfo = await _redisDb.HashGetAsync(userCacheKey, "userInfo");
-                if (!userInfo.HasValue)
+                if (!userInfo.HasValue ||  userInfo.ToString() == "{}")
                 {
                     //首次读取如果缓存未命中则查询数据库
                     var user = await _dbContext.Queryable<BlogsUser>().Where(it => it.Id.ToString() == userTokenModel.Id).FirstAsync();
+                    if(user == null)
+                    {
+                        throw new Exception("账号出错，请联系管理员");
+                    }
+                    
                     var handler = new JwtSecurityTokenHandler();
                     var jwtToken = handler.ReadJwtToken(token);
 

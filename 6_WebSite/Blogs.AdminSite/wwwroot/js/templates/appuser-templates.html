@@ -6,19 +6,19 @@
         <div class="layui-form-item">
             <label class="layui-form-label">用户名</label>
             <div class="layui-input-block">
-                <input type="text" name="username" lay-verify="required|username" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+                <input type="text" name="userName" lay-verify="required|username" placeholder="请输入用户名" autocomplete="off" class="layui-input">
             </div>
         </div>
 
         <div class="layui-form-item">
             <label class="layui-form-label">姓名</label>
             <div class="layui-input-block">
-                <input type="text" name="realname" lay-verify="required" placeholder="请输入姓名" autocomplete="off" class="layui-input">
+                <input type="text" name="realName" lay-verify="required" placeholder="请输入姓名" autocomplete="off" class="layui-input">
             </div>
         </div>
 
         <div class="layui-form-item">
-            <label class="layui-form-label">手机号1</label>
+            <label class="layui-form-label">手机号</label>
             <div class="layui-input-block">
                 <input type="text" name="phoneNumber" lay-verify="required|phoneNumber" placeholder="请输入手机号" autocomplete="off" class="layui-input">
             </div>
@@ -59,13 +59,6 @@
         </div>
         {{# } }}
 
-        <div class="layui-form-item">
-            <label class="layui-form-label">状态</label>
-            <div class="layui-input-block">
-                <input type="checkbox" name="status" lay-skin="switch" lay-text="启用|禁用" {{# if(d.user && d.user.status == 1){ }} checked{{# } }}>
-            </div>
-        </div>
-
         <div class="layui-form-item layui-form-text">
             <label class="layui-form-label">备注</label>
             <div class="layui-input-block">
@@ -103,7 +96,7 @@
                 <tbody>
                     <tr>
                         <td><strong>用户名:</strong></td>
-                        <td>{{ d.user.username || '' }}</td>
+                        <td>{{ d.user.userName || '' }}</td>
                     </tr>
                     <tr>
                         <td><strong>手机号:</strong></td>
@@ -133,11 +126,11 @@
                     </tr>
                     <tr>
                         <td><strong>注册时间:</strong></td>
-                        <td>{{ d.user.createTime || '' }}</td>
+                        <td>{{ d.user.createAt || '' }}</td>
                     </tr>
                     <tr>
-                        <td><strong>备注:</strong></td>
-                        <td>{{ d.user.description || '无' }}</td>
+                        <td><strong>最近登录:</strong></td>
+                        <td>{{ d.user.lastLoginTime || '无' }}</td>
                     </tr>
                 </tbody>
             </table>

@@ -69,7 +69,55 @@ namespace Blogs.AppServices.Commands.Blogs.Article
         /// </summary>
         public long? CategoryId { get; private set; }
 
+        public string? Tags { get; private set; }
+        /// <summary>
+        /// 操作用户
+        /// </summary>
 
-        public List<BlogsComment>? Comments { get; set; }
+        public string? UserName { get; private set; }
+
+
+        public string? Comment { get; set; }
+
+        /// <summary>
+        /// 设置文章信息
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="summary"></param>
+        /// <param name="content"></param>
+        /// <param name="coverImage"></param>
+        /// <param name="status"></param>
+        /// <param name="isTop"></param>
+        /// <param name="isRecommend"></param>
+        /// <param name="categoryId"></param>
+        public void SetArticleInfo(long? id, string title, string summary, string content, string tags, long? categoryId, string? coverImage)
+        {
+            if (id.HasValue)
+            {
+                this.Id = id.Value;
+            }
+            this.Title = title;
+            this.Summary = summary;
+            this.Content = content;
+            this.Tags = tags;
+            this.CoverImage = coverImage;
+            this.Status = 1;
+            this.IsTop = true;
+            this.IsRecommend = false;
+            this.CategoryId = categoryId;
+        }
+
+        /// <summary>
+        /// 点赞/取消点赞
+        /// </summary>
+        /// <param name="val"></param>
+        public void SetLikeCount(long id, int val, string userName)
+        {
+            this.Id = id;
+            this.LikeCount += val;
+            this.UserName = userName;
+        }
+
+
     }
 }

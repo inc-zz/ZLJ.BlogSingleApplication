@@ -11,15 +11,12 @@ namespace Blogs.AppServices.Queries.App
     /// <summary>
     /// 
     /// </summary>
-    public class GetArticleListQuery : PagedRequest, IRequest<ResultObject<List<ArticleDto>>>
+    public class GetArticleListQuery : PagedRequest, IRequest<PagedResult<ArticleDto>>
     {
 
         public int? CategoryId {  get; set; }  
 
         public int? TagId { get; set; } 
-
-        public string? Keyword { get; set; }
-
 
     }
 }

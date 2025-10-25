@@ -95,7 +95,7 @@ namespace Blogs.Infrastructure.Services.Admin
                 var userId = user.Id.ToString();
                 await StoreTokensInRedisAsync(principal, userId, accessToken, refreshToken);
 
-                return TokenResult.Success(accessToken, refreshToken, DateTime.UtcNow.AddHours(1));
+                return TokenResult.Success(accessToken, refreshToken, DateTime.Now.AddHours(24));
             }
             catch (Exception ex)
             {

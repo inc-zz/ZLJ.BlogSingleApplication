@@ -5,6 +5,8 @@ using Blogs.AppServices.Requests.App;
 using Blogs.Core.Models;
 using Blogs.Domain.EventNotices;
 using Blogs.Domain.Notices;
+using Blogs.Infrastructure.Constant;
+using Blogs.Infrastructure.Context;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,10 +23,13 @@ namespace Blogs.WebApi.Controllers.App
         private readonly ILogger<ArticleController> _logger;
         private readonly IMediator _mediator; //查询调用处理器
         private readonly DomainNotificationHandler _notificationHandler; //领域通知处理器
-
+        
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="mediator"></param>
+        /// <param name="notifications"></param>
         public ArticleController(ILogger<ArticleController> logger,
             IMediator mediator,
             INotificationHandler<DomainNotification> notifications)
@@ -94,7 +99,25 @@ namespace Blogs.WebApi.Controllers.App
             var query = new GetArticleRecommendationsQuery
             {
                 TopCount = param.TopCount,
-                RecommendationType = param.Type
+                RecommendationType = BlogsSettingBusType.Recommend
+            };
+
+            var result = await _mediator.Send(query);
+            return new OkObjectResult(result);
+        }
+
+        /// <summary>
+        /// 获取开源项目
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet("openSourceProject")]
+        public async Task<ActionResult> GetOpenSourceProjectAsync([FromQuery] RecommendationRequest param)
+        {
+            var query = new GetArticleRecommendationsQuery
+            {
+                TopCount = param.TopCount,
+                RecommendationType = BlogsSettingBusType.OpenSourceProject
             };
 
             var result = await _mediator.Send(query);
@@ -132,190 +155,107 @@ namespace Blogs.WebApi.Controllers.App
                 PageSize = param.PageSize,
                 CategoryId = param.CategoryId,
                 TagId = param.TagId,
-                Keyword = param.Keyword,
+                SearchTerm = param.Where,
                 SortBy = param.SortBy
             };
-
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
         }
-
-        ///// <summary>
-        ///// 文章搜索
-        ///// </summary>
-        ///// <param name="param"></param>
-        ///// <returns></returns>
-        //[HttpGet("search")]
-        //public async Task<ActionResult> SearchArticlesAsync([FromQuery] ArticleSearchRequest param)
-        //{
-        //    var query = new SearchArticlesQuery
-        //    {
-        //        Keyword = param.Keyword,
-        //        PageIndex = param.PageIndex,
-        //        PageSize = param.PageSize,
-        //        CategoryId = param.CategoryId,
-        //        TagId = param.TagId
-        //    };
-
-        //    var result = await _mediator.Send(query);
-        //    return new OkObjectResult(result);
-        //}
-
-        ///// <summary>
-        ///// 增加文章阅读量
-        ///// </summary>
-        ///// <param name="param"></param>
-        ///// <returns></returns>
-        //[HttpPost("view-count")]
-        //public async Task<ActionResult> IncreaseViewCountAsync([FromBody] ArticleIdRequest param)
-        //{
-        //    var command = new IncreaseArticleViewCountCommand
-        //    {
-        //        ArticleId = param.ArticleId
-        //    };
-
-        //    var result = await _mediator.Send(command);
-
-        //    if (result)
-        //    {
-        //        return Ok(ResultObject.Success("阅读量更新成功"));
-        //    }
-        //    else
-        //    {
-        //        var notifications = _notificationHandler.GetNotifications();
-        //        return BadRequest(notifications);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// 点赞文章
-        ///// </summary>
-        ///// <param name="param"></param>
-        ///// <returns></returns>
-        //[HttpPost("like")]
-        //public async Task<ActionResult> LikeArticleAsync([FromBody] ArticleLikeRequest param)
-        //{
-        //    var command = new LikeArticleCommand
-        //    {
-        //        ArticleId = param.ArticleId,
-        //        UserId = param.UserId // 从token或session中获取
-        //    };
-
-        //    var result = await _mediator.Send(command);
-
-        //    if (result)
-        //    {
-        //        return Ok(ResultObject.Success("点赞成功"));
-        //    }
-        //    else
-        //    {
-        //        var notifications = _notificationHandler.GetNotifications();
-        //        return BadRequest(notifications);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// 取消点赞
-        ///// </summary>
-        ///// <param name="param"></param>
-        ///// <returns></returns>
-        //[HttpPost("unlike")]
-        //public async Task<ActionResult> UnlikeArticleAsync([FromBody] ArticleLikeRequest param)
-        //{
-        //    var command = new UnlikeArticleCommand
-        //    {
-        //        ArticleId = param.ArticleId,
-        //        UserId = param.UserId
-        //    };
-
-        //    var result = await _mediator.Send(command);
-
-        //    if (result)
-        //    {
-        //        return Ok(ResultObject.Success("取消点赞成功"));
-        //    }
-        //    else
-        //    {
-        //        var notifications = _notificationHandler.GetNotifications();
-        //        return BadRequest(notifications);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// 获取相关文章
-        ///// </summary>
-        ///// <param name="param"></param>
-        ///// <returns></returns>
-        //[HttpGet("related")]
-        //public async Task<ActionResult> GetRelatedArticlesAsync([FromQuery] RelatedArticlesRequest param)
-        //{
-        //    var query = new GetRelatedArticlesQuery
-        //    {
-        //        ArticleId = param.ArticleId,
-        //        TopCount = param.TopCount
-        //    };
-
-        //    var result = await _mediator.Send(query);
-        //    return new OkObjectResult(result);
-        //}
-
-
-
+        
         /// <summary>
-        /// 获取评论列表
+        /// 我的文章列表
         /// </summary>
-        /// <param name="param"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        [HttpGet("comments")]
-        public async Task<ActionResult> GetArticleCommentListAsync([FromQuery] GetArticleCommentsRequest param)
+        [HttpGet("myArticles")]
+        public async Task<ActionResult> GetMyArticleListAsync([FromQuery] GetMyArticleListRequest request)
         {
-            var query = new GetArticleCommentsQuery
+            var query = new GetMyArticleListQuery
             {
-                ArticleId = param.ArticleId,
-                PageIndex = param.PageIndex,
-                PageSize = param.PageSize
+                PageIndex = request.PageIndex,
+                PageSize = request.PageSize,
+                SortBy = "CreateAt",
+                SortDescending = true
             };
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
         }
 
-
         /// <summary>
-        /// 提交评论
+        /// 点赞文章
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        [HttpPost("setcomment")]
-        public async Task<ActionResult> SetArticleCommentAsync([FromBody] SetArticleCommentRequest param)
+        [HttpPost("like")]
+        public async Task<ActionResult> LikeArticleAsync([FromBody] ArticleLikeRequest param)
         {
-            CreateArticleCommentCommand command = new CreateArticleCommentCommand(param.ArticleId, param.Content);
-            // 发送命令并获取结果
+            var command = new LikeArticleCommand(param.ArticleId, param.IsLike);
+
             var result = await _mediator.Send(command);
+
             if (result)
             {
-                return Ok(ResultObject.Success("评论成功！"));
+                return Ok(ResultObject.Success("操作成功"));
             }
-            return BadRequest(ResultObject.Success("提交失败！"));
-
+            else
+            {
+                var notifications = _notificationHandler.GetNotifications();
+                return BadRequest(notifications);
+            }
         }
 
         /// <summary>
-        /// 删除评论
+        /// 获取相关文章
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        [HttpDelete("comment")]
-        public async Task<ActionResult> DeleteArticleCommentAsync([FromBody] IdParam param)
+        [HttpGet("related")]
+        public async Task<ActionResult> GetRelatedArticlesAsync([FromQuery] RelatedArticlesRequest param)
         {
+            var query = new GetRelatedArticlesQuery(param.ArticleId, param.TopCount);
+            var result = await _mediator.Send(query);
+            return new OkObjectResult(result);
+        }
 
-            DeleteArticleCommentCommand command = new DeleteArticleCommentCommand(param.Id);
+
+        /// <summary>
+        /// 发布文章
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost("publish")]
+        public async Task<ActionResult> CreateArticleAsync([FromBody] CreateArticleRequest param)
+        {
+            CreateArticleCommand command = new CreateArticleCommand(param);
             // 发送命令并获取结果
             var result = await _mediator.Send(command);
             if (result)
             {
-                return Ok(ResultObject.Success("删除成功！"));
+                return Ok(ResultObject.Success("文章创建成功！"));
             }
-            return BadRequest(ResultObject.Success("删除失败！"));
+            return BadRequest(ResultObject.Success("文章创建失败！"));
+        }
+
+        /// <summary>
+        /// 删除文章
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        public async Task<ActionResult> DeleteArticleAsync([FromBody] IdParam param)
+        {
+            return Ok(ResultObject.Success("删除成功！"));
+        }
+
+        /// <summary>
+        /// 隐藏文章
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPut("status")]
+        public async Task<ActionResult> ChangeArticleStatusAsync([FromBody] ChangeArticleStatusRequest param)
+        {
+            return Ok(ResultObject.Success("状态修改成功！"));
         }
 
 

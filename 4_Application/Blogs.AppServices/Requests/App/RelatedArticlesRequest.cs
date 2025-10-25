@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Requests.App
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class RelatedArticlesRequest
     {
         public long ArticleId { get; set; }

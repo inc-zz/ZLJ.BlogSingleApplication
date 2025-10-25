@@ -69,7 +69,7 @@ public class AppConfig
 
     /// <summary>
     /// 加载所有配置
-    /// </summary>
+    /// </summary>  
     private void LoadAllConfigs()
     {
         BlogsConfig = GetConfigModel<BlogsConfig>("AppConfig") ?? new BlogsConfig();

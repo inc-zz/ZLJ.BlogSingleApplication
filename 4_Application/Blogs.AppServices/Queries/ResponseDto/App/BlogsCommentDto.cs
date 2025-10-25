@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blogs.Domain.Entity.Blogs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
         /// <summary>
         /// 回复列表
         /// </summary>
-        public List<BlogsCommentDto> Replies { get; set; } = new List<BlogsCommentDto>();
+        public List<BlogsComment> Replies { get; set; }
 
 
     }

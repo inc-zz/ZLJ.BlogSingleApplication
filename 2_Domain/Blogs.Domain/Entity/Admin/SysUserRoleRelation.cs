@@ -8,9 +8,8 @@ namespace Blogs.Domain.Entity.Admin
     /// </summary>
 
     [SugarTable("sys_user_role_relation")]
-    public class SysUserRoleRelation 
+    public class SysUserRoleRelation : BaseEntity
     {
-        public long Id { get; set; }
         /// <summary>
         /// 用户ID
         /// </summary>

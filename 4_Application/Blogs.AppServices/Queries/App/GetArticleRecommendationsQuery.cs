@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace Blogs.AppServices.Queries.App
 {
     /// <summary>
-    /// 
+    /// 获取推荐榜单
     /// </summary>
-    public class GetArticleRecommendationsQuery : IRequest<ResultObject<List<ArticleTagDto>>>
+    public class GetArticleRecommendationsQuery : IRequest<ResultObject<List<BlogsSettingDto>>>
     {
         public GetArticleRecommendationsQuery()
         {
@@ -20,7 +20,7 @@ namespace Blogs.AppServices.Queries.App
 
         public int TopCount { get; set; }
 
-        public int RecommendationType { get; set; }
+        public string RecommendationType { get; set; }
 
     }
 }

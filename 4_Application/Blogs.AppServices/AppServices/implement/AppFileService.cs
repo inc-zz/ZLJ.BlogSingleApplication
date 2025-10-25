@@ -2,8 +2,10 @@
 using Blogs.Core;
 using Blogs.Core.Config;
 using Blogs.Domain.Entity.Blogs;
+using Blogs.Infrastructure.Constant;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -18,7 +20,7 @@ namespace Blogs.AppServices.AppServices.implement
     /// <summary>
     /// 
     /// </summary>
-    public class AppFileService: IAppFileService
+    public class AppFileService : IAppFileService
     {
         private readonly SqlSugarDbContext _db;
         private readonly IWebHostEnvironment _environment;
@@ -29,13 +31,21 @@ namespace Blogs.AppServices.AppServices.implement
         /// </summary>
         /// <param name="db"></param>
         /// <param name="environment"></param>
-        public AppFileService( IWebHostEnvironment environment)
+        public AppFileService(IWebHostEnvironment environment)
         {
             _db = new SqlSugarDbContext();
-            _environment = environment; 
+            _environment = environment;
             _semaphore = new SemaphoreSlim(AppConfig.Instance.FileStoreConfig.MaxConcurrentUploads);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="businessType"></param>
+        /// <param name="description"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public async Task<FileUploadResult> UploadSingleFileAsync(IFormFile file, string businessType, string? description = null, string? userId = null)
         {
             // 并发控制
@@ -50,18 +60,21 @@ namespace Blogs.AppServices.AppServices.implement
                 }
 
                 // 获取业务目录配置
-                var directoryConfig = AppConfig.Instance.FileStoreConfig.DirectoryConfig.FirstOrDefault(d => d.BusinessType == businessType);
+                var directoryConfig = await _db.DbContext.Queryable<BlogsSettings>()
+                    .Where(it => it.BusType == BlogsSettingBusType.FileStoreDictionary && it.Title == businessType)
+                    .FirstAsync();
+
                 if (directoryConfig == null)
                 {
                     return new FileUploadResult { Success = false, Message = $"未找到业务类型 '{businessType}' 的目录配置" };
                 }
 
                 // 确保目录存在
-                EnsureDirectoryExists(directoryConfig.PhysicalPath);
+                EnsureDirectoryExists(directoryConfig.Content);
 
                 // 生成存储文件名
                 var storedFileName = GenerateStoredFileName(file.FileName);
-                var filePath = Path.Combine(directoryConfig.PhysicalPath, storedFileName);
+                var filePath = Path.Combine(directoryConfig.Content, storedFileName);
                 var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
                 // 计算文件MD5（针对大文件使用流式处理）
@@ -81,9 +94,9 @@ namespace Blogs.AppServices.AppServices.implement
                     return new FileUploadResult
                     {
                         Success = true,
-                        Message = "文件已存在",
-                        FileRecord = existingFile,
-                        FileUrl = $"{directoryConfig.UrlPath}/{existingFile.StoredFileName}"
+                        Message = "文件上传成功",
+                        //FileRecord = existingFile,
+                        FileUrl = $"{AppConfig.Instance.FileStoreConfig.StoreServerUrl}/{directoryConfig.Title}/{existingFile.StoredFileName}"
                     };
                 }
 
@@ -120,8 +133,7 @@ namespace Blogs.AppServices.AppServices.implement
                 {
                     Success = true,
                     Message = "文件上传成功",
-                    FileRecord = fileRecord,
-                    FileUrl = $"{directoryConfig.UrlPath}/{storedFileName}"
+                    FileUrl = $"{AppConfig.Instance.FileStoreConfig.StoreServerUrl}/{directoryConfig.Title}/{storedFileName}"
                 };
             }
             finally
@@ -156,6 +168,12 @@ namespace Blogs.AppServices.AppServices.implement
             return await _db.DbContext.Deleteable<BlogsFileRecord>().Where(f => f.Id == fileId).ExecuteCommandHasChangeAsync();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="businessType"></param>
+        /// <returns></returns>
         private FileUploadResult ValidateFile(IFormFile file, string businessType)
         {
             // 检查文件大小
@@ -179,10 +197,14 @@ namespace Blogs.AppServices.AppServices.implement
             }
 
             // 检查业务类型
-            var fileDirectories = AppConfig.Instance.FileStoreConfig.DirectoryConfig;
-            if (!fileDirectories.Any(d => d.BusinessType == businessType))
+            // 获取业务目录配置
+            var directoryConfig = _db.DbContext.Queryable<BlogsSettings>()
+                .Where(it => it.BusType == BlogsSettingBusType.FileStoreDictionary && it.Title == businessType)
+                .First();
+
+            if (directoryConfig == null)
             {
-                return new FileUploadResult { Success = false, Message = $"无效的业务类型：{businessType}" };
+                return new FileUploadResult { Success = false, Message = $"未找到业务类型 '{businessType}' 的目录配置" };
             }
 
             // 验证文件内容类型（MIME类型）
@@ -233,7 +255,7 @@ namespace Blogs.AppServices.AppServices.implement
         }
 
         /// <summary>
-        /// 
+        /// 生成文件名
         /// </summary>
         /// <param name="originalFileName"></param>
         /// <returns></returns>
@@ -242,7 +264,7 @@ namespace Blogs.AppServices.AppServices.implement
             var extension = Path.GetExtension(originalFileName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
             var safeFileName = Regex.Replace(fileNameWithoutExtension, @"[^a-zA-Z0-9\u4e00-\u9fa5-]", "_");
-            return $"{safeFileName}_{DateTime.Now:yyyyMMddHHmmssfff}_{Guid.NewGuid():N}{extension}";
+            return $"{safeFileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
         }
         /// <summary>
         /// 

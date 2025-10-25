@@ -12,7 +12,7 @@ namespace Blogs.Common.DtoModel.App
         public AppLoginUserDto UserInfo { get; set; }
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
-        public DateTime? ExpiresIn { get; set; }
+        public string? ExpiresIn { get; set; }
         public string TokenType { get; set; } = "Bearer";
     }
 }

@@ -11,12 +11,10 @@ namespace Blogs.Common.Config
     /// </summary>
     public class FileStoreConfig
     {
-
         /// <summary>
-        /// 上传目录配置
+        /// 存储服务器URL
         /// </summary>
-        public DirectoryConfig[] DirectoryConfig { get; set; } = Array.Empty<DirectoryConfig>();
-
+        public string? StoreServerUrl { get; set; }
         /// <summary>
         /// 允许的文件扩展名
         /// </summary>

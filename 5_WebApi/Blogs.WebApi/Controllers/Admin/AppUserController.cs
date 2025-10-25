@@ -22,15 +22,17 @@ namespace Blogs.WebApi.Controllers.Admin
         /// 中介者-调用查询处理器
         /// </summary>
         private readonly IMediator _mediator;
-        /// <summary>
-        /// 领域通知处理器
-        /// </summary>
-        private readonly DomainNotificationHandler _notificationHandler;
+        private readonly ILogger<AccountController> _logger;
 
-        public AppUserController(IMediator mediator, INotificationHandler<DomainNotification> notifications)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mediator"></param>
+        /// <param name="logger"></param>
+        public AppUserController(IMediator mediator, ILogger<AccountController> logger)
         {
             _mediator = mediator;
-            _notificationHandler = notifications as DomainNotificationHandler;
+            _logger = logger;
         }
 
         /// <summary>
@@ -46,9 +48,11 @@ namespace Blogs.WebApi.Controllers.Admin
                 PageIndex = param.PageIndex,
                 PageSize = param.PageSize
             };
+            _logger.LogInformation("================查询用户列表===============");
 
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
+
         }
 
         /// <summary>

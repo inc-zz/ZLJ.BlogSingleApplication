@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Commands.Blogs.Article
 {
+
+    /// <summary>
+    /// 点赞文章命令
+    /// </summary>
     public class LikeArticleCommand : ArticleCommand
     {
-        public LikeArticleCommand(long id)
+        public LikeArticleCommand(long id, bool isLike)
         {
-            this.Id = id;
+            var likeCount = isLike ? 1 : -1;
+            this.SetLikeCount(id, LikeCount, CurrentAppUser.Instance.UserInfo.UserName);
         }
 
         public override bool IsValid()

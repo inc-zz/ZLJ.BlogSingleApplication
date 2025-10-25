@@ -21,6 +21,6 @@ namespace Blogs.Core.Models
 
         public string SortBy { get; set; }
         public bool SortDescending { get; set; }
-        public string SearchTerm { get; set; }
+        public string? SearchTerm { get; set; }
     }
 }

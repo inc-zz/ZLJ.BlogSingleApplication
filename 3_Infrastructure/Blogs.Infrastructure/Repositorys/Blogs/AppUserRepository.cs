@@ -31,5 +31,36 @@ namespace Blogs.Infrastructure.Repositorys.Blogs
             var result = await dbContext.DbContext.Updateable(user).ExecuteCommandAsync();
             return result > 0;
         }
+
+        /// <summary>
+        /// 查询App用户分页数据
+        /// </summary>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="searchTerm"></param>
+        /// <param name="isActive"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<(IEnumerable<BlogsUser> Users, int TotalCount)> GetAppUserListAsync(
+        int pageIndex,
+        int pageSize,
+        string searchTerm = null,
+        bool? isActive = null,
+        CancellationToken cancellationToken = default)
+        {
+            var query = base.Context.Queryable<BlogsUser>();
+            if (!string.IsNullOrEmpty(searchTerm))
+                query = query.Where(u => u.Account.Contains(searchTerm) || u.Email.Contains(searchTerm));
+
+            if (isActive.HasValue)
+                query = query.Where(u => u.IsDeleted == 0);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+            var skip = (pageIndex - 1) * pageSize;
+            var users = await query.Skip(skip).Take(pageSize).ToListAsync(cancellationToken);
+            return (users, totalCount);
+
+        }
+
     }
 }

@@ -22,7 +22,6 @@ namespace Blogs.AppServices.Requests.App
 
         public string? Email { set; get; }
 
-        public string? PhoneNumber { set; get; }
 
     }
 }

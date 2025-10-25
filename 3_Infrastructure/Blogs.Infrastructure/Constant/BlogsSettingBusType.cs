@@ -26,7 +26,7 @@ namespace Blogs.Infrastructure.Constant
         /// <summary>
         /// 存储目录
         /// </summary>
-        public const string StorageDirectory = "FileStorage";
+        public const string FileStoreDictionary = "FileStoreDictionary";
 
     }
 }

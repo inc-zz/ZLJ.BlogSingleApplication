@@ -1,0 +1,64 @@
+services:
+  # .NET WebAPI 服务
+  webapi:
+    build:
+      context: .                    # 构建上下文：当前目录（必须包含 Dockerfile 和项目结构）
+      dockerfile: Dockerfile        # 指定 Dockerfile
+    image: blogs-webapi:latest      # 构建后的镜像名称
+    container_name: blogs-webapi
+    ports:
+      - "8080:8080"                 # HTTP
+      # - "8081:8081"                 # HTTPS（可选）
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8087
+      # 数据库连接字符串
+      - ConnectionStrings__Default="Server=mysql;Port=3306;Database=blogs_single_application;User=root;Password=123456;SslMode=Preferred;"
+      - Redis__Host=redis
+      - Redis__Port=6379
+      - Redis__InstanceName=blogs_cache
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # MySQL 服务
+  mysql:
+    image: mysql:8.0
+    container_name: blogs-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: blogs_single_application
+    ports:
+      - "3310:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init-sql:/docker-entrypoint-initdb.d  # 可选：初始化 SQL 脚本
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - app-network
+
+  # Redis 服务
+  redis:
+    image: redis:7-alpine
+    container_name: blogs-redis
+    ports:
+      - "6377:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - app-network
+
+# 卷声明
+volumes:
+  mysql-data:
+  redis-data:
+
+# 网络声明（所有服务在同一自定义网络中，可互相解析主机名）
+networks:
+  app-network:
+    driver: bridge

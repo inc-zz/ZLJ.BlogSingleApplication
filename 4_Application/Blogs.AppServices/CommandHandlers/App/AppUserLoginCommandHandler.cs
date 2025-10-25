@@ -1,10 +1,13 @@
-﻿using Blogs.AppServices.Commands.Blogs.User;
+﻿using Blogs.AppServices.Commands.Admin.SysUser;
+using Blogs.AppServices.Commands.Blogs.User;
 using Blogs.Common.DtoModel.App;
 using Blogs.Core;
 using Blogs.Core.Models;
 using Blogs.Domain.IRepositorys.Blogs;
 using Blogs.Domain.IServices;
 using Blogs.Infrastructure.Services.App;
+using Microsoft.Extensions.Logging;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Blogs.AppServices.CommandHandlers.App
 {
@@ -12,17 +15,19 @@ namespace Blogs.AppServices.CommandHandlers.App
     /// App用户登录
     /// </summary>
     public class AppUserLoginCommandHandler : AppCommandHandler,
-         IRequestHandler<AppUserLoginCommand, ResultObject>
+         IRequestHandler<AppUserLoginCommand, ResultObject>,
+        IRequestHandler<AppRefreshTokenCommand, ResultObject>
     {
         private readonly IAppUserRepository _userRepository;
         private readonly IAppAuthService _authService;
         private readonly IMediatorHandler _eventBus;
         private readonly IAppOpenIddictService _appOpenIddictService;
-
+        private readonly ILogger<AppUserLoginCommandHandler> _logger;
 
         public AppUserLoginCommandHandler(IMediatorHandler mediator,
             IAppAuthService appAuthService,
             IAppUserRepository appUserRepository,
+            ILogger<AppUserLoginCommandHandler> logger,
             IAppOpenIddictService appOpenIddictService)
             : base(mediator)
         {
@@ -30,6 +35,7 @@ namespace Blogs.AppServices.CommandHandlers.App
             _authService = appAuthService;
             _userRepository = appUserRepository;
             _appOpenIddictService = appOpenIddictService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -109,13 +115,71 @@ namespace Blogs.AppServices.CommandHandlers.App
                 UserInfo = user.Adapt<AppLoginUserDto>(),
                 AccessToken = tokenResult.AccessToken,
                 RefreshToken = tokenResult.RefreshToken,
-                ExpiresIn = tokenResult.Expiration
+                ExpiresIn = tokenResult.Expiration.ToString("G")
             };
             return ResultObject<AppLoginResultDto>.Success(loginResult, "登录成功");
         }
 
 
+        /// <summary>
+        /// 刷新Token
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<ResultObject> Handle(AppRefreshTokenCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _logger.LogInformation("开始刷新令牌");
 
+                // 从令牌中提取用户ID
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(request.AccessToken);
+
+                // 从刷新令牌中获取用户ID
+                var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("无法从刷新令牌获取用户ID: {RefreshToken}", request.RefreshToken);
+                    return ResultObject.Error("刷新令牌无效或已过期");
+                }
+
+                // 获取用户信息
+                var user = await _userRepository.GetFirstAsync(it => it.Id.ToString() == userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("用户不存在: {UserId}", userId);
+                    return ResultObject.Error("登录账号异常");
+                }
+
+                if (user.IsDeleted == 1)
+                {
+                    _logger.LogWarning("用户已被锁定: {UserId}", userId);
+                    return ResultObject.Error("用户已被锁定，请稍后再试");
+                }
+
+                // 使旧的令牌失效
+                await _appOpenIddictService.RevokeJwtToken(request.AccessToken, request.RefreshToken);
+
+                // 重新生产令牌，不重置刷新令牌
+                var tokenResult = await _appOpenIddictService.GenerateTokenAsync(user, request.RefreshToken);
+                if (!tokenResult.Result)
+                {
+                    _logger.LogError("生成新令牌失败: {Error}", tokenResult.Message);
+                    return ResultObject.Error($"生成新令牌失败: {tokenResult.Message}");
+                }
+
+                _logger.LogInformation("令牌刷新成功，用户ID: {UserId}", userId);
+
+                return ResultObject<TokenResult>.Success(tokenResult, "");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "刷新令牌过程中发生错误");
+                return ResultObject.Error($"刷新令牌失败: {ex.Message}");
+            }
+        }
 
     }
 }

@@ -24,17 +24,18 @@ namespace Blogs.Infrastructure.Repositorys.Admin
         /// <param name="userId"></param>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        public async Task<bool> UserRoleAuth(long userId, long roleId)
+        public async Task<bool> UserRoleAuth(SysUser adminUser,long roleId)
         {
-            var isAny = await base.Context.Queryable<SysUserRoleRelation>().Where(it => it.UserId == userId
+            var isAny = await base.Context.Queryable<SysUserRoleRelation>().Where(it => it.UserId == adminUser.Id
             && it.RoleId == roleId).AnyAsync();
             if (!isAny)
             {
                 var userRole = new SysUserRoleRelation
                 {
                     RoleId = roleId,
-                    UserId = userId
+                    UserId = adminUser.Id
                 };
+                userRole.MarkAsCreated(adminUser.CreatedBy);
                 var res = await base.Context.Insertable(userRole).ExecuteCommandAsync();
                 isAny = res > 0;
             }
@@ -83,7 +84,10 @@ namespace Blogs.Infrastructure.Repositorys.Admin
 
             var totalCount = await query.CountAsync(cancellationToken);
             var skip = (pageIndex - 1) * pageSize;
-            var users = await query.Skip(skip).Take(pageSize).ToListAsync(cancellationToken);
+            var users = await query.OrderByDescending(it=>it.CreatedAt)
+                .Skip(skip)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
 
             return (users, totalCount);
         }

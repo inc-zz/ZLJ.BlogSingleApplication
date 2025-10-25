@@ -4,8 +4,9 @@ using Blogs.Domain.Enums;
 namespace Blogs.Domain.Entity.Blogs
 {
     /// <summary>
-    /// 
+    /// 博客评论表
     /// </summary>
+    [SugarTable("blogs_comment")]
     public class BlogsComment : BaseEntity
     {
 
@@ -29,12 +30,15 @@ namespace Blogs.Domain.Entity.Blogs
         /// </summary>
         /// <param name="articleId"></param>
         /// <param name="content"></param>
-        public void SetComment(long articleId, string content)
+        public void SetComment(long articleId, string content, string userName)
         {
             this.ArticleId = articleId;
             this.Content = content;
-
+            this.CreatedBy = userName;
+            this.CreatedAt    = DateTime.Now;
+            this.ParentId = 0;
         }
+
         /// <summary>
         /// 回复评论
         /// </summary>

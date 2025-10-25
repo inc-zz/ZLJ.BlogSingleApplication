@@ -32,6 +32,8 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
         /// 简介
         /// </summary>
         public string Summary { get;  set; }
+
+        public string? Tags { get; set; }   
         /// <summary>
         /// 内容
         /// </summary>

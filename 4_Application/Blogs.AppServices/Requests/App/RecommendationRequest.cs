@@ -9,7 +9,5 @@ namespace Blogs.AppServices.Requests.App
     public class RecommendationRequest
     {
         public int TopCount {  get; set; }
-
-        public int Type { get; set; }
     }
 }

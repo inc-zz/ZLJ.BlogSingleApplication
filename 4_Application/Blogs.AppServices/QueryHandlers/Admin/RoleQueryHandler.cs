@@ -1,5 +1,6 @@
 ﻿using Blogs.AppServices.Queries.Admin;
 using Blogs.AppServices.Queries.ResponseDto.Admin;
+using Blogs.AppServices.Queries.ResponseDto.App;
 using Blogs.Core.DtoModel.ResponseDto;
 using Blogs.Core.Models;
 using Blogs.Domain.Entity.Admin;
@@ -41,17 +42,7 @@ namespace Blogs.AppServices.QueryHandlers.Admin
             var list = await DbContext.Queryable<SysRole>()
                 .ToPageListAsync(request.PageIndex, request.PageSize, total, cancellationToken);
             var dtoList = list.Adapt<List<RoleDto>>();
-            var result = new PagedResult<RoleDto>
-            {
-                code = 200,
-                message = "获取成功",
-                success = true,
-                Items = dtoList,
-                Total = total.Value,
-                PageIndex = request.PageIndex,
-                PageSize = request.PageSize,
-            };
-             
+            var result = new PagedResult<RoleDto>(dtoList, total.Value, request.PageIndex, request.PageSize);
             return result;
         }
 

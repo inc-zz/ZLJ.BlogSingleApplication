@@ -1,4 +1,5 @@
 ﻿using Blogs.AppServices.Queries.App;
+using Blogs.AppServices.Queries.ResponseDto.Admin;
 using Blogs.AppServices.Queries.ResponseDto.App;
 using Blogs.Core.Models;
 using Blogs.Domain.Entity.Blogs;
@@ -20,9 +21,11 @@ namespace Blogs.AppServices.QueryHandlers.App
          IRequestHandler<GetArticleDetailQuery, ResultObject<ArticleInfoDto>>,
          IRequestHandler<GetArticleTagsQuery, ResultObject<List<ArticleTagDto>>>,
          IRequestHandler<GetHotArticlesQuery, ResultObject<List<ArticleCategoryDto>>>,
-         IRequestHandler<GetArticleRecommendationsQuery, ResultObject<List<ArticleTagDto>>>,
-         IRequestHandler<GetArticleListQuery, ResultObject<List<ArticleDto>>>,
-         IRequestHandler<GetArticleCommentsQuery, ResultObject<List<BlogsCommentDto>>>
+         IRequestHandler<GetArticleRecommendationsQuery, ResultObject<List<BlogsSettingDto>>>,
+         IRequestHandler<GetArticleListQuery, PagedResult<ArticleDto>>,
+         IRequestHandler<GetArticleCommentsQuery, PagedResult<BlogsCommentDto>>,
+        IRequestHandler<GetRelatedArticlesQuery, ResultObject<List<ArticleDto>>>,
+        IRequestHandler<GetMyArticleListQuery, PagedResult<ArticleDto>>
     {
 
         /// <summary>
@@ -73,10 +76,13 @@ namespace Blogs.AppServices.QueryHandlers.App
                     CategoryId = it.CategoryId,
                     CategoryName = SqlFunc.Subqueryable<BlogsCategory>().Where(c => c.Id == it.CategoryId).Select(c => c.Name),
                     CreatedBy = it.CreatedBy,
+                    Tags = it.Tags,
                     CreatedAt = it.CreatedAt,
                     ViewCount = it.ViewCount,
                     LikeCount = it.LikeCount
                 }).FirstAsync();
+
+            _ = SetArticleViewCountAsync(request.ArticleId);
 
             return ResultObject<ArticleInfoDto>.Success(articleInfo, "");
 
@@ -117,7 +123,7 @@ namespace Blogs.AppServices.QueryHandlers.App
         public async Task<ResultObject<List<ArticleCategoryDto>>> Handle(GetHotArticlesQuery request, CancellationToken cancellationToken)
         {
             var list = await DbContext.Queryable<BlogsCategory>()
-               .Where(it => it.IsDeleted == 0 && it.BusType == CategoryBusType.ArticleDomain) 
+               .Where(it => it.IsDeleted == 0 && it.BusType == CategoryBusType.ArticleDomain)
                .OrderByDescending(o => o.Sort)
                .Select(it => new ArticleCategoryDto
                {
@@ -125,7 +131,7 @@ namespace Blogs.AppServices.QueryHandlers.App
                    ArticleCount = 0,
                    Name = it.Name,
                    Description = it.Description,
-                   Slug = it.Slug   
+                   Slug = it.Slug
                })
                .Take(request.TopCount)
                .ToListAsync();
@@ -134,31 +140,32 @@ namespace Blogs.AppServices.QueryHandlers.App
         }
 
         /// <summary>
-        /// 获取文章标签
+        /// 获取推荐榜单
         /// </summary>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<ResultObject<List<ArticleTagDto>>> Handle(GetArticleRecommendationsQuery request, CancellationToken cancellationToken)
+        public async Task<ResultObject<List<BlogsSettingDto>>> Handle(GetArticleRecommendationsQuery request, CancellationToken cancellationToken)
         {
-
-            var list = await DbContext.Queryable<BlogsArticleTag>()
-               .Where(it => it.IsDeleted == 0)
-               .OrderByDescending(o => o.Sort)
-               .Select(it => new ArticleTagDto
+            var list = await DbContext.Queryable<BlogsSettings>()
+               .Where(it => it.IsDeleted == 0 && it.BusType == request.RecommendationType)
+               .OrderBy(o => o.CreatedAt)
+               .Select(it => new BlogsSettingDto
                {
                    Id = it.Id,
-                   Name = it.Name,
-                   StyleColor = it.Color
+                   Tags = it.Tags,
+                   Title = it.Title,
+                   Content = it.Content,
+                   Summary = it.Summary,
+                   Url = it.Url
                })
                .Take(request.TopCount)
                .ToListAsync();
 
-            return ResultObject<List<ArticleTagDto>>.Success(list, "");
-
-
+            return ResultObject<List<BlogsSettingDto>>.Success(list, "");
         }
+
         /// <summary>
         ///首页文章分类列表
         /// </summary>
@@ -166,12 +173,14 @@ namespace Blogs.AppServices.QueryHandlers.App
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<ResultObject<List<ArticleDto>>> Handle(GetArticleListQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<ArticleDto>> Handle(GetArticleListQuery request, CancellationToken cancellationToken)
         {
-
+            RefAsync<int> total = 0;
             var list = await DbContext.Queryable<BlogsArticle>()
               .Where(it => it.IsDeleted == 0 && it.IsTop == true)
-              .OrderByDescending(o => o.ViewCount)
+              .WhereIF(!string.IsNullOrWhiteSpace(request.SearchTerm), wt => wt.Title.Contains(request.SearchTerm)
+              || wt.Summary.Contains(request.SearchTerm) || wt.CreatedBy == request.SearchTerm)
+              .OrderByDescending(o => o.CreatedAt)
               .Select(it => new ArticleDto
               {
                   Id = it.Id,
@@ -180,14 +189,16 @@ namespace Blogs.AppServices.QueryHandlers.App
                   CoverImage = it.CoverImage,
                   ViewCount = it.ViewCount,
                   LikeCount = it.LikeCount,
+                  CommentCount = it.CommentCount,
                   CategoryName = SqlFunc.Subqueryable<BlogsCategory>().Where(c => c.Id == it.CategoryId).Select(c => c.Name),
                   CreatedBy = it.CreatedBy,
-                  CreatedAt = it.CreatedAt
+                  CreatedAt = it.CreatedAt,
+                  Tags = it.Tags
               })
-              .ToListAsync();
+              .ToPageListAsync(request.PageIndex, request.PageSize, total, cancellationToken);
+            var result = new PagedResult<ArticleDto>(list, total.Value, request.PageIndex, request.PageSize);
 
-            return ResultObject<List<ArticleDto>>.Success(list, "");
-
+            return result;
         }
 
         /// <summary>
@@ -197,11 +208,11 @@ namespace Blogs.AppServices.QueryHandlers.App
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<ResultObject<List<BlogsCommentDto>>> Handle(GetArticleCommentsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<BlogsCommentDto>> Handle(GetArticleCommentsQuery request, CancellationToken cancellationToken)
         {
-
+            RefAsync<int> total = 0;
             var list = await DbContext.Queryable<BlogsComment>()
-                .Where(it => it.IsDeleted == 0 && it.ArticleId == request.ArticleId)
+                .Where(it => it.IsDeleted == 0 && it.ParentId == 0 && it.ArticleId == request.ArticleId)
                 .OrderBy(it => it.CreatedAt, OrderByType.Desc)
                 .Select(it => new BlogsCommentDto
                 {
@@ -212,17 +223,93 @@ namespace Blogs.AppServices.QueryHandlers.App
                     CreatedAt = it.CreatedAt,
                     LikeCount = it.LikeCount,
                     Replies = SqlFunc.Subqueryable<BlogsComment>()
-                    .Where(c => c.ParentId == it.Id).ToList()
-                    .Select(c=>new BlogsCommentDto
-                    {
-                        Id = c.Id,
-                        ArticleId=c.ArticleId,
-                        Content =c.Content,
-                        CreatedBy = c.CreatedBy,
-                        CreatedAt = c.CreatedAt
-                    }).ToList()
+                    .Where(c => c.ParentId == it.Id && c.ParentId > 0).ToList()
+                }).ToPageListAsync(request.PageIndex, request.PageSize, total);
+            var result = new PagedResult<BlogsCommentDto>(list, total.Value, request.PageIndex, request.PageSize);
+            return result;
+        }
+
+        /// <summary>
+        /// 获取推荐文章
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<ResultObject<List<ArticleDto>>> Handle(GetRelatedArticlesQuery request, CancellationToken cancellationToken)
+        {
+            var articleInfo = await DbContext.Queryable<BlogsArticle>().Where(it => it.Id == request.ArticleId).FirstAsync();
+            if (articleInfo == null)
+            {
+                return ResultObject<List<ArticleDto>>.Success(new List<ArticleDto>(), "");
+            }
+
+            var list = await DbContext.Queryable<BlogsArticle>().Where(BlogsArticle => BlogsArticle.IsDeleted == 0
+                && BlogsArticle.Id != request.ArticleId
+                && (BlogsArticle.CategoryId == articleInfo.CategoryId || BlogsArticle.Tags.Contains(articleInfo.Tags)))
+                .OrderBy(it => it.ViewCount, OrderByType.Desc)
+                .Take(request.TopCount)
+                .Select(it => new ArticleDto
+                {
+                    Id = it.Id,
+                    Title = it.Title,
+                    Summary = it.Summary,
+                    CoverImage = it.CoverImage,
+                    ViewCount = it.ViewCount,
+                    LikeCount = it.LikeCount,
+                    CommentCount = it.CommentCount,
+                    CategoryName = SqlFunc.Subqueryable<BlogsCategory>().Where(c => c.Id == it.CategoryId).Select(c => c.Name),
+                    CreatedBy = it.CreatedBy,
+                    CreatedAt = it.CreatedAt,
+                    Tags = it.Tags
                 }).ToListAsync();
-            return ResultObject<List<BlogsCommentDto>>.Success(list, "");
+            return ResultObject<List<ArticleDto>>.Success(list, "");
+        }
+
+        /// <summary>
+        /// 获取我的文章列表
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<PagedResult<ArticleDto>> Handle(GetMyArticleListQuery request, CancellationToken cancellationToken)
+        {
+            RefAsync<int> total = 0;
+            var list = await DbContext.Queryable<BlogsArticle>()
+              .Where(it => it.CreatedBy == CurrentAppUser.Instance.UserInfo.UserName)
+              .WhereIF(!string.IsNullOrWhiteSpace(request.SearchTerm), wt => wt.Title.Contains(request.SearchTerm)
+              || wt.Summary.Contains(request.SearchTerm) || wt.CreatedBy == request.SearchTerm)
+              .OrderByDescending(o => o.CreatedAt)
+              .Select(it => new ArticleDto
+              {
+                  Id = it.Id,
+                  Title = it.Title,
+                  Summary = it.Summary,
+                  CoverImage = it.CoverImage,
+                  ViewCount = it.ViewCount,
+                  LikeCount = it.LikeCount,
+                  CommentCount = it.CommentCount,
+                  CategoryName = SqlFunc.Subqueryable<BlogsCategory>().Where(c => c.Id == it.CategoryId).Select(c => c.Name),
+                  CreatedBy = it.CreatedBy,
+                  CreatedAt = it.CreatedAt,
+                  Tags = it.Tags
+              })
+              .ToPageListAsync(request.PageIndex, request.PageSize, total, cancellationToken);
+            var result = new PagedResult<ArticleDto>(list, total.Value, request.PageIndex, request.PageSize);
+
+            return result;
+        }
+
+        /// <summary>
+        /// 增加文章浏览量
+        ///    
+        public async Task SetArticleViewCountAsync(long articleId)
+        {
+            var articleInfo = await DbContext.Queryable<BlogsArticle>().Where(it => it.Id == articleId).FirstAsync();
+            articleInfo.ViewCountPush();
+            await DbContext.Updateable<BlogsArticle>(articleInfo)
+                .ExecuteCommandAsync();
         }
     }
 }

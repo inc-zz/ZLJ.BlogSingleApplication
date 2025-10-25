@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Blogs.WebApi.Controllers.Store
 {
+    /// <summary>
+    /// 管理端文件存储
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class FileStoreController : ControllerBase
@@ -20,13 +23,12 @@ namespace Blogs.WebApi.Controllers.Store
         }
 
         [HttpPost("upload")]
-        //[AllowAnonymous]
-        public async Task<ActionResult<ApiResponse>> UploadFile(IFormFile file, [FromForm] string businessType,[FromForm] string? description = null)
+        public async Task<ActionResult<ApiResponse>> UploadFile(IFormFile file, [FromForm] string businessType)
         {
             try
             {
-                var userId = CurrentUser.Instance.UserId.ToString();
-                var result = await _fileUploadService.UploadSingleFileAsync(file, businessType, description, userId);
+                var userId = CurrentAppUser.Instance.UserId.ToString();
+                var result = await _fileUploadService.UploadSingleFileAsync(file, businessType, "", userId);
 
                 if (result.Success)
                 {

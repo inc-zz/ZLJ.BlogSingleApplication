@@ -11,9 +11,6 @@ namespace Blogs.AppServices.Requests.App
         public long Id { get; set; }
         public string Remark { get; set; }
         public string? Email { set; get; }
-
         public string? PhoneNumber { set; get; }
-
-
     }
 }

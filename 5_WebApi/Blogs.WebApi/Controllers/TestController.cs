@@ -33,7 +33,7 @@ namespace Blogs.WebApi.Controllers
         [AllowAnonymous]
         public string GenerateId()
         {
-            IdWorkerUtils idWorker = new IdWorkerUtils(1, 1);
+            IdWorkerUtils idWorker = new IdWorkerUtils();
             long id = idWorker.NextId();
             return id.ToString();
         }

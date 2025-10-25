@@ -10,6 +10,6 @@ namespace Blogs.AppServices.Requests.App
     {
         public long ArticleId { get; set; }
 
-        public long UserId { get; set; }
+        public bool IsLike { get; set; }
     }
 }

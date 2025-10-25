@@ -129,6 +129,9 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             entity.Status = command.Status;
             entity.Description = command.Description;
 
+            //用户角色授权
+            await _userRepository.UserRoleAuth(entity, command.RoleId);
+
             entity.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
 
             var isUpdate = await _userRepository.UpdateAsync(entity);
@@ -172,6 +175,7 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 return await Task.FromResult(true);
             return await Task.FromResult(false);
         }
+
         /// <summary>
         /// 禁用启用
         /// </summary>
@@ -239,5 +243,7 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             return await Task.FromResult(false);
 
         }
+
+        
     }
 }

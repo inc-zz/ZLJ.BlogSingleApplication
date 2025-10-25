@@ -1,4 +1,5 @@
 ﻿using Blogs.Domain.AggregateRoot;
+using SqlSugar.DistributedSystem.Snowflake;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Blogs.Core.Entity
         /// 主键
         /// </summary>
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
-        public long Id { get; set; }
+        public virtual long Id { get; set; }
         /// <summary>
         /// 创建时间
         /// </summary>
@@ -44,9 +45,9 @@ namespace Blogs.Core.Entity
         /// </summary>
         public string? ModifiedBy { get;  set; }
         /// <summary>
-        /// 是否删除
+        /// 是否删除(针对树形表需要直接操作)
         /// </summary>
-        public int IsDeleted { get; protected set; } = 0;
+        public int IsDeleted { get;  set; } = 0;
 
         /// <summary>
         /// 创建信息

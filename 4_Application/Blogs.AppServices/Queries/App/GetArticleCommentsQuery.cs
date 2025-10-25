@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Queries.App
 {
-    public class GetArticleCommentsQuery : PagedRequest, IRequest<ResultObject<List<BlogsCommentDto>>>
+    public class GetArticleCommentsQuery : PagedRequest, IRequest<PagedResult<BlogsCommentDto>>
     {
 
         public long ArticleId { get; set; }

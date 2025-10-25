@@ -11,10 +11,10 @@ namespace Blogs.Domain.IRepositorys.Admin
         /// <summary>
         /// 用户角色授权
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="adminUser"></param>
         /// <param name="roleId"></param>
         /// <returns></returns>
-        Task<bool> UserRoleAuth(long userId, long roleId);
+        Task<bool> UserRoleAuth(SysUser adminUser, long roleId);
         /// <summary>
         /// 更新登录时间
         /// </summary>

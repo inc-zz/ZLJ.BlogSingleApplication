@@ -18,5 +18,21 @@ namespace Blogs.Domain.IRepositorys.Blogs
         /// <returns></returns>
         Task<bool> UpdateLastLoginInfoAsync(long userId, string ipAddress, DateTime loginTime);
 
+        /// <summary>
+        /// 查询App用户分页数据
+        /// </summary>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="searchTerm"></param>
+        /// <param name="isActive"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<(IEnumerable<BlogsUser> Users, int TotalCount)> GetAppUserListAsync(
+        int pageIndex,
+        int pageSize,
+        string searchTerm = null,
+        bool? isActive = null,
+        CancellationToken cancellationToken = default);
+
     }
 }

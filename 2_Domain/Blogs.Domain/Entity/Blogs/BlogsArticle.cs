@@ -10,12 +10,15 @@ namespace Blogs.Domain.Entity.Blogs
     [SugarTable("blogs_article")]
     public class BlogsArticle : BaseEntity
     {
+        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        public override long Id { get; set; }
+
         // 基本属性
         public string Title { get; private set; }
         public string Summary { get; private set; }
         public string Content { get; private set; }
         public string CoverImage { get; private set; }
-
+        public string Tags { get; private set; }
         // 状态属性
         public ArticleStatusEnum Status { get; private set; }
         public bool IsTop { get; private set; } // 是否置顶
@@ -29,19 +32,20 @@ namespace Blogs.Domain.Entity.Blogs
 
         // 时间属性
         public DateTime PublishTime { get; private set; }
-        public DateTime? LastEditTime { get; private set; }
 
         // 外键关系
         public long AuthorId { get; private set; }
         public long? CategoryId { get; private set; }
 
-        // 导航属性
-        public virtual BlogsUser Author { get; private set; }
-        public virtual BlogsCategory Category { get; private set; }
-        private readonly List<BlogsTag> _articleTags = new();
-        public virtual IReadOnlyCollection<BlogsTag> ArticleTags => _articleTags.AsReadOnly();
-        private readonly List<BlogsComment> _comments = new();
-        public virtual IReadOnlyCollection<BlogsComment> Comments => _comments.AsReadOnly();
+        //// 导航属性
+        //public virtual BlogsUser Author { get; private set; }
+        //public virtual BlogsCategory Category { get; private set; }
+
+        //private readonly List<BlogsTag> _articleTags = new();
+        //public virtual IReadOnlyCollection<BlogsTag> ArticleTags => _articleTags.AsReadOnly();
+
+        //private readonly List<BlogsComment> _comments = new();
+        //public virtual IReadOnlyCollection<BlogsComment> Comments => _comments.AsReadOnly();
 
         // 构造函数
         public BlogsArticle() { } // 为ORM保留
@@ -61,8 +65,10 @@ namespace Blogs.Domain.Entity.Blogs
             string content,
             long authorId,
             string summary = null,
-            string coverImage = null)
+            string coverImage = null,
+            string tags = null)
         {
+            Id = id;
             Title = title;
             Content = content;
             AuthorId = authorId;
@@ -74,6 +80,7 @@ namespace Blogs.Domain.Entity.Blogs
             CommentCount = 0;
             ShareCount = 0;
             PublishTime = DateTime.UtcNow;
+            Tags = tags;
         }
 
         /// <summary>
@@ -95,6 +102,43 @@ namespace Blogs.Domain.Entity.Blogs
             return plainText.Length <= maxLength
                 ? plainText
                 : plainText.Substring(0, maxLength) + "...";
+        }
+
+        public void ViewCountPush()
+        {
+            this.ViewCount += 1;
+        }
+
+        public void SetlikeCount(int likeCount)
+        {
+            this.LikeCount = likeCount;
+        }
+
+        public void SetModifyInfo(string userName)
+        {
+            this.ModifiedBy = userName;
+            this.ModifiedAt = DateTime.Now;
+        }
+          
+        /// <summary>
+        /// 设置信息
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="title"></param>
+        /// <param name="summary"></param>
+        /// <param name="tags"></param>
+        /// <param name="content"></param>
+        /// <param name="userName"></param>
+        public void SetArticleInfo(long id,long? categoryId, string title,string summary, string tags,string content,string userName)
+        {
+            this.Id = id;
+            this.CategoryId = categoryId;
+            this.Title = title;
+            this.Content = content;
+            this.Summary = summary;
+            this.Status = ArticleStatusEnum.Draft;
+            this.Tags = tags;
+            this.MarkAsModified(userName);
         }
     }
 }

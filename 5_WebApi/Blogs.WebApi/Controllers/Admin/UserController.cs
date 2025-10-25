@@ -94,7 +94,8 @@ namespace Blogs.WebApi.Controllers.Admin
             {
                 //处理失败，返回错误信息
                 var notifications = _notificationHandler.GetNotifications();
-                return BadRequest(notifications);
+                var message = notifications.Select(it => it.Value).FirstOrDefault()?.ToString();
+                return BadRequest(ResultObject.Error(message));
             }
         }
 

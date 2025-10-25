@@ -1,14 +1,19 @@
 ﻿using Azure.Core;
 using Blogs.AppServices.Commands.Admin.SysUser;
 using Blogs.AppServices.Commands.Blogs.User;
+using Blogs.AppServices.Queries.App;
 using Blogs.AppServices.Requests.Admin;
 using Blogs.AppServices.Requests.App;
+using Blogs.AppServices.Responses;
 using Blogs.Core.Models;
 using Blogs.Domain.EventNotices;
 using Blogs.Domain.Notices;
+using Blogs.Infrastructure.Context;
+using Blogs.WebApi.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Blogs.WebApi.Controllers.App
 {
@@ -25,8 +30,8 @@ namespace Blogs.WebApi.Controllers.App
         /// <summary>
         /// 
         /// </summary>
-        public AppUserController(ILogger<AppUserController> logger, 
-            IMediator mediator, 
+        public AppUserController(ILogger<AppUserController> logger,
+            IMediator mediator,
             INotificationHandler<DomainNotification> notifications)
         {
             _logger = logger;
@@ -93,6 +98,65 @@ namespace Blogs.WebApi.Controllers.App
             }
         }
 
+        /// <summary>
+        /// 获取当前登录用户信息
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("current")]
+        public async Task<ActionResult> GetCurrentUserAsync()
+        {
+            var query = new GetAppUserInfoQuery
+            {
+                Id = CurrentAppUser.Instance.UserId
+            };
+            var result = await _mediator.Send(query);
+            return new OkObjectResult(result);
+        }
+
+        /// <summary>
+        /// 刷新令牌
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("refreshToken")]
+        public async Task<ActionResult<UserLoginDto>> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            try
+            {
+                // 创建登录命令
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
+                AppRefreshTokenCommand command = new AppRefreshTokenCommand(token, request.RefreshToken);
+                // 发送命令并获取结果
+                var result = await _mediator.Send<ResultObject>(command);
+                if (result.IsSuccess())
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    result.code = 401;
+                    result.message = "令牌无效或已过期";
+                    return Unauthorized(result);
+                }
+            }
+            catch (SecurityTokenException)
+            {
+                return Unauthorized("Invalid token");
+            }
+        }
+
+        /// <summary>
+        /// 更新个人信息
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("update")]
+        public async Task<ActionResult> SetUserInfoAsync(UpdateAppUserRequest request)
+        {
+            var updateAppUserCommand = new UpdateAppUserCommand(request);
+            var result = await _mediator.Send(updateAppUserCommand);
+            return Ok(ResultObject.Success("处理成功"));
+        }
 
     }
 }

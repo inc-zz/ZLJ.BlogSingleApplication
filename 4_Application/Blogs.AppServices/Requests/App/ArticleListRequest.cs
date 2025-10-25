@@ -14,7 +14,6 @@ namespace Blogs.AppServices.Requests.App
     {
         public int? CategoryId { get; set; }
         public int? TagId { get; set; }
-        public string? Keyword { get; set; }
-        public string SortBy { get; set; } = "PublishDate";
+        public string SortBy { get; set; } = "CreatedAt";
     }
 }

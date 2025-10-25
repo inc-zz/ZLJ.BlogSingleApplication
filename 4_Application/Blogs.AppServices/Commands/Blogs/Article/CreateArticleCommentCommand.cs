@@ -6,18 +6,41 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Commands.Blogs.Article
 {
-    public class CreateArticleCommentCommand : ArticleCommand
+    /// <summary>
+    /// 提交评论
+    /// </summary>
+    public class CreateArticleCommentCommand : ArticleCommentCommand
     {
 
-        public CreateArticleCommentCommand(long articleId, string comment)
+        /// <summary>
+        /// 评论提交
+        /// </summary>
+        /// <param name="articldId"></param>
+        /// <param name="comment"></param>
+        public CreateArticleCommentCommand(long articldId, string comment)
         {
-            this.Id = articleId;
+            this.ArticleId = articldId;
+            this.Content = comment;
+        }
 
+        /// <summary>
+        /// 评论回复
+        /// </summary>
+        /// <param name="articleId"></param>
+        /// <param name="id"></param>
+        /// <param name="comment"></param>
+        public CreateArticleCommentCommand(long articleId, long id, string comment)
+        {
+            this.ArticleId = articleId;
+            this.ParentId = id;
+            this.Content = comment;
+            this.CreatedAt = DateTime.Now;
+            this.CreatedBy = CurrentAppUser.Instance.UserInfo.UserName;
         }
 
         override public bool IsValid()
         {
-            return  this.Id>0 && !string.IsNullOrEmpty(this.Content);
+            return this.ArticleId > 0 && !string.IsNullOrEmpty(this.Content);
         }
 
     }
