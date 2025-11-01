@@ -14,6 +14,10 @@ namespace Blogs.AppServices.Queries.Admin
     /// </summary>
     public class GetDepartmentInfoQuery : IdParam, IRequest<ResultObject<SysDepartmentDto>>
     {
+        public GetDepartmentInfoQuery(long id)
+        {
+            this.Id = id;
+        }
 
     }
 }

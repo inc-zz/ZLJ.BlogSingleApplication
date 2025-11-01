@@ -17,7 +17,7 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         /// </summary>
         /// <param name="menuId"></param>
         /// <param name="buttons"></param>
-        public PutMenuButtonCommand(long menuId,List<MenuButtonCommand> buttons)
+        public PutMenuButtonCommand(long menuId,long[] buttons)
         {
             Id = menuId;
             Buttons = buttons;

@@ -19,7 +19,7 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
         /// <summary>
         ///  真实姓名
         /// </summary>
-        public string? TrueName { set; get; }
+        public string? RealName { set; get; }
         /// <summary>
         ///  邮箱
         /// </summary>

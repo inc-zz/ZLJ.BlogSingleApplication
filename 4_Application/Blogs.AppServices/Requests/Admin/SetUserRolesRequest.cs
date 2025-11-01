@@ -15,9 +15,9 @@ namespace Blogs.AppServices.Requests.Admin
         /// </summary>
         public long UserId { get; set; }
         /// <summary>
-        /// 角色Id
+        /// 用户角色
         /// </summary>
-        public long RoleId { get; set; }
+        public string UserRoleJson { get; set; }
 
 
     }

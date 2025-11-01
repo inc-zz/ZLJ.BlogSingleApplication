@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blogs.AppServices.Responses;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -14,25 +15,8 @@ namespace Blogs.AppServices.Requests.Admin
         /// 角色Id
         /// </summary>
         public long RoleId { get; set; }
-        /// <summary>
-        /// 角色菜单
-        /// </summary>
-        public RoleMenuInfo RoleMenus { get; set; }
+         
+        public List<RoleMenuAuthDto> MenuPermissions { get; set;} = new List<RoleMenuAuthDto>();
 
-
-    }
-    /// <summary>
-    /// 角色菜单
-    /// </summary>
-    public class RoleMenuInfo
-    {
-        /// <summary>
-        /// 菜单Id
-        /// </summary>
-        public long MenuId { get; set; }
-        /// <summary>
-        /// 菜单按钮
-        /// </summary>
-        public List<string> ButtonIdList { get; set; }
-    }
+    } 
 }

@@ -24,7 +24,7 @@ namespace Blogs.Core.Entity.Admin
         /// <summary>
         /// 菜单图标
         /// </summary>
-        public string? ICon { get; set; }
+        public string? Icon { get; set; }
         /// <summary>
         /// 菜单类型：1目录，2:地址，3：外部链接
         /// </summary>

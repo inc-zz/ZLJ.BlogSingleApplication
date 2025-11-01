@@ -8,10 +8,15 @@ using Blogs.Core.Enums;
 using Blogs.Domain.Entity.Admin;
 using Blogs.Domain.EventNotices;
 using Blogs.Domain.IRepositorys.Admin;
+using Blogs.Domain.Notices;
+using Blogs.Domain.ValueObject;
 using Blogs.Infrastructure.Context;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using NCD.Common;
+using Newtonsoft.Json;
 
 namespace Blogs.AppServices.CommandHandlers.Admin
 {
@@ -25,8 +30,10 @@ namespace Blogs.AppServices.CommandHandlers.Admin
         IRequestHandler<CreateUserCommand, bool>,
         IRequestHandler<UpdateUserCommand, bool>,
         IRequestHandler<DeleteUserCommand, bool>,
+        IRequestHandler<BeathDeleteUserCommand, bool>,
         IRequestHandler<ChangeUserStatusCommand, bool>,
-        IRequestHandler<UserRoleAuthCommand, bool>
+        IRequestHandler<UserRoleAuthCommand, bool>,
+        IRequestHandler<ResetPasswordCommand, bool>
     {
         private readonly IMediatorHandler _eventBus;
         private readonly IHttpContextAccessor _httpContext;
@@ -38,14 +45,17 @@ namespace Blogs.AppServices.CommandHandlers.Admin
         /// <param name="eventBus"></param>
         /// <param name="httpContext"></param>
         /// <param name="userRepository"></param>
-        public AppUserCommandHandler(IMediatorHandler eventBus, 
-            IHttpContextAccessor httpContext, 
+        public AppUserCommandHandler( 
+            IHttpContextAccessor httpContext,
+            IMediatorHandler mediatorHandler,
+            DomainNotificationHandler notificationHandler,
+            ILogger<AppUserCommandHandler> logger,
             IUserRepository userRepository)
-            : base(eventBus)
+            : base(notificationHandler,logger)
         {
-            _eventBus = eventBus;
             _httpContext = httpContext;
             _userRepository = userRepository;
+            _eventBus = mediatorHandler;
         }
 
         /// <summary>
@@ -90,15 +100,36 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 return await Task.FromResult(false);
             }
             var user = command.Adapt<SysUser>();
-
+            user.Id = new IdWorkerUtils().NextId();
             //创建人信息
             user.MarkAsCreated(CurrentUser.Instance.UserInfo.UserName);
             user.Status = (int)ApproveStatusEnum.Normal;
 
-            var isTrue = await _userRepository.InsertAsync(user);
-            if (isTrue)
-                return await Task.FromResult(true);
-            return await Task.FromResult(false);
+            if (!string.IsNullOrWhiteSpace(command.DepartmentJson))
+            {
+                var userDepartment = JsonConvert.DeserializeObject<UserDepartment>(command.DepartmentJson);
+                user.DepartmentId = userDepartment.Id;
+            }
+
+            //用户角色关系
+            if (!string.IsNullOrWhiteSpace(command.UserRoleJson))
+            {
+                List<UserRoleModel> userRole = JsonConvert.DeserializeObject<List<UserRoleModel>>(command.UserRoleJson);
+                user.UserRoles = userRole.Adapt<List<SysUserRoleRelation>>();
+
+            }
+            List<SysUserRoleRelation> userRoleRelations = user.UserRoles;
+            foreach (var item in userRoleRelations)
+            {
+                item.UserId = user.Id;
+            }
+            var result = await DbContext.UseTranAsync(async () =>
+            {
+                await DbContext.Insertable(user).ExecuteCommandAsync();
+                await DbContext.Insertable(user.UserRoles).ExecuteCommandAsync();
+            });
+
+            return await Task.FromResult(result.IsSuccess);
         }
 
         /// <summary>
@@ -119,25 +150,43 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             if (entity == null)
                 return await Task.FromResult(false);
 
-            //entity = command.Adapt<SysUser>();
-
             entity.RealName = command.RealName;
             entity.Sex = command.Sex;
             entity.HeadPic = command.HeadPic;
             entity.PhoneNumber = command.PhoneNumber;
             entity.Email = command.Email;
-            entity.Status = command.Status;
             entity.Description = command.Description;
 
-            //用户角色授权
-            await _userRepository.UserRoleAuth(entity, command.RoleId);
-
+            //修改人信息
             entity.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
+            entity.Status = (int)ApproveStatusEnum.Normal;
 
-            var isUpdate = await _userRepository.UpdateAsync(entity);
-            if (isUpdate)
-                return await Task.FromResult(true);
-            return await Task.FromResult(false);
+            if (!string.IsNullOrWhiteSpace(command.DepartmentJson))
+            {
+                var userDepartment = JsonConvert.DeserializeObject<UserDepartment>(command.DepartmentJson);
+                entity.DepartmentId = userDepartment.Id;
+            }
+
+            //用户角色关系
+            if (!string.IsNullOrWhiteSpace(command.UserRoleJson))
+            {
+                List<UserRoleModel> userRole = JsonConvert.DeserializeObject<List<UserRoleModel>>(command.UserRoleJson);
+                entity.UserRoles = userRole.Adapt<List<SysUserRoleRelation>>();
+
+            }
+            List<SysUserRoleRelation> userRoleRelations = entity.UserRoles;
+            foreach (var item in userRoleRelations)
+            {
+                item.UserId = entity.Id;
+            }
+            var result = await DbContext.UseTranAsync(async () =>
+            {
+                await DbContext.Deleteable<SysUserRoleRelation>().Where(it => it.UserId == entity.Id).ExecuteCommandAsync();
+                await DbContext.Updateable(entity).ExecuteCommandAsync();
+                await DbContext.Insertable(entity.UserRoles).ExecuteCommandAsync();
+            });
+
+            return result.IsSuccess;
         }
 
         /// <summary>
@@ -153,24 +202,64 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 NotifyValidationErrors(command);
                 return await Task.FromResult(false);
             }
-
+            var currentUserName = CurrentUser.Instance.UserInfo.UserName;
             var user = await DbContext.Queryable<SysUser>().FirstAsync(x => x.Id == command.Id);
             if (user == null)
             {
                 await _eventBus.RaiseEvent(new DomainNotification("deleteUser", "用户不存在！"));
                 return await Task.FromResult(false);
             }
-            var existsAdmin = await DbContext.Queryable<SysRole>().AnyAsync(x => x.Id == command.RoleId && x.IsSystem == 1);
+            if (user.UserName == "admin" || user.UserName == currentUserName)
+            {
+                await _eventBus.RaiseEvent(new DomainNotification("deleteUser", "无法删除管理员"));
+                return await Task.FromResult(false);
+            }
+            user.SoftDelete();
+            user.Status = (int)ApproveStatusEnum.Disable; //删除的账号禁用登录
+            user.MarkAsModified(currentUserName);
+
+            var result = await DbContext.Updateable(user).ExecuteCommandAsync();
+            if (result > 0)
+                return await Task.FromResult(true);
+            return await Task.FromResult(false);
+        }
+
+        /// <summary>
+        /// 批量删除
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<bool> Handle(BeathDeleteUserCommand command, CancellationToken cancellationToken)
+        {
+            if (!command.IsValid())
+            {
+                NotifyValidationErrors(command);
+                return await Task.FromResult(false);
+            }
+            var userList = await DbContext.Queryable<SysUser>()
+                .Where(x => command.Ids.Contains(x.Id)).ToListAsync();
+
+            if (userList.Count == 0)
+            {
+                await _eventBus.RaiseEvent(new DomainNotification("deleteUser", "用户不存在！"));
+                return await Task.FromResult(false);
+            }
+            var currentUserName = CurrentUser.Instance.UserInfo.UserName;
+            var existsAdmin = userList.Where(x => x.UserName == "admin" || x.UserName == currentUserName).Any();
             if (existsAdmin)
             {
                 await _eventBus.RaiseEvent(new DomainNotification("deleteUser", "无法删除管理员"));
                 return await Task.FromResult(false);
             }
-             
-            user.Status = (int)ApproveStatusEnum.Delete;
-            user.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
-           
-            var result = await DbContext.Updateable(user).ExecuteCommandAsync();
+            foreach (var user in userList)
+            {
+                user.SoftDelete();
+                user.Status = (int)ApproveStatusEnum.Disable; //删除的账号禁用登录
+                user.MarkAsModified(currentUserName);
+            }
+            var result = await DbContext.Updateable(userList).ExecuteCommandAsync();
             if (result > 0)
                 return await Task.FromResult(true);
             return await Task.FromResult(false);
@@ -196,12 +285,12 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 return await Task.FromResult(false);
             }
             user.Status = command.Status;
+            user.ResetStatus();
             user.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
             var result = await DbContext.Updateable(user).ExecuteCommandAsync();
             if (result > 0)
                 return await Task.FromResult(true);
             return await Task.FromResult(false);
-
         }
 
         /// <summary>
@@ -223,27 +312,45 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 await _eventBus.RaiseEvent(new DomainNotification("userTenantAuth", "用户不存在！"));
                 return await Task.FromResult(false);
             }
-            var validate = DbContext.Queryable<SysPermissions>().Any(x => x.RoleId == command.RoleId && x.MenuId > 0);
-            if (!validate)
+
+            var userRole = JsonConvert.DeserializeObject<List<UserRoleModel>>(command.UserRoleJson);
+            user.UserRoles = userRole.Adapt<List<SysUserRoleRelation>>();
+            foreach (var item in user.UserRoles)
             {
-                await _eventBus.RaiseEvent(new DomainNotification("userTenantAuth", "该角色没有对应的菜单权限！"));
-                return await Task.FromResult(false);
+                item.UserId = user.Id;
             }
-
-            //user.RoleIds = command.RoleId.ToString();
-            
-            //var result = await DbContext.Updateable(user).ExecuteCommandAsync();
-            //if (result > 0)
-            //{
-            //    //清除Redis缓存
-            //    var cacheKey = $"{SqrayConfig.Instance.baseConfig.LoginKey}{user.Account}";
-            //    _cacheService.RemoveCache(cacheKey);
-            //    return await Task.FromResult(true);
-            //}
-            return await Task.FromResult(false);
-
+            var result = await DbContext.UseTranAsync(async () =>
+            {
+                await DbContext.Deleteable<SysUserRoleRelation>().Where(it => it.UserId == user.Id).ExecuteCommandAsync();
+                await DbContext.Insertable(user.UserRoles).ExecuteCommandAsync();
+            });
+            return result.IsSuccess;
         }
 
-        
+        /// <summary>
+        /// 重置密码
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<bool> Handle(ResetPasswordCommand command, CancellationToken cancellationToken)
+        {
+            if (!command.IsValid())
+            {
+                NotifyValidationErrors(command);
+                return await Task.FromResult(false);
+            }
+            var user = await DbContext.Queryable<SysUser>().FirstAsync(x => x.Id == command.Id);
+            if (user == null)
+            {
+                await _eventBus.RaiseEvent(new DomainNotification("userTenantAuth", "用户不存在！"));
+                return await Task.FromResult(false);
+            }
+            user.Password = command.Password;
+            var userName = CurrentUser.Instance.UserInfo.UserName;
+            user.MarkAsModified(userName);
+            var result = await DbContext.Updateable(user).ExecuteCommandAsync();
+            return result > 0;
+        }
     }
 }

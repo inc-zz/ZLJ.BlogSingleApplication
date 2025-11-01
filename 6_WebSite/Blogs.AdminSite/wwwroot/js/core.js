@@ -30,11 +30,11 @@ layui.define(['jquery', 'layer'], function (exports) {
          */
         _request: function (method, url, data, options) {
             var config = $.extend({ loading: true, timeout: Core.api.timeout, headers: {} }, options);
-            
+
             return new Promise(function (resolve, reject) {
                 var loadingIndex = config.loading ? Core.msg.loading() : null;
                 var token = localStorage.getItem('auth_token');
-                
+
                 if (token) {
                     config.headers['Authorization'] = 'Bearer ' + token;
                 }
@@ -102,7 +102,7 @@ layui.define(['jquery', 'layer'], function (exports) {
                 } catch (e) {
                     originalRequestData = requestContext || null;
                 }
-                
+
                 // 检查是否已经在刷新令牌
                 if (this._refreshingToken) {
                     // 如果已经在刷新，则将当前请求加入队列等待重试
@@ -110,7 +110,7 @@ layui.define(['jquery', 'layer'], function (exports) {
                         this._requestQueue.push({ resolve, reject, originalRequest: originalRequestData });
                     });
                 }
-                
+
                 // 尝试刷新令牌并处理结果
                 return this.refreshToken()
                     .then((newToken) => {
@@ -133,43 +133,39 @@ layui.define(['jquery', 'layer'], function (exports) {
         /**
          * 刷新令牌 - 简洁版本
          */
-      async refreshToken(refreshToken) {
-        try {
-            // 使用超时保护
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('刷新令牌超时')), 10000);
-            });
+        async refreshToken(refreshToken) {
+            try {
+                // 使用超时保护
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('刷新令牌超时')), 10000);
+                });
 
-            const fetchPromise = Core.http.post(this.api.refreshTokenUrl, { refreshToken }, {
-                loading: false,
-                headers: {}
-            });
+                const fetchPromise = Core.http.post(this.api.refreshTokenUrl, { refreshToken }, {
+                    loading: false,
+                    headers: {}
+                });
 
-            const response = await Promise.race([fetchPromise, timeoutPromise]);
-            
-            if (!response.success || !response.data?.accessToken) {
-                throw new Error(response.message || '刷新令牌失败');
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+                if (!response.success || !response.data?.accessToken) {
+                    location.href = "/Account/Login?r=" + Math.random();
+                }
+
+                // 保存令牌
+                localStorage.setItem('auth_token', response.data.accessToken);
+                if (response.data.refreshToken) {
+                    localStorage.setItem('refresh_token', response.data.refreshToken);
+                }
+
+                // 处理等待队列
+                this._processRequestQueue();
+                return response.data.accessToken;
+            } catch (error) { 
+                this._handleUnauthorized();
+                throw error;
             }
-
-            // 保存令牌
-            localStorage.setItem('auth_token', response.data.accessToken);
-            if (response.data.refreshToken) {
-                localStorage.setItem('refresh_token', response.data.refreshToken);
-            }
-
-            // 处理等待队列
-            this._processRequestQueue();
-            
-            return response.data.accessToken;
-        } catch (error) {
-            console.error('刷新令牌失败:', error);
-            this._handleUnauthorized();
-            throw error;
-        } finally {
-            this._refreshingToken = null;
-        }
-    },
-
+        },
+        
         /**
          * 处理未授权 - 简洁版本
          */
@@ -186,10 +182,10 @@ layui.define(['jquery', 'layer'], function (exports) {
         },
         // ==================== 消息提示 ====================
         msg: {
-            success: function (message,options) { return layer.msg(message, { icon: 1, time: 2000,...options }); },
-            error: function (message,options) { return layer.msg(message, { icon: 2, time: 3000,...options }); },
-            warning: function (message,options) { return layer.msg(message, { icon: 0, time: 2500,...options }); },
-            loading: function (message,options) { return layer.msg(message || '加载中...', { icon: 16, shade: 0.01, time: 0,...options }); },
+            success: function (message, options) { return layer.msg(message, { icon: 1, time: 2000, ...options }); },
+            error: function (message, options) { return layer.msg(message, { icon: 2, time: 3000, ...options }); },
+            warning: function (message, options) { return layer.msg(message, { icon: 0, time: 2500, ...options }); },
+            loading: function (message, options) { return layer.msg(message || '加载中...', { icon: 16, shade: 0.01, time: 0, ...options }); },
             close: function (index) { layer.close(index); }
         },
 

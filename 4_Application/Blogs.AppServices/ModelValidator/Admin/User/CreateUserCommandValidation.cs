@@ -18,8 +18,9 @@ namespace Blogs.AppServices.ModelValidator.Admin.User
         {
             ValidateName();
             ValidatePassword();
-            ValidateDepartment();
+            //ValidateDepartment();
             ValidateAccountExists();
+
         }
     }
 }

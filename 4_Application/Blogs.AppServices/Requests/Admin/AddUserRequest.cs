@@ -18,21 +18,21 @@ namespace Blogs.AppServices.Requests.Admin
         ///<summary>
         ///  登录密码
         ///</summary>
-        public string Password { set; get; }
+        public string? Password { set; get; }
         ///<summary>
         ///  部门Id
         ///</summary>
-        public long DepartmentId { set; get; }
-
+        public string? DepartmentJson{ set; get; }
+        /// <summary>
+        /// 用户角色
+        /// </summary>
+        public string? UserRoleJson { get; set; }
         public string? Description { set; get; }
-
         public string? Email { set; get; }
-
         public string? PhoneNumber { set; get; }
-
         public string? RealName { get; set; }
 
-        public string? Role { get; set; }
+        public int Sex { get; set; }
 
     }
 }

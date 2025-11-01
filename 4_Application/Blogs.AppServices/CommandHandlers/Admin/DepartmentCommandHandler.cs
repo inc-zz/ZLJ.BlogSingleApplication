@@ -1,8 +1,11 @@
-﻿using Blogs.AppServices.Commands.Admin.SysDepartment;
+﻿using Azure.Core;
+using Blogs.AppServices.Commands.Admin.SysDepartment;
 using Blogs.Core.Entity.Admin;
 using Blogs.Domain.Entity.Admin;
+using Blogs.Domain.Notices;
 using Mapster;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Blogs.AppServices.CommandHandlers.Admin
 {
@@ -10,20 +13,18 @@ namespace Blogs.AppServices.CommandHandlers.Admin
     /// <summary>
     /// 
     /// </summary>
-    public class DepartmentCommandHandler: CommandHandler,
+    public class DepartmentCommandHandler : CommandHandler,
        IRequestHandler<CreateDepartmentCommand, bool>,
-        IRequestHandler<UpdateDepartmentCommand,bool>,
+        IRequestHandler<UpdateDepartmentCommand, bool>,
         IRequestHandler<DeleteDepartmentCommand, bool>
     {
-        private readonly IMediatorHandler _mediatorHandler;
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="mediatorHandler"></param>
-        public DepartmentCommandHandler(IMediatorHandler mediatorHandler):base(mediatorHandler)
+        public DepartmentCommandHandler(DomainNotificationHandler mediatorHandler,
+             ILogger<RoleCommandHandler> logger) : base(mediatorHandler,logger)
         {
-            _mediatorHandler = mediatorHandler;
         }
 
 
@@ -41,13 +42,10 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 return Task.FromResult(false);
             }
             var entity = command.Adapt<SysDepartment>();
-            //entity.CreateTime = DateTime.Now;
-            //entity.CreateUser = CurrentUserContext.Instance.Account;
-            //entity.CreateUserName = CurrentUserContext.Instance.TrueName;
-            //entity.Status = (int)ApproveStatusEnum.Normal;
-            var response =  DbContext.Insertable(entity).ExecuteCommand();
+            entity.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
+            var response = DbContext.Insertable(entity).ExecuteCommand();
             if (response > 0)
-                return  Task.FromResult(true);
+                return Task.FromResult(true);
             return Task.FromResult(false);
         }
 
@@ -57,22 +55,26 @@ namespace Blogs.AppServices.CommandHandlers.Admin
         /// <param name="command"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<bool> Handle(UpdateDepartmentCommand command,CancellationToken cancellationToken)
+        public async Task<bool> Handle(UpdateDepartmentCommand command, CancellationToken cancellationToken)
         {
             if (!command.IsValid())
             {
                 NotifyValidationErrors(command);
-                return Task.FromResult(false);
+                return false;
             }
-
             var entity = command.Adapt<SysDepartment>();
-            //entity.UpdateTime = DateTime.Now;
-            //entity.UpdateUser = CurrentUserContext.Instance.Account;
-            //entity.UpdateUserName = CurrentUserContext.Instance.TrueName;
-            var response = DbContext.Updateable(entity).ExecuteCommand();
+
+            entity.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
+            var response = await DbContext.Updateable(entity).UpdateColumns(it=> 
+            new {it.ParentId, 
+                it.Name,it.Sort,it.Description,it.Abbreviation,it.ModifiedAt,it.ModifiedBy })
+                .ExecuteCommandAsync();
             if (response > 0)
-                return Task.FromResult(true);
-            return Task.FromResult(false);
+            {
+                //await _mediatorHandler.Publish(new DomainNotification("notices", "部门修改成功"));
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -81,14 +83,14 @@ namespace Blogs.AppServices.CommandHandlers.Admin
         /// <param name="command"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<bool> Handle(DeleteDepartmentCommand command,CancellationToken cancellationToken)
+        public Task<bool> Handle(DeleteDepartmentCommand command, CancellationToken cancellationToken)
         {
             if (!command.IsValid())
             {
                 NotifyValidationErrors(command);
                 return Task.FromResult(false);
             }
-            var entity = DbContext.Queryable<SysDepartment>().Single(x=>x.Id == command.Id);
+            var entity = DbContext.Queryable<SysDepartment>().Single(x => x.Id == command.Id);
             //if(entity == null)
             //{
             //    _mediatorHandler.RaiseEvent(new DomainNotification("deleteDepartment", "删除失败"));

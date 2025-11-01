@@ -1,4 +1,5 @@
-﻿using Blogs.Domain.Entity.Admin;
+﻿using Blogs.Core.DtoModel.Admin;
+using Blogs.Domain.Entity.Admin;
 using Blogs.Domain.IRepositorys;
 
 namespace Blogs.Domain.IRepositorys.Admin
@@ -21,21 +22,6 @@ namespace Blogs.Domain.IRepositorys.Admin
         /// <param name="userId"></param>
         /// <returns></returns>
         Task UpdateLoginTimeAsync(long userId);
-        /// <summary>
-        /// 查询用户分页数据
-        /// </summary>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="searchTerm"></param>
-        /// <param name="isActive"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<(IEnumerable<SysUser> Users, int TotalCount)> GetUsersForListingAsync(
-        int pageIndex,
-        int pageSize,
-        string searchTerm = null,
-        bool? isActive = null,
-        CancellationToken cancellationToken = default);
 
         Task<SysUser> GetByUserNameAsync(string userName);
         Task<bool> LockUserAsync(long userId, DateTime unlockTime);

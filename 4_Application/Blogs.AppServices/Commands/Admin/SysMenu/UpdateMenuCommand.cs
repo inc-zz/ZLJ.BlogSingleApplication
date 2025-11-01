@@ -18,10 +18,12 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         {
             Id = request.Id;
             ParentId = request.ParentId;
+            Buttons = request.Buttons;
             Name = request.Name;
             Type = request.Type;
             Url = request.Url;
             Icon = request.Icon;
+            Sort = request.Sort;
         }
 
         /// <summary>

@@ -16,6 +16,10 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// </summary>
         public long Id { get; protected set; }
         /// <summary>
+        /// Id(批量删除)
+        /// </summary>
+        public long[] Ids { get; protected set; }
+        /// <summary>
         /// 角色ID
         /// </summary>
         public long RoleId { get; protected set; }
@@ -28,11 +32,11 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// <summary>
         /// 密码
         /// </summary>
-        public string Password { get; protected set; }
+        public string? Password { get; protected set; }
         /// <summary>
         /// 名称
         /// </summary>
-        public string RealName { get; protected set; }
+        public string? RealName { get; protected set; }
         /// <summary>
         /// Sex
         /// </summary>
@@ -57,24 +61,23 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         /// 备注
         /// </summary>
         public string? Description { get; protected set; }
-
         /// <summary>
         /// 用户角色菜单权限
         /// 1角色-多菜单
         /// </summary>
-        public List<UserRoleMenu>? RoleMenus { get; set; }
+        public string? RoleMenuJson { get; set; }
         /// <summary>
         /// 用户角色
         /// </summary>
-        public List<UserRoleModel>? RoleList { get; set; }
+        public string? UserRoleJson { get; set; }
         /// <summary>
         /// 用户部门
         /// </summary>
-        public UserDepartment? Department { get; set; }
+        public string? DepartmentJson { get; set; }
         /// <summary>
         /// 用户权限
         /// </summary>
-        public AuthorizeJson? Authorizes { get; set; }
+        public string? Authorizes { get; set; }
 
     }
 

@@ -8,7 +8,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
     /// <summary>
     /// 系统权限表仓储
     /// </summary>
-    public class PermissionsRepository: SimpleClient<SysPermissions>,IPermissionsRepository
+    public class PermissionsRepository: SimpleClient<SysRoleMenuAuth>,IPermissionsRepository
     {
 
 

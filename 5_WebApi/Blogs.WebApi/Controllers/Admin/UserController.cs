@@ -43,13 +43,16 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <returns></returns>
         [HttpGet("list")]
-        public async Task<ActionResult> GetAdminUserList([FromQuery] PageParam param)
+        public async Task<ActionResult> GetAdminUserList([FromQuery] GetAdminListRequest param)
         {
             // 创建查询对象
             var query = new GetUserListQuery
             {
                 PageIndex = param.PageIndex,
-                PageSize = param.PageSize 
+                PageSize = param.PageSize,
+                RoleId = param.Role,
+                IsActive = param.Status,
+                SearchTerm = param.Where
             };
 
             // 通过中介者发送查询请求
@@ -121,7 +124,6 @@ namespace Blogs.WebApi.Controllers.Admin
             }
         }
 
-
         /// <summary>
         /// 删除管理员用户
         /// </summary>
@@ -142,7 +144,26 @@ namespace Blogs.WebApi.Controllers.Admin
                 return BadRequest(notifications);
             }
         }
-
+        /// <summary>
+        /// 批量删除
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpDelete("beath")]
+        public async Task<ActionResult> BeathDeleteAdminUserAsync([FromBody] long[] param)
+        {
+            var command = new BeathDeleteUserCommand(param);
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(ResultObject.Success("删除成功"));
+            }
+            else
+            {
+                var notifications = _notificationHandler.GetNotifications();
+                return BadRequest(notifications);
+            }
+        }
         /// <summary>
         /// 设置用户状态（启用/禁用）
         /// </summary>
@@ -169,7 +190,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPut("reset-password")]
+        [HttpPut("resetPassword")]
         public async Task<ActionResult> ResetUserPasswordAsync([FromBody] ChangePasswordRequest request)
         {
             var command = new ResetPasswordCommand(request);
@@ -190,7 +211,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPut("set-roles")]
+        [HttpPut("setRoles")]
         public async Task<ActionResult> SetUserRolesAsync([FromBody] SetUserRolesRequest request)
         {
             var command = new UserRoleAuthCommand(request);

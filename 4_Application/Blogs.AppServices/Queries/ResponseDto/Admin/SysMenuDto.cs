@@ -32,9 +32,17 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         /// </summary>
         public int Sort { get; set; }
         /// <summary>
-        /// 状态
+        /// 菜单图标
         /// </summary>
-        public string Icon { get; set; } 
+        public string? Icon { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public long[] Buttons { get; set; }
+        /// <summary>
+        /// 菜单类型：1目录，2:地址，3：外部链接
+        /// </summary>
+        public int Type { get; set; }
         /// <summary>
         /// 
         /// </summary>

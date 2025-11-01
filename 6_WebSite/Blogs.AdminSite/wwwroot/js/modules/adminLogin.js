@@ -232,7 +232,8 @@ layui.use(['form', 'layer'], function () {
 
         // 获取Token
         getToken() {
-            return localStorage.getItem(this.tokenKey) || sessionStorage.getItem(this.tokenKey);
+
+            return localStorage.getItem(this.tokenKey);
         }
 
         // 检查Token是否有效

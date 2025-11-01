@@ -56,7 +56,7 @@ namespace Blogs.AppServices.ModelValidator.Admin.Menu
         /// </summary>
         protected void ValidateButton()
         {
-            RuleFor(v => v.Buttons.Count).NotEqual(0).WithMessage("菜单按钮不能为空");
+            RuleFor(v => v.Buttons).NotEmpty().WithMessage("菜单按钮不能为空");
         }
 
 

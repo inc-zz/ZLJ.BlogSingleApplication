@@ -18,7 +18,7 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         public UserRoleAuthCommand(SetUserRolesRequest request)
         {
             Id = request.UserId;
-            RoleId = request.RoleId;
+            UserRoleJson = request.UserRoleJson;
         }
 
         /// <summary>

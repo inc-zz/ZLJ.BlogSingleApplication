@@ -6,6 +6,7 @@ using Blogs.Core.DtoModel.Admin;
 using Blogs.Core.Models;
 using Blogs.Domain.IRepositorys.Admin;
 using Blogs.Domain.IServices;
+using Blogs.Domain.Notices;
 using Blogs.Infrastructure.OpenIdDict;
 using Blogs.Infrastructure.Services.Admin;
 using Microsoft.Extensions.Logging;
@@ -30,10 +31,10 @@ namespace Blogs.AppServices.CommandHandlers
             IUserRepository userRepository,
             IAuthService authService,
             IOpenIddictService openIddictService,
-            IMediatorHandler mediator,
+            DomainNotificationHandler notificationHandler,
             ILogger<UserLoginCommandHandler> logger,
             IRedisCacheService redisCache)
-             : base(mediator)
+             : base(notificationHandler,logger)
         {
             _userRepository = userRepository;
             _authService = authService;

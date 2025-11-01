@@ -17,7 +17,7 @@ namespace Blogs.AppServices.Commands.Admin.SysDepartment
         {
             Id = id;
             Status = status;
-            Remark = remark;
+            Description = remark;
         }
 
         /// <summary>

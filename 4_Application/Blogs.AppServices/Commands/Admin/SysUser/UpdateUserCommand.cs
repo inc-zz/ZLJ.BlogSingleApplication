@@ -3,6 +3,8 @@ using Blogs.AppServices.ModelValidator.Admin.User;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Blogs.Core;
+using NCD.Common;
 
 namespace Blogs.AppServices.Commands.Admin.SysUser
 {
@@ -10,7 +12,7 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
     /// <summary>
     /// 修改用户
     /// </summary>
-    public class UpdateUserCommand:UserCommand
+    public class UpdateUserCommand : UserCommand
     {
         /// <summary>
         /// 初始化编辑字段
@@ -19,12 +21,12 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
         {
             Id = param.Id;
             RealName = param.RealName;
-            Sex = param.Sex;
-            HeadPic = param.HeadPic;
+            Description = param.Description;
+            DepartmentJson = param.DepartmentJson;
+            UserRoleJson = param.UserRoleJson;
             PhoneNumber = param.PhoneNumber;
             Email = param.Email;
-            Status = param.Status;
-            Description = param.Description;
+            Sex = param.Sex;
         }
         /// <summary>
         /// 

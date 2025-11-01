@@ -12,5 +12,7 @@ namespace Blogs.Infrastructure.OpenIdDict
         Task<T> GetAsync<T>(string key);
         Task<bool> RemoveAsync(string key);
         Task<bool> ExistsAsync(string key);
+
+
     }
 }

@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 namespace Blogs.Domain.AggregateRoot
 {
     /// <summary>
-    /// 
+    /// 聚合根
     /// </summary>
     public interface IAggregateRoot
     {
+        
     }
 }

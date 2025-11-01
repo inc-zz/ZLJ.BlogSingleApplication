@@ -35,21 +35,36 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 配置初始化
 AppConfig.Init(builder.Services, builder.Configuration);
 
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 #region 配置Swagger并开启认证
-
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+    // 为App接口创建文档
+    options.SwaggerDoc("app", new OpenApiInfo
+    {
+        Title = "App API",
+        Version = "v1",
+        Description = "移动端应用程序接口"
+    });
+
+    // 为Admin后端接口创建文档
+    options.SwaggerDoc("admin", new OpenApiInfo
+    {
+        Title = "Admin API",
+        Version = "v1",
+        Description = "后台管理系统接口"
+    });
 
     // 添加JWT安全方案
     var securityScheme = new OpenApiSecurityScheme
@@ -64,11 +79,34 @@ builder.Services.AddSwaggerGen(options =>
     };
 
     options.AddSecurityDefinition("Bearer", securityScheme);
+
+    // 为两个文档都添加安全要求
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         { securityScheme, Array.Empty<string>() }
     });
-    //添加JWT注释
+
+    // 配置文档筛选器，根据路由自动分组
+    options.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        // 获取控制器路由模板
+        var attribute = apiDesc.ActionDescriptor.EndpointMetadata
+            .OfType<RouteAttribute>()
+            .FirstOrDefault();
+
+        if (attribute != null)
+        {
+            var template = attribute.Template ?? "";
+            if (docName == "app" && template.StartsWith("api/app"))
+                return true;
+            if (docName == "admin" && template.StartsWith("api/admin"))
+                return true;
+        }
+
+        return false;
+    });
+
+    // 添加XML注释（两个文档共享）
     var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
     var xmlFile = $"{assemblyName}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -79,7 +117,6 @@ builder.Services.AddSwaggerGen(options =>
     }
     else
     {
-        // 可选：记录警告日志
         Console.WriteLine($"XML文档文件未找到: {xmlPath}");
     }
 });
@@ -128,7 +165,7 @@ builder.Services.Scan(scan => scan
 #endregion
 
 #region 注册事件总线处理程序
-builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
+builder.Services.AddSingleton<IMediatorHandler, MediatorHandler>();
 #endregion
 
 #region 批量注册所有Command和Query Handler
@@ -151,6 +188,10 @@ var dbContext = new SqlSugarDbContext();
 
 #region 注册领域通知处理器
 builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
+builder.Services.AddScoped<DomainNotificationHandler>();
+
+// 注册过滤器需要的服务
+builder.Services.AddScoped<GlobalExceptionFilter>();
 #endregion
 
 //builder.WebHost.UseUrls("http://0.0.0.0:8080");
@@ -403,16 +444,30 @@ app.UseStaticFileMappings(
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    //app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        // App接口文档
+        options.SwaggerEndpoint("/swagger/app/swagger.json", "App API v1");
+
+        // Admin接口文档  
+        options.SwaggerEndpoint("/swagger/admin/swagger.json", "Admin API v1");
+
+        // 可选：设置默认文档
+        options.RoutePrefix = "swagger";
+    });
 }
 
 //启用CORS
 app.UseCors("WebSiteCors");
-
 //app.UseHttpsRedirection();
 
 //启用认证中间件
 app.UseAuthentication();
 app.UseAuthorization();
+
+//注册统一响应处理中间件（应该在所有中间件之后，Endpoint之前）
+app.UseMiddleware<UnifiedResponseMiddleware>();
+
 app.MapControllers();
 app.Run();

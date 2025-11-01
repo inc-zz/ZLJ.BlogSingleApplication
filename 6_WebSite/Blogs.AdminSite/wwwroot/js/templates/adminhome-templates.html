@@ -1,0 +1,114 @@
+﻿<script type="text/html"  template lay-done="layui.data.done(d);"  id="topUserArticleListTpl">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>标题</th>
+                        <th>作者</th>
+                        <th>分类</th>
+                        <th>发布时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{# layui.each(d, function(index, item){ }}
+                    <tr>
+                        <td>{{ item.title || '' }}</td>
+                        <td>{{ item.createdBy || '' }}</td>
+                        <td>{{ item.categoryName || '' }}</td>
+                        <td>
+                            {{ item.createdAt }}
+                        </td>
+                        <td><span class="badge bg-success">已发布</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">编辑</button>
+                            <button class="btn btn-sm btn-outline-danger">删除</button>
+                        </td>
+                    </tr>
+                    {{# }); }}
+                    
+                    {{# if(d.length === 0){ }}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>暂无文章数据</p>
+                        </td>
+                    </tr>
+                    {{# } }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="homeStatisticsTpl">
+    <div class="row">
+    <div class="col-md-3">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-primary">用户总数</h5>
+                        <h3 class="mb-0" id="total_user">{{d.userCount}}</h3>
+                        <small class="text-muted">较上月增长 12%</small> 
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-success">文章总数</h5>
+                        <h3 class="mb-0" id="total_article">{{d.articleCount}}</h3>
+                        <small class="text-muted">较上月增长 8%</small> 
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-file-alt fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-warning">评论总数</h5>
+                        <h3 class="mb-0" id="total_article_comment">{{d.articleCommentCount}}</h3>
+                        <small class="text-muted">较上月增长 15%</small> 
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-comments fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-info">访问量</h5>
+                        <h3 class="mb-0">12,584</h3>
+                        <small class="text-muted" id="total_view">{{d.articleViewCount}}</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</script>

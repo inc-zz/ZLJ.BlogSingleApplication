@@ -1,4 +1,5 @@
-﻿using Blogs.Domain;
+﻿using Blogs.AppServices.Responses;
+using Blogs.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,30 +17,7 @@ namespace Blogs.AppServices.Commands.Admin.SysDepartment
         /// 用户
         /// </summary>
         public long UserId { get; set; }
-        /// <summary>
-        /// 菜单
-        /// </summary>
-        public List<AuthMenuDto> AuthMenu { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<MenuButtonDto> MenuButtons { get; set; }
-
-
-
-
-    }
-    public class AuthMenuDto
-    {
-        public long MenuId { get; set; }
-
-        public string MenuName { get; set; }
-    }
-
-    public class MenuButtonDto
-    {
-        public long MenuId { get; set; }
-
-        public string[] Actions { get; set; }
-    }
+        public long RoleId { get; set; }
+        public List<RoleMenuAuthDto> MenuPermissions { get; set; } = new List<RoleMenuAuthDto>();
+    } 
 }

@@ -1,15 +1,21 @@
 ﻿using Blogs.AppServices.Queries.Admin;
+using Blogs.Core;
 using Blogs.Core.DtoModel.Admin;
+using Blogs.Core.Enums;
 using Blogs.Core.Models;
 using Blogs.Domain.Entity.Admin;
 using Blogs.Domain.IRepositorys.Admin;
+using Dm.util;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Blogs.AppServices.QueryHandlers.Admin
 {
@@ -35,17 +41,71 @@ namespace Blogs.AppServices.QueryHandlers.Admin
         /// <returns></returns>
         public async Task<PagedResult<AdminUserDto>> Handle(GetUserListQuery request, CancellationToken cancellationToken)
         {
-            // 使用领域仓储的专门方法
-            var (users, totalCount) = await _userRepository.GetUsersForListingAsync(
-                request.PageIndex,
-                request.PageSize,
-                request.SearchTerm,
-                request.IsActive,
-            cancellationToken);
+            var searchTerm = request.SearchTerm;
+            var isActive = request.IsActive;
+             
+            var query = DbContext.Queryable<SysUser>()
+            .Where(it => it.IsDeleted == false)
+            .Includes(u => u.Department) // 预加载部门
+            .Includes(u => u.UserRoles)  // 预加载用户角色关系
+            .WhereIF(!string.IsNullOrWhiteSpace(searchTerm), u =>
+               u.UserName.Contains(searchTerm) ||
+               u.Email.Contains(searchTerm) ||
+               u.RealName.Contains(searchTerm))
+            .WhereIF(request.RoleId > 0, u =>
+            SqlFunc.Subqueryable<SysUserRoleRelation>()
+                .Where(ur => ur.UserId == u.Id && ur.RoleId == request.RoleId)
+                .Any())
+            .WhereIF(isActive.HasValue, u => u.IsDeleted == isActive.Value);
 
-            //var userDtos = _mapper.Map<List<AdminUserDto>>(users);
-            var userDtos = users.Adapt<List<AdminUserDto>>();
-            return new PagedResult<AdminUserDto>(userDtos, totalCount, request.PageIndex, request.PageSize);
+            var totalCount = new SqlSugar.RefAsync<int>();
+            var userEntities = await query.OrderByDescending(u => u.CreatedAt)
+                .ToPageListAsync(request.PageIndex, request.PageSize, totalCount, cancellationToken);
+
+            // 单独加载角色信息
+            var allUserRoleIds = userEntities
+                .SelectMany(u => u.UserRoles ?? new List<SysUserRoleRelation>())
+                .Select(ur => ur.RoleId)
+                .Distinct()
+                .ToList();
+
+            var roles = await DbContext.Queryable<SysRole>()
+                .Where(r => allUserRoleIds.Contains(r.Id) && r.IsDeleted == 0)
+                .ToListAsync(cancellationToken);
+
+            var roleDict = roles.ToDictionary(r => r.Id, r => r);
+
+            // 转换为DTO
+            var users = userEntities.Select(u => new AdminUserDto
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                RealName = u.RealName,
+                PhoneNumber = u.PhoneNumber,
+                Email = u.Email,
+                DepartmentId = u.DepartmentId,
+                DepartmentName = u.Department?.Name,
+                CreatedAt = u.CreatedAt,
+                LastLoginTime = u.LastLoginTime,
+                Description = u.Description,
+                Status = u.Status,
+                Roles = (u.UserRoles ?? new List<SysUserRoleRelation>())
+                    .Where(ur => roleDict.ContainsKey(ur.RoleId))
+                    .Select(ur => new SysUserRoleDto
+                    {
+                        UserId = u.Id,
+                        RoleId = ur.RoleId,
+                        Code = roleDict[ur.RoleId].Code,
+                        Name = roleDict[ur.RoleId].Name
+                    }).ToList()
+            }).ToList();
+
+            foreach (var item in users)
+            {
+                item.StatusName = EnumHelper.GetEnumText(new ApproveStatusEnum(), item.Status);
+            }
+
+            return new PagedResult<AdminUserDto>(users, totalCount, request.PageIndex, request.PageSize);
         }
 
         /// <summary>
@@ -57,15 +117,57 @@ namespace Blogs.AppServices.QueryHandlers.Admin
         /// <exception cref="NotImplementedException"></exception>
         public async Task<ResultObject<AdminUserDto>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
         {
+
             var userInfo = await DbContext.Queryable<SysUser>()
-                .Where(u => u.Id == request.Id)
-                .FirstAsync();
+           .Includes(u => u.Department).Includes(u => u.UserRoles)
+           .Where(it => it.Id == request.Id).ToListAsync();
+
+            var allUserRoleIds = userInfo.SelectMany(u => u.UserRoles ?? new List<SysUserRoleRelation>())
+                .Select(ur => ur.RoleId)
+                .Distinct()
+                .ToList();
+            var roles = await DbContext.Queryable<SysRole>()
+                           .Where(r => allUserRoleIds.Contains(r.Id) && r.IsDeleted == 0)
+                           .ToListAsync(cancellationToken);
+
+            var roleDict = roles.ToDictionary(r => r.Id, r => r);
+
+            // 转换为DTO
+            var users = userInfo.Select(u => new AdminUserDto
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                RealName = u.RealName,
+                PhoneNumber = u.PhoneNumber,
+                Email = u.Email,
+                DepartmentId = u.DepartmentId,
+                DepartmentName = u.Department?.Name,
+                CreatedAt = u.CreatedAt,
+                LastLoginTime = u.LastLoginTime,
+                Description = u.Description,
+                Status = u.Status,
+                Sex = u.Sex,
+                Roles = (u.UserRoles ?? new List<SysUserRoleRelation>())
+                    .Where(ur => roleDict.ContainsKey(ur.RoleId))
+                    .Select(ur => new SysUserRoleDto
+                    {
+                        UserId = u.Id,
+                        RoleId = ur.RoleId,
+                        Code = roleDict[ur.RoleId].Code,
+                        Name = roleDict[ur.RoleId].Name
+                    }).ToList()
+            }).ToList();
+
+            foreach (var item in users)
+            {
+                item.StatusName = EnumHelper.GetEnumText(new ApproveStatusEnum(), item.Status);
+            }
 
             return new ResultObject<AdminUserDto>
             {
                 code = 200,
                 message = "查询成功",
-                data = userInfo.Adapt<AdminUserDto>(),
+                data = users?.FirstOrDefault(),
                 success = true
             };
         }

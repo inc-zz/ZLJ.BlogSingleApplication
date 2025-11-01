@@ -7,7 +7,7 @@ namespace Blogs.Domain.IRepositorys.Admin
     /// <summary>
     /// 系统权限表仓储
     /// </summary>
-    public interface IPermissionsRepository: IBaseRepository<SysPermissions>
+    public interface IPermissionsRepository: IBaseRepository<SysRoleMenuAuth>
     {
 
 

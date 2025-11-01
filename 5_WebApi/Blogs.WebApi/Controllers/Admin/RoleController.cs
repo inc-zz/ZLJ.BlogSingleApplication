@@ -17,7 +17,7 @@ namespace Blogs.WebApi.Controllers.Admin
     /// </summary>
     [ApiController]
     [Authorize]
-    [Route("/api/admin/[controller]")]
+    [Route("api/admin/[controller]")]
     public class RoleController : ControllerBase
     {
         private readonly ILogger<RoleController> _logger;
@@ -140,7 +140,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        [HttpGet("module-permissions")]
+        [HttpGet("roleauth")]
         public async Task<ActionResult> GetRoleModulePermissionsAsync([FromQuery] IdParam param)
         {
             var query = new GetRoleModulePermissionsQuery
@@ -156,7 +156,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("authorize-modules")]
+        [HttpPost("rolemenuauth")]
         public async Task<ActionResult> AuthorizeRoleModulesAsync([FromBody] AuthRoleToMenuButtonRequest request)
         {
             var command = new AuthorizeRoleModulesCommand(request);
@@ -177,7 +177,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        [HttpGet("user-roles")]
+        [HttpGet("userroles")]
         public async Task<ActionResult> GetUserRolesAsync([FromQuery] IdParam param)
         {
             var query = new GetUserRolesQuery
@@ -193,7 +193,7 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("authorize-user")]
+        [HttpPost("authusertorole")]
         public async Task<ActionResult> AuthorizeUserRolesAsync([FromBody] AuthorizeUserRolesRequest request)
         {
             var command = new AuthorizeUserRolesCommand(request);
@@ -207,7 +207,6 @@ namespace Blogs.WebApi.Controllers.Admin
                 var notifications = _notificationHandler.GetNotifications();
                 return BadRequest(notifications);
             }
-        }
-         
+        } 
     }
 }

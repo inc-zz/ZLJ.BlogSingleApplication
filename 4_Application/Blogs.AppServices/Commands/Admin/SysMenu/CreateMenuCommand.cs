@@ -20,10 +20,11 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         {
             ParentId = request.ParentId;
             Name = request.Name;
-            this.Type = request.Type;
+            Type = request.Type;
             Url = request.Url;
             Icon = request.Icon;
             Status = (int)ApproveStatusEnum.Normal;
+            Buttons = request.Buttons;
            
         }
 

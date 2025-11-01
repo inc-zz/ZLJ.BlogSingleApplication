@@ -178,6 +178,7 @@ namespace Blogs.AppServices.QueryHandlers.App
             RefAsync<int> total = 0;
             var list = await DbContext.Queryable<BlogsArticle>()
               .Where(it => it.IsDeleted == 0 && it.IsTop == true)
+              .WhereIF(request.CategoryId > 0, it => it.CategoryId == request.CategoryId)
               .WhereIF(!string.IsNullOrWhiteSpace(request.SearchTerm), wt => wt.Title.Contains(request.SearchTerm)
               || wt.Summary.Contains(request.SearchTerm) || wt.CreatedBy == request.SearchTerm)
               .OrderByDescending(o => o.CreatedAt)

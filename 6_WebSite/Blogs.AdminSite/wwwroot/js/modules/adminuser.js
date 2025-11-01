@@ -79,8 +79,8 @@ layui.define(['layer', 'form', 'table', 'laypage', 'adminuser-template', 'core']
                 row.append('<td>' + user.realName + '</td>');
                 row.append('<td>' + self.getPhoneNumber(user.phoneNumber) + '</td>');
                 row.append('<td>' + self.getEmail(user.email) + '</td>');
-                row.append('<td>' + self.getRoleBadge(user.roles || user.role) + '</td>');
-                 row.append('<td>' + self.formatStatus(user.status, user.id) + '</td>');
+                row.append('<td>' + user.role + '</td>');
+                row.append('<td>' + self.formatStatus(user.status, user.id) + '</td>');
                 row.append('<td>' + self.formatDateTime(user.lastLoginTime) + '</td>');
                 row.append('<td>' + self.formatDateTime(user.createdAt) + '</td>');
                 row.append('<td>' + self.getActionButtons(user.id) + '</td>');
@@ -94,8 +94,7 @@ layui.define(['layer', 'form', 'table', 'laypage', 'adminuser-template', 'core']
             var keyword = $('#searchKeyword').val().trim();
             // 调用加载用户数据方法，并传入搜索关键词
             this.loadUserData(keyword);
-        },
-
+        }, 
         // 格式化手机号
         getPhoneNumber: function(phoneNumber) {
             return phoneNumber==null?'':phoneNumber;
@@ -108,12 +107,22 @@ layui.define(['layer', 'form', 'table', 'laypage', 'adminuser-template', 'core']
 
         // 获取角色徽章
         getRoleBadge: function (role) {
-            var badges = {
-                'admin': '<span class="badge bg-danger">管理员</span>',
-                'editor': '<span class="badge bg-warning">编辑</span>',
-                'user': '<span class="badge bg-primary">普通用户</span>'
-            };
-            return badges[role] || '<span class="badge bg-secondary">普通用户</span>';
+            var optionHtml = "";
+            http.get(this.config.baseUrl + '/role/all')
+                .then(function (res) {
+                    debugger
+                    var data = res.data.data;
+                    $.each(data, (k, v) => {
+                        debugger
+                    })
+
+                });
+            //var badges = {
+            //    'admin': '<span class="badge bg-danger">管理员</span>',
+            //    'editor': '<span class="badge bg-warning">编辑</span>',
+            //    'user': '<span class="badge bg-primary">普通用户</span>'
+            //};
+            //return badges[role] || '<span class="badge bg-secondary">普通用户</span>';
         },
 
         // 获取状态徽章

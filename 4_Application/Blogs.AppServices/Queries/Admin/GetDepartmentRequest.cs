@@ -14,6 +14,5 @@ namespace Blogs.AppServices.Queries.Admin
         /// </summary>
         public long DepId { get; set; }
 
-
     }
 }

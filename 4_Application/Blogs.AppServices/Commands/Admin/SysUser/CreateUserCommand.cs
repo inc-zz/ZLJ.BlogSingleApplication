@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using Blogs.Domain.ValueObject;
 
 namespace Blogs.AppServices.Commands.Admin.SysUser
 {
@@ -26,8 +27,11 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
             Password =  AESCryptHelper.Encrypt(param.Password); //可选择非对称加密
             RealName = param.RealName;
             Description = param.Description;
+            DepartmentJson = param.DepartmentJson;
+            UserRoleJson = param.UserRoleJson;
+            PhoneNumber = param.PhoneNumber; 
             Email = param.Email;
-            
+            Sex = param.Sex;
         }
 
         /// <summary>

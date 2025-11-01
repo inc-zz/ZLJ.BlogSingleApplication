@@ -7,15 +7,17 @@ using Blogs.Domain.EventNotices;
 using Blogs.Domain.Notices;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blogs.WebApi.Controllers.Admin
 {
     /// <summary>
-    /// 
+    /// 部门管理
     /// </summary>
     [ApiController]
-    [Route("/api/admin/[controller]")]
+    [Authorize]
+    [Route("api/admin/[controller]")]
     public class DepartmentController : ControllerBase
     {
         private readonly ILogger<DepartmentController> _logger;
@@ -40,7 +42,7 @@ namespace Blogs.WebApi.Controllers.Admin
         {
             // 创建查询对象
             var query = request.Adapt<GetDepartmentListQuery>();
-           
+
             // 通过中介者发送查询请求
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
@@ -67,10 +69,7 @@ namespace Blogs.WebApi.Controllers.Admin
         [HttpGet("info")]
         public async Task<ActionResult> GetDepartmentInfoAsync([FromQuery] IdParam param)
         {
-            var query = new GetDepartmentInfoQuery
-            {
-                Id = param.Id
-            };
+            var query = new GetDepartmentInfoQuery(param.Id);
             var result = await _mediator.Send(query);
             return Ok(result);
         }
@@ -136,7 +135,7 @@ namespace Blogs.WebApi.Controllers.Admin
                 var notifications = _notificationHandler.GetNotifications();
                 return BadRequest(notifications);
             }
-        } 
-         
+        }
+
     }
 }

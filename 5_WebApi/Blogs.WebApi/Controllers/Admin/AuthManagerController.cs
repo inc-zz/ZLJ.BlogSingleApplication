@@ -1,0 +1,64 @@
+﻿using Blogs.AppServices.Commands.Admin.AuthManager;
+using Blogs.AppServices.Queries.Admin;
+using Blogs.Core.Models;
+using Blogs.Domain.EventNotices;
+using Blogs.Domain.Notices;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+
+namespace Blogs.WebApi.Controllers.Admin
+{
+    /// <summary>
+    /// 权限管理
+    /// </summary>
+    [ApiController]
+    [Route("api/admin/[controller]")]
+    public class AuthManagerController : ControllerBase
+    {
+        private readonly ILogger<AuthManagerController> _logger;
+        private readonly IMediator _mediator;
+        private readonly DomainNotificationHandler _notificationHandler;
+        public AuthManagerController(ILogger<AuthManagerController> logger,
+        IMediator mediator,
+        INotificationHandler<DomainNotification> notifications)
+        {
+            _logger = logger;
+            _mediator = mediator;
+            _notificationHandler = notifications as DomainNotificationHandler;
+        }
+
+        /// <summary>
+        /// 获取菜单按钮列表
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ActionResult> GetMenuButtonListAsync([FromQuery] GetMenuButtonListQuery request)
+        {
+            var result = await _mediator.Send(request);
+            return new OkObjectResult(result);
+        }
+
+        /// <summary>
+        /// 角色菜单按钮授权
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPut]
+        public async Task<ActionResult> AuthRoleMenuAsync([FromQuery] AuthRoleMenuCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(ResultObject.Success("授权成功"));
+            }
+            else
+            {
+                var notifications = _notificationHandler.GetNotifications();
+                return BadRequest(notifications);
+            }
+        }
+
+    }
+}

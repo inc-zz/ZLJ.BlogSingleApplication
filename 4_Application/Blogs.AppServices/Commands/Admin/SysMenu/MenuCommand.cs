@@ -22,7 +22,7 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         /// <summary>
         /// 父级Id
         /// </summary>
-        public long ParentId { get; protected set; } 
+        public long ParentId { get; protected set; }
         /// <summary>
         /// 菜单名称
         /// </summary>
@@ -30,7 +30,7 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         /// <summary>
         /// 菜单类型 1菜单，2页面，3外部链接
         /// </summary>
-        public string Type { get; protected set; }
+        public int Type { get; protected set; }
         /// <summary>
         /// 菜单Url
         /// </summary>
@@ -46,7 +46,12 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         /// <summary>
         /// 菜单按钮
         /// </summary>
-        public List<MenuButtonCommand> Buttons { get; protected set; }
+        public long[]? Buttons { get; protected set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int Sort { set; get; } = 0;
+
 
     }
 }

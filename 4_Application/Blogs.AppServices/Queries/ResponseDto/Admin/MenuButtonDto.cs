@@ -4,27 +4,23 @@ using System.Text;
 
 namespace Blogs.AppServices.Queries.ResponseDto.Admin
 {
-
     /// <summary>
-    /// 菜单功能按钮
+    /// 菜单按钮数据传输对象
     /// </summary>
     public class MenuButtonDto
     {
+        public long MenuId { get; set; }
         /// <summary>
-        /// BtnId
+        /// 按钮代码
         /// </summary>
-        public long Id { get; set; }
-        /// <summary>
-        /// 按钮Code
-        /// </summary>
-        public string Code { get; set; }
+        public string? ButtonCode { get; set; }
         /// <summary>
         /// 按钮名称
         /// </summary>
-        public string Name { get; set; } 
+        public string? ButtonName { get; set; }
         /// <summary>
-        /// 授权
+        /// 是否拥有权限
         /// </summary>
-        public bool Auth { get; set; }
+        public bool HasPermission { get; set; }
     }
 }

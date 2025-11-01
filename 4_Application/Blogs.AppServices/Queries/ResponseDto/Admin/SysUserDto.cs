@@ -18,11 +18,11 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         /// <summary>
         ///  登录账号
         /// </summary>
-        public string Account { set; get; }
+        public string? Account { set; get; }
         /// <summary>
         ///  真实姓名
         /// </summary>
-        public string TrueName { set; get; }
+        public string? RealName { set; get; }
         /// <summary>
         /// 用户角色    
         /// </summary>
@@ -30,11 +30,11 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         /// <summary>
         ///  角色
         /// </summary>
-        public string RoleName { set; get; }
+        public string? RoleName { set; get; }
         /// <summary>
         ///  邮箱
         /// </summary>
-        public string Email { set; get; }
+        public string? Email { set; get; }
         /// <summary>
         /// 状态
         /// </summary>
@@ -42,7 +42,7 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         /// <summary>
         /// 状态名称
         /// </summary>
-        public string StatusName { get; set; }
+        public string? StatusName { get; set; }
         /// <summary>
         ///  创建时间
         /// </summary>
@@ -50,7 +50,7 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         /// <summary>
         /// 创建人
         /// </summary>
-        public string CreateUserName { get; set; }
+        public string? CreateUserName { get; set; }
 
     }
 }

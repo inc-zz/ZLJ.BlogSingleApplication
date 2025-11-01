@@ -1,4 +1,5 @@
-﻿using Blogs.AppServices.ModelValidator.Admin.Department;
+﻿using Azure.Core;
+using Blogs.AppServices.ModelValidator.Admin.Department;
 using Blogs.AppServices.Requests.Admin;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace Blogs.AppServices.Commands.Admin.SysDepartment
             Name = param.Name;
             Abbreviation = param.Abbreviation;
             Sort = param.Sort;
-            Remark = param.Summary;
+            Description = param.Summary; 
         }
 
         /// <summary>

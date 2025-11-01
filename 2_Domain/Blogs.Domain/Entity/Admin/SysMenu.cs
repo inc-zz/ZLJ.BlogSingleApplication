@@ -7,7 +7,7 @@ namespace Blogs.Domain.Entity.Admin
     /// </summary> 
 
     [SugarTable("sys_menu")]
-    public class SysMenu: BaseEntity
+    public class SysMenu : BaseEntity
     {
         ///<summary>
         ///  菜单父级Id
@@ -20,11 +20,11 @@ namespace Blogs.Domain.Entity.Admin
         /// <summary>
         /// 菜单图标
         /// </summary>
-        public string? ICon { get; set; }
+        public string? Icon { get; set; }
         /// <summary>
         /// 菜单类型：1目录，2:地址，3：外部链接
         /// </summary>
-        public string? Type { get; set; }
+        public int Type { get; set; }
         /// <summary>
         /// 菜单地址
         /// </summary>
@@ -37,10 +37,9 @@ namespace Blogs.Domain.Entity.Admin
         ///  是否可见：1是，0否
         ///</summary>
         public int Status { set; get; }
-        ///<summary>
-        ///  菜单按钮
-        ///</summary>
-        public string? Buttons { set; get; }
 
+        // 导航属性 - 菜单按钮关系
+        [Navigate(NavigateType.OneToMany, nameof(SysMenuButton.MenuId))]
+        public List<SysMenuButton> MenuBtnRelations { get; set; } = new List<SysMenuButton>();
     }
 }

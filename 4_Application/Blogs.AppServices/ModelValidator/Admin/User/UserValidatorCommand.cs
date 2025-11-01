@@ -29,7 +29,12 @@ namespace Blogs.AppServices.ModelValidator.Admin.User
         /// </summary>
         protected void ValidateId()
         {
-            RuleFor(x => x.Id).NotNull().NotEqual(0).WithMessage("用户Id");
+            RuleFor(x => x.Id).NotNull().NotEqual(0).WithMessage("用户Id不能为空");
+        }
+
+        protected void ValidateIds()
+        {
+            RuleFor(x => x.Ids).NotEmpty().NotEqual([]).WithMessage("用户Id不能为空");
         }
 
         /// <summary>
@@ -66,7 +71,7 @@ namespace Blogs.AppServices.ModelValidator.Admin.User
         /// </summary>
         protected void ValidateDepartment()
         {
-            RuleFor(v => v).Must(f => f.Department == null).WithMessage("部门不能为空");
+            RuleFor(v => v).Must(f => f.DepartmentJson == null).WithMessage("部门不能为空");
         }
         /// <summary>
         /// 验证权限
@@ -81,7 +86,7 @@ namespace Blogs.AppServices.ModelValidator.Admin.User
         /// </summary>
         protected void ValidateRoleIds()
         {
-            RuleFor(v => v.RoleId).Equal(0).WithMessage("用户角色不能为空");
+            RuleFor(v => v).Must(v => v.UserRoleJson == null).WithMessage("用户角色不能为空");
         }
 
         /// <summary>

@@ -7,9 +7,9 @@ namespace Blogs.AppServices.ModelValidator.Admin.User
 {
 
     /// <summary>
-    /// 
+    /// 删除
     /// </summary>
-    public class DeleteUserCommandValidation:UserValidatorCommand<UserCommand>
+    public class DeleteUserCommandValidation : UserValidatorCommand<UserCommand>
     {
         /// <summary>
         /// 
@@ -19,4 +19,6 @@ namespace Blogs.AppServices.ModelValidator.Admin.User
             ValidateId();
         }
     }
+
+    
 }

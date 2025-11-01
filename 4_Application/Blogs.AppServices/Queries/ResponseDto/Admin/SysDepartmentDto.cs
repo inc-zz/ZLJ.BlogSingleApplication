@@ -21,6 +21,8 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         ///  上级部门名称
         ///</summary>
         public string? ParentName { set; get; }
+
+        public string? Abbreviation { get; set; }
         ///<summary>
         ///  描述
         ///</summary>

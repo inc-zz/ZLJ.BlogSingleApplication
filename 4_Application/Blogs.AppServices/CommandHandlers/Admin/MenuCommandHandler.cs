@@ -1,9 +1,12 @@
 ﻿using Blogs.AppServices.Commands.Admin.SysMenu;
 using Blogs.Core.Entity.Admin;
 using Blogs.Domain.Entity.Admin;
+using Blogs.Domain.Enums;
 using Blogs.Domain.IRepositorys.Admin;
+using Blogs.Domain.Notices;
 using Mapster;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Blogs.AppServices.CommandHandlers.Admin
 {
@@ -18,16 +21,17 @@ namespace Blogs.AppServices.CommandHandlers.Admin
         IRequestHandler<PutMenuButtonCommand, bool>
     {
         private readonly IMenuRepository _menuRepository;
-        private readonly IMediatorHandler _mediatorHandler;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="mediatorHandler"></param>
         /// <param name="menuRepository"></param>
-        public MenuCommandHandler(IMediatorHandler mediatorHandler, IMenuRepository menuRepository) : base(mediatorHandler)
+        public MenuCommandHandler(DomainNotificationHandler mediatorHandler,
+            ILogger<MenuCommandHandler> logger,
+            IMenuRepository menuRepository)
+            : base(mediatorHandler, logger)
         {
-            _mediatorHandler = mediatorHandler;
             _menuRepository = menuRepository;
         }
 
@@ -42,18 +46,46 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             if (!command.IsValid())
             {
                 NotifyValidationErrors(command);
-                return await Task.FromResult(false);
+                return false;
             }
             var entity = command.Adapt<SysMenu>();
             entity.MarkAsCreated(CurrentUser.Instance.UserInfo.UserName);
 
-            if (command.Buttons?.Count > 0)
-                entity.Buttons = string.Join(",", command.Buttons.Select(x => x.ButtonId).ToList());
-            else
-                entity.Buttons = string.Empty;
-            var result = await DbContext.Insertable(entity).ExecuteCommandAsync();
+            //根据传入的按钮ID获取操作按钮
+            if (command.Type == (int)MenuButtonTypeEnum.Action)
+            {
+                if (command.Buttons?.Length == 0)
+                {
+                    await NotifyError("菜单没有配置操作按钮");
+                    return false;
+                }
+                var menuId = DbContext.Insertable(entity).ExecuteReturnIdentity();
 
-            return result > 0;
+                var buttonIds = command.Buttons;
+                var sysButtonList = await DbContext.Queryable<SysButtons>()
+                    .Where(it => buttonIds.Contains(it.Id) && it.IsDeleted == 0)
+                    .ToListAsync();
+
+                var menuButtonRelations = new List<SysMenuButton>();
+                foreach (var item in sysButtonList)
+                {
+                    var menuButton = new SysMenuButton
+                    {
+                        MenuId = menuId,
+                        ButtonId = item.Id,
+                        SortOrder = item.SortOrder
+                    };
+                    menuButton.MarkAsCreated(CurrentUser.Instance.UserInfo.UserName);
+                    menuButtonRelations.Add(menuButton);
+                } 
+                var result = await DbContext.Insertable(menuButtonRelations).ExecuteCommandAsync();
+                return result > 0;
+            }
+            else
+            {
+                var result = await DbContext.Insertable(entity).ExecuteCommandAsync();
+                return result > 0;
+            }
         }
 
         /// <summary>
@@ -71,14 +103,43 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             }
             var entity = command.Adapt<SysMenu>();
             entity.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
+            //根据传入的按钮ID获取操作按钮
+            if (command.Type == (int)MenuButtonTypeEnum.Action)
+            {
+                if (command.Buttons?.Length == 0)
+                {
+                    await NotifyError("菜单没有配置操作按钮");
+                    return false;
+                } 
 
-            if (command.Buttons?.Count > 0)
-                entity.Buttons = string.Join(",", command.Buttons.Select(x => x.ButtonId).ToList());
-            else
-                entity.Buttons = string.Empty;
+                var buttonIds = command.Buttons;
+                var sysButtonList = await DbContext.Queryable<SysButtons>()
+                    .Where(it => buttonIds.Contains(it.Id) && it.IsDeleted == 0)
+                    .ToListAsync();
 
+                var menuButtonRelations = new List<SysMenuButton>();
+                foreach (var item in sysButtonList)
+                {
+                    var menuButton = new SysMenuButton
+                    {
+                        MenuId = entity.Id,
+                        ButtonId = item.Id,
+                        SortOrder = item.SortOrder
+                    };
+                    menuButton.MarkAsCreated(CurrentUser.Instance.UserInfo.UserName);
+                    menuButtonRelations.Add(menuButton);
+                }
+
+                //删除菜单按钮关系并重新插入。
+                var execResult = await DbContext.UseTranAsync(async () =>
+                {
+                    await DbContext.Deleteable<SysMenuButton>().Where(it => it.MenuId == entity.Id).ExecuteCommandAsync();
+                    await DbContext.Updateable(entity).ExecuteCommandAsync();
+                    await DbContext.Insertable(menuButtonRelations).ExecuteCommandAsync();
+                });
+                return execResult.IsSuccess;
+            }
             var result = await DbContext.Updateable(entity).ExecuteCommandAsync();
-
             return result > 0;
         }
 
@@ -93,14 +154,17 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             if (!command.IsValid())
             {
                 NotifyValidationErrors(command);
-                return await Task.FromResult(false);
+                return false;
             }
-            var isDeleted = await _menuRepository.DeleteAsync(x => x.Id == command.Id);
-            if (isDeleted)
+            var menuInfo = await DbContext.Queryable<SysMenu>().Where(it => it.Id == command.Id).FirstAsync();
+            if (menuInfo == null)
             {
-                return await Task.FromResult(true);
+                //菜单不存在
+                return false;
             }
-            return await Task.FromResult(false);
+            menuInfo.SoftDelete();
+            var result = await DbContext.Updateable(menuInfo).ExecuteCommandAsync();
+            return result > 0;
         }
 
         /// <summary>
@@ -119,11 +183,11 @@ namespace Blogs.AppServices.CommandHandlers.Admin
             var menuInfo = await DbContext.Queryable<SysMenu>().Where(it => it.Id == command.Id).FirstAsync();
             if (menuInfo == null)
                 return false;
-            
-            var menuIdList = command.Buttons.Select(x => x.ButtonId).ToList();
-            var menuButtons = string.Join(",", menuIdList);
 
-            menuInfo.Buttons = menuButtons;
+            
+
+
+
             menuInfo.MarkAsModified(CurrentUser.Instance.UserId.ToString());
             var result = await DbContext.Updateable(menuInfo).ExecuteCommandAsync();
 

@@ -13,7 +13,13 @@ namespace Blogs.AppServices.Queries.Admin
     /// </summary>
     public class GetMenuTreeQuery : IRequest<ResultObject<List<SysMenuTreeDto>>>
     {
+        /// <summary>
+        /// 状态：1启用，0禁用  
+        /// </summary>
         public int? Status { get; set; }
+        /// <summary>
+        /// 菜单类型:1目录，2:地址，3：外部链接
+        /// </summary>
         public int? MenuType { get; set; }
     }
 

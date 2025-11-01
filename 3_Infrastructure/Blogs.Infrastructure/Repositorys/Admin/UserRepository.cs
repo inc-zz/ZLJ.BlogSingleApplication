@@ -1,4 +1,5 @@
 ﻿using Blogs.Core;
+using Blogs.Core.DtoModel.Admin;
 using Blogs.Core.Entity.Admin;
 using Blogs.Core.Models;
 using Blogs.Domain.Entity.Admin;
@@ -35,7 +36,6 @@ namespace Blogs.Infrastructure.Repositorys.Admin
                     RoleId = roleId,
                     UserId = adminUser.Id
                 };
-                userRole.MarkAsCreated(adminUser.CreatedBy);
                 var res = await base.Context.Insertable(userRole).ExecuteCommandAsync();
                 isAny = res > 0;
             }
@@ -55,43 +55,8 @@ namespace Blogs.Infrastructure.Repositorys.Admin
                 user.LastLoginTime = DateTime.Now;
                 base.Context.Updateable(user);
             }
-        }
-
-        /// <summary>
-        /// 查询用户分页
-        /// </summary>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="searchTerm"></param>
-        /// <param name="isActive"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async Task<(IEnumerable<SysUser> Users, int TotalCount)> GetUsersForListingAsync(
-        int pageIndex,
-        int pageSize,
-        string searchTerm = null,
-        bool? isActive = null,
-        CancellationToken cancellationToken = default)
-        {
-            // 使用SqlSugar实现复杂查询
-            var query = base.Context.Queryable<SysUser>();
-
-            if (!string.IsNullOrEmpty(searchTerm))
-                query = query.Where(u => u.UserName.Contains(searchTerm) || u.Email.Contains(searchTerm));
-
-            if (isActive.HasValue)
-                query = query.Where(u => u.IsDeleted == isActive.Value);
-
-            var totalCount = await query.CountAsync(cancellationToken);
-            var skip = (pageIndex - 1) * pageSize;
-            var users = await query.OrderByDescending(it=>it.CreatedAt)
-                .Skip(skip)
-                .Take(pageSize)
-                .ToListAsync(cancellationToken);
-
-            return (users, totalCount);
-        }
-
+        } 
+        
         /// <summary>
         /// 
         /// </summary>

@@ -18,6 +18,10 @@ namespace Blogs.Domain.ValueObject
         /// 角色Id
         /// </summary>
         public long RoleId { get; set; }
+        /// <summary>
+        /// 角色名称
+        /// </summary>
+        public string? RoleName { get; set; }
 
     }
 }

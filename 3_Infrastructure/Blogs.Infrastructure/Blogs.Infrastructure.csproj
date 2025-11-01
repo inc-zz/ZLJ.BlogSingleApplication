@@ -28,9 +28,5 @@
     <ProjectReference Include="..\..\2_Domain\Blogs.Domain\Blogs.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Responses\Admin\" />
-  </ItemGroup>
-
 
 </Project>

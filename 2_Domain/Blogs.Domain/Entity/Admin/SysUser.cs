@@ -9,7 +9,7 @@ namespace Blogs.Domain.Entity.Admin
     [SugarTable("sys_user")]
     public class SysUser
     {
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
         public long Id { get; set; }
 
         public int AccessFailedCount { get; set; }
@@ -33,7 +33,20 @@ namespace Blogs.Domain.Entity.Admin
         ///<summary>
         ///  状态
         ///</summary>
-        public int?  Status { set; get; } 
+        public int? Status { set; get; }
+        /// <summary>
+        /// 部门Id
+        /// </summary>
+        public long? DepartmentId { get; set; }
+        /// <summary>
+        /// 部门信息
+        /// </summary>
+        [Navigate(NavigateType.OneToOne, nameof(DepartmentId))]
+        public SysDepartment? Department { get; set; }
+        // 角色关系导航属性
+        [Navigate(NavigateType.OneToMany, nameof(SysUserRoleRelation.UserId))]
+        public List<SysUserRoleRelation> UserRoles { get; set; }
+
         /// <summary>
         /// 手机号
         /// </summary>
@@ -96,6 +109,13 @@ namespace Blogs.Domain.Entity.Admin
         public void SoftDelete()
         {
             IsDeleted = true;
+        }
+        /// <summary>
+        /// 重置状态
+        /// </summary>
+        public void ResetStatus()
+        {
+            IsDeleted = false;
         }
 
 

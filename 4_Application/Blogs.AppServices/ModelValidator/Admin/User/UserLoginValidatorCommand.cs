@@ -66,7 +66,7 @@ namespace Blogs.AppServices.ModelValidator.Admin.User
         /// </summary>
         protected void ValidateDepartment()
         {
-            RuleFor(v => v).Must(f => f.Department == null).WithMessage("部门不能为空");
+            RuleFor(v => v).Must(f => f.DepartmentJson == null).WithMessage("部门不能为空");
         }
         /// <summary>
         /// 验证权限

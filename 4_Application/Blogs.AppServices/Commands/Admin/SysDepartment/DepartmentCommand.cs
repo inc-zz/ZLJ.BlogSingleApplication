@@ -27,7 +27,7 @@ namespace Blogs.AppServices.Commands.Admin.SysDepartment
         /// <summary>
         /// 简称
         /// </summary>
-        public string Abbreviation { get; protected set; }
+        public string? Abbreviation { get; protected set; }
         /// <summary>
         /// 排序
         /// </summary>
@@ -35,7 +35,7 @@ namespace Blogs.AppServices.Commands.Admin.SysDepartment
         /// <summary>
         /// 备注
         /// </summary>
-        public string Remark { get; protected set; }
+        public string? Description { get; protected set; }
         /// <summary>
         /// 状态
         /// </summary>

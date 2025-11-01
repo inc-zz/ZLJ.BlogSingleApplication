@@ -21,10 +21,9 @@ namespace Blogs.AppServices.Commands.Admin.SysDepartment
             Id = request.Id;
             ParentId = request.ParentId;
             Name = request.Name;
-            //Code = code;
-            Abbreviation = request.Abbreviation;
             Sort = request.Sort;
-            Remark = request.Summary;
+            Abbreviation = request.Abbreviation;
+            Description = request.Description;
         }
 
         /// <summary>

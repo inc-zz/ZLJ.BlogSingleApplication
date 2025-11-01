@@ -18,7 +18,7 @@ namespace Blogs.AppServices.ModelValidator.Admin.User
         public UserRoleAuthCommandValidation()
         {
             ValidateId();
-            ValidateRoleIds();
+            //ValidateRoleIds();
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Blogs.AppServices.Requests.Admin
         /// <summary>
         ///  菜单名称
         /// </summary>
-        public string? Name { set; get; } 
+        public string? Name { set; get; }
         /// <summary>
         ///  菜单Url 
         /// </summary>
@@ -26,13 +26,17 @@ namespace Blogs.AppServices.Requests.Admin
         /// </summary>
         public string? Icon { set; get; }
         /// <summary>
+        /// 菜单按钮
+        /// </summary>
+        public long[] Buttons { get; set; }
+        /// <summary>
         /// 菜单类型：1目录，2:地址，3：外部链接
         /// </summary>
-        public string? Type { get; set; }
+        public int Type { get; set; } = 2;
         /// <summary>
         ///  菜单排序
         /// </summary>
-        public int Sort { set; get; }  
-    } 
+        public int Sort { set; get; }
+    }
 
 }

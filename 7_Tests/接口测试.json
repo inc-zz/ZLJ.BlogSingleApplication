@@ -1,0 +1,861 @@
+ 
+{
+  "account": "admin",
+  "password": "123456",
+  "captcha": "qq22"
+}
+
+首页-仪表盘调用以下接口：
+1、首页统计接口
+接口地址：/api/admin/Home/statistics
+请求方式：GET
+返回数据：
+{
+  "data": {
+    "userCount": 4,
+    "articleCount": 32,
+    "articleCommentCount": 16,
+    "articleViewCount": 2380
+  },
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+
+2、首页文章数据列表（左侧）
+请求地址：/api/admin/Home/articleList
+请求参数：TopCount=10
+返回格式：
+
+{
+  "pageIndex": 1,
+  "pageSize": 1,
+  "total": 32,
+  "items": [
+    {
+      "id": 29604489367568,
+      "title": "关于发散性思维以及推导关联性思维",
+      "createdAt": "2025-10-31T13:27:48",
+      "createdBy": "zhenglijun",
+      "tags": "思维",
+      "summary": "想法瞬息万变，但是能抓住并逐步延伸思考下去很难，可以通过片段、阶段性提示来延伸思维",
+      "coverImage": null,
+      "categoryName": "感悟",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+
+  
+  创建管理员
+  接口地址：/api/admin/user
+  请求方式：POST
+  请求参数：
+  {
+    "userName": "zhenglijun4",
+    "password": "123456",
+    "departmentJson": "{id:1,name:'销售部'}",
+    "userRoleJson": "[{RoleId:1,RoleName:'系统管理员'}]",
+    "description": "11111111111",
+    "email": "zhengljiun1@sing.com",
+    "phoneNumber": "15816818891",
+    "realName": "zhenglijun"
+  }
+  返回格式：
+  {
+    "success": true,
+    "message": "处理成功",
+    "code": 200
+  }
+  编辑管理员用户
+  接口地址：/api/admin/user
+  请求方式：PUT
+  请求参数：
+  {
+    "Id": 29531664585744,
+    "password": "123456",
+    "departmentJson": "{id:1,name:'销售部'}",
+    "userRoleJson": "[{RoleId:1,RoleName:'系统管理员'}]",
+    "description": "zhenglijun5###################################",
+    "email": "zhengljiun5@sing.com",
+    "phoneNumber": "15816818891",
+    "realName": "zhenglijun5",
+    "sex":1
+  }
+  返回格式：
+  {
+    "success": true,
+    "message": "处理成功",
+    "code": 200
+  }
+
+  删除管理员
+  接口地址：/api/admin/user
+  请求方式：Delete
+  请求参数：
+  {
+    "id": 29531664585744
+  }
+  返回格式：
+  {
+    "success": true,
+    "message": "删除成功",
+    "code": 200
+  }
+  更新管理员状态、启用-禁用
+  接口地址：/api/admin/user/status
+  请求方式：PUT
+  请求参数：
+  {
+    "id": 29531664585744,
+    "status": 1
+  }
+  返回数据格式：
+  {
+    "success": true,
+    "message": "状态更新成功",
+    "code": 200
+  }
+
+  重置密码：
+  接口地址：/api/admin/User/resetPassword
+  请求参数：
+  {
+    "userId":29531664585744 ,
+    "password": "123457",
+    "oldPassword": ""
+  }
+
+  用户授权角色
+  接口地址：/api/admin/User/setRoles
+  请求方式：PUT
+  请求参数：{
+    "userId": 100014,
+    "userRoleJson": "[{RoleId:1,RoleName:'系统管理员'}]"
+  }
+  返回格式：
+  {
+    "success": true,
+    "message": "角色设置成功",
+    "code": 
+    }
+    
+    
+    
+    
+ 角色模块
+ 
+ 1、角色列表：
+ 接口地址：/api/admin/Role/list
+ 请求方式；GET
+ 请求参数：PageIndex=1&PageSize=10&SearchTerm=""&Status=1
+ 返回格式：
+ {
+  "pageIndex": 1,
+  "pageSize": 1,
+  "total": 4,
+  "items": [
+    {
+      "id": 3,
+      "isSystem": 0,
+      "name": "审核员",
+      "code": "verify",
+      "remark": null,
+      "status": 1,
+      "createdAt": "2025-10-09T12:40:31",
+      "createdBy": "admin",
+      "modifiedAt": null,
+      "modifiedBy": null,
+      "isDeleted": false,
+      "statusName": "启用"
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+2、获取角色（下拉菜单）
+接口地址：/api/admin/Role/all
+请求方式：GET
+返回格式：
+{
+  "data": [
+    {
+      "id": 3,
+      "code": "verify",
+      "name": "审核员"
+    },
+    {
+      "id": 2,
+      "code": "publish",
+      "name": "编辑"
+    },
+    {
+      "id": 1,
+      "code": "sysadmin",
+      "name": "系统管理员"
+    }
+  ],
+  "success": true,
+  "message": "获取成功",
+  "code": 200,
+  "traceId": null
+}
+3、获取角色详情
+接口地址：/api/admin/Role/info
+请求方式：GET
+请求参数：id=1
+返回格式：
+{
+  "data": {
+    "id": 1,
+    "isSystem": 1,
+    "name": "系统管理员",
+    "code": "sysadmin",
+    "remark": null,
+    "status": 1,
+    "createdAt": "2025-10-08T09:07:33",
+    "createdBy": "admin",
+    "modifiedAt": null,
+    "modifiedBy": null,
+    "isDeleted": false,
+    "statusName": "启用"
+  },
+  "success": true,
+  "message": "获取成功",
+  "code": 200,
+  "traceId": null
+}
+
+4、添加角色
+接口地址：/api/admin/Role
+请求方式：POST
+请求参数：
+{
+  "isSystem": 是否管理员,
+  "name": "string",
+  "code": "string",
+  "remark": "string"
+}
+返回格式：
+
+ {
+  "success": true,
+  "message": "角色创建成功",
+  "code": 200,
+  "traceId": null
+}
+
+5、编辑角色
+接口地址：/api/admin/Role
+请求方式：PUT
+请求参数：
+{
+  "name": "销售负责人",
+  "code": "Sales",
+  "isSystem": 0,
+  "sort": 1,
+  "remark": "111",
+  "id": 5
+}
+返回格式：
+{
+  "success": true,
+  "message": "角色更新成功",
+  "code": 200,
+  "traceId": null
+}
+
+
+6、删除角色
+接口地址：/api/admin/Role
+请求方式：DELETE
+请求参数：
+{
+  "id": 5
+}
+返回格式：
+{
+  "success": true,
+  "message": "删除成功",
+  "code": 200,
+  "traceId": null
+}
+
+7 获取角色已授权模块和权限
+接口地址：/api/admin/Role/roleauth
+请求方式：GET
+请求参数：id=1
+返回格式：
+{
+  "data": [
+    {
+      "menuId": 1,
+      "menuName": "首页",
+      "menuUrl": "/home",
+      "parentId": 0,
+      "hasPermission": false,
+      "buttonPermissions": []
+    },
+    {
+      "menuId": 3,
+      "menuName": "用户管理",
+      "menuUrl": "/users",
+      "parentId": 2,
+      "hasPermission": true,
+      "buttonPermissions": [
+        "Create",
+        "Update",
+        "Insert"
+      ]
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+
+8 角色授权模块
+接口地址：/api/admin/Role/rolemenuauth
+请求方式：POST
+请求参数：
+{
+  "roleId": 2,
+  "menuPermissions": [
+    {
+      "menuId": 1,
+      "buttonCodes": [
+        "Create","Update","Select"
+      ]
+    }
+  ]
+}
+返回格式
+{
+  "success": true,
+  "message": "角色模块授权成功",
+  "code": 200,
+  "traceId": null
+}
+    
+    
+菜单管理模块相关功能
+1、菜单列表：
+接口地址：/api/admin/Menu/list
+请求方式：GET
+请求参数：PageIndex=1&PageSize=10&MenuName=''&ParentId=0
+返回数据
+{
+  "pageIndex": 1,
+  "pageSize": 11,
+  "total": 3,
+  "items": [
+    {
+      "id": 3,
+      "parentId": 2,
+      "name": "用户管理",
+      "url": "/users",
+      "sort": 0,
+      "icon": null,
+      "children": null
+    },
+    {
+      "id": 2,
+      "parentId": 0,
+      "name": "用户管理",
+      "url": "/users",
+      "sort": 0,
+      "icon": null,
+      "children": null
+    },
+    {
+      "id": 1,
+      "parentId": 0,
+      "name": "首页",
+      "url": "/home",
+      "sort": 0,
+      "icon": null,
+      "children": null
+    }
+  ],
+  "success": true,
+  "message": "获取成功",
+  "code": 200,
+  "traceId": null
+}
+2、菜单列表左侧需要加载菜单栏，采用树形结构展示：
+菜单树形结构接口：
+接口地址：/api/admin/Menu/tree
+请求方式：GET
+请求参数：Status(非必要)
+返回数据格式：
+{
+  "data": [
+    {
+      "id": 2,
+      "name": "用户管理",
+      "icon": "fa-users",
+      "children": [
+        {
+          "id": 3,
+          "name": "用户管理",
+          "icon": "fa-users",
+          "children": null
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "首页",
+      "icon": "fa-cog",
+      "children": null
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+点击左侧菜单树时，传入当前点击的菜单id到list接口参数ParentId
+
+3、创建菜单
+接口地址：/api/admin/Menu
+请求方式：POST
+请求参数：
+{
+  "parentId": 5,
+  "name": "角色管理",
+  "url": "/permission/role",
+  "icon": "User",
+  "buttons": [
+    100001,100002,100003,100005
+  ],
+  "type": 2, //1、目录，2、地址，3、外部链接
+  "sort": 1
+}
+parent是针对子集菜单配置，icon任意或者不设置
+返回格式：{
+  "success": true,
+  "message": "创建成功",
+  "code": 200,
+  "traceId": null
+}
+
+4、删除菜单
+接口地址：/api/admin/Menu
+请求方式：Dlete
+请求参数：
+{
+  "id": 3
+}
+返回格式：
+{
+  "success": true,
+  "message": "菜单删除成功",
+  "code": 200,
+  "traceId": null
+}
+    
+5、编辑菜单
+接口地址：/api/admin/Menu
+请求方式：PUT
+请求参数：
+{
+  "parentId": 0,
+  "name": "数据统计1",
+  "url": "/statistics",
+  "icon": "",
+  "buttons": "Select,Export",
+  "type": "1", //1目录，2:地址，3：外部链接
+  "sort": 0,
+  "id": 4
+}
+返回数据：
+{
+  "success": true,
+  "message": "菜单修改成功",
+  "code": 200,
+  "traceId": null
+}
+6、菜单详情：
+接口地址：/api/admin/Menu/info
+请求方式：GET
+请求参数：Id=11
+返回格式：{
+  "id": 11,
+  "parentId": 5,
+  "name": "角色管理",
+  "url": "/permission/role",
+  "sort": 0,
+  "iCon": null,
+  "buttons": "[{\"Id\":100001,\"Name\":\"创建\",\"Code\":\"Create\"},{\"Id\":100003,\"Name\":\"删除\",\"Code\":\"Delete\"},{\"Id\":100005,\"Name\":\"导出\",\"Code\":\"Export\"}]",
+  "children": null
+}
+返回的buttons字段是当前菜单设置的操作按钮。需要与前端按钮列表匹配，命中则显示勾选。
+
+    
+    
+ 部门管理接口：
+ 1、左侧部门信息导航
+ 接口地址：
+
+ 
+ 
+ [{name:'新增',code:'Create'},
+ {name:'修改',code:'Update'},
+ {name:'删除',code:'Delete'},
+ name:'查询',code:'Select'}]
+ 
+ 
+ 
+按钮管理API
+1、查询按钮列表
+接口地址：/api/admin/SysButton/list
+请求方式：GET
+请求参数: PageIndex=1&PageSize=10&Name=''&Position='toolbar|row|both'
+返回格式：
+{
+  "data": {
+    "pageIndex": 1,
+    "pageSize": 1,
+    "total": 8,
+    "items": [
+      {
+        "id": 1,
+        "code": "Create",
+        "name": "新增",
+        "description": "新增数据",
+        "icon": "plus",
+        "buttonType": "primary",
+        "position": "toolbar",
+        "status": 0,
+        "statusName": "禁用",
+        "createdAt": "2025-10-31T07:37:07",
+        "createdBy": null
+      }
+    ],
+    "success": true,
+    "message": "处理成功",
+    "code": 200,
+    "traceId": null
+  },
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+
+
+2、查询单个按钮详情
+接口地址：/api/admin/SysButton/info
+请求方式：GET
+请求参数：id=1
+返回格式：
+{
+  "data": {
+    "relatedMenus": [], //引用了该操作按钮的菜单
+    "id": 1,
+    "code": "Create",
+    "name": "新增",
+    "description": "新增数据",
+    "icon": "plus",
+    "buttonType": "primary",
+    "position": "toolbar",
+    "status": 0,
+    "statusName": null,
+    "createdAt": "2025-10-31T07:37:07",
+    "createdBy": null
+  },
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+
+3、新增按钮
+接口地址：/api/admin/SysButton
+请求方式：POST
+请求参数:
+{
+  "name": "批量删除",
+  "code": "BatchDelete",
+  "positoin": "toolbar"
+}
+返回格式：
+{
+  "success": true,
+  "message": "创建按钮成功",
+  "code": 200,
+  "traceId": null
+}
+
+
+4、更新按钮
+接口地址：/api/admin/SysButton
+请求方式：PUT
+请求参数：
+{
+  "name": "创建",
+  "code": "Create",
+  "positoin": "toolbar",
+  "id": 1
+}
+返回格式：
+{
+  "success": true,
+  "message": "更新按钮成功",
+  "code": 200,
+  "traceId": null
+}
+
+5、删除按钮
+接口地址：/api/admin/SysButton
+请求方式：DELETE
+请求参数：
+{
+  "id": 2
+}
+返回格式：
+{
+  "success": true,
+  "message": "删除按钮成功",
+  "code": 200,
+  "traceId": null
+}
+
+6、更新按钮状态（在列表中切换显示隐藏）
+接口地址：/api/admin/SysButton/status
+请求方式：PUT
+请求参数：
+{
+  "id": 1,
+  "status": 0
+}
+返回格式：
+{
+  "success": true,
+  "message": "删除更新成功",
+  "code": 200,
+  "traceId": null
+}
+
+部门管理：
+1、获取部门列表：
+接口地址：/api/admin/Department/list
+请求方式：GET
+请求参数：PageIndex=1&PageSize=50&DepId=部门Id&Where=部门名称
+返回格式：这里返回了树形结构数据，考虑到前端页面应该采用树形表格（可收缩子集即可）一般部门不会很多，分页大小设置相对大一些
+{
+  "pageIndex": 1,
+  "pageSize": 1,
+  "total": 0,
+  "items": [
+    {
+      "id": 1,
+      "name": "销售部",
+      "parentName": "顶级部门",
+      "description": "1121",
+      "createdAt": "2025-09-29T23:59:09",
+      "createdBy": "admin",
+      "modifiedAt": "2025-09-29T23:59:14",
+      "modifiedBy": "admin",
+      "isDeleted": false,
+      "children": [
+        {
+          "id": 101,
+          "name": "华东销售部",
+          "parentName": null,
+          "description": "111",
+          "createdAt": "2025-10-01T01:34:40",
+          "createdBy": "admin",
+          "modifiedAt": "2025-10-01T01:34:46",
+          "modifiedBy": null,
+          "isDeleted": false,
+          "children": null
+        },
+        {
+          "id": 102,
+          "name": "华南销售部",
+          "parentName": null,
+          "description": "111",
+          "createdAt": "2025-10-01T01:34:40",
+          "createdBy": "admin",
+          "modifiedAt": "2025-10-01T01:34:46",
+          "modifiedBy": null,
+          "isDeleted": false,
+          "children": null
+        }
+      ]
+    }
+  ],
+  "success": true,
+  "message": "获取成功",
+  "code": 200,
+  "traceId": null
+}
+
+2、获取部门列表左侧部门名称树,点击左侧部门名称传入部门Id查询列表，
+接口地址：/api/admin/Department/tree
+请求方式：GET
+返回格式：
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "销售部",
+      "total": 0,
+      "children": [
+        {
+          "id": 101,
+          "name": "华东销售部",
+          "total": 0,
+          "children": null
+        },
+        {
+          "id": 102,
+          "name": "华南销售部",
+          "total": 0,
+          "children": [
+            {
+              "id": 103,
+              "name": "广东省销售部",
+              "total": 0,
+              "children": [
+                {
+                  "id": 104,
+                  "name": "深圳销售部",
+                  "total": 0,
+                  "children": null
+                },
+                {
+                  "id": 105,
+                  "name": "汕头销售部",
+                  "total": 0,
+                  "children": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "实施部",
+      "total": 0,
+      "children": [
+        {
+          "id": 201,
+          "name": "华南实施部",
+          "total": 0,
+          "children": null
+        },
+        {
+          "id": 202,
+          "name": "华东实施2部",
+          "total": 0,
+          "children": null
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "研发部",
+      "total": 0,
+      "children": null
+    }
+  ],
+  "success": true,
+  "message": "获取成功",
+  "code": 200,
+  "traceId": null
+}
+
+3、获取部门详情
+接口地址：/api/admin/Department/info
+请求方式：GET
+请求参数：id=1
+返回格式：
+{
+  "data": {
+    "id": 1,
+    "name": "销售部",
+    "parentName": "顶级部门",
+    "description": "1121",
+    "createdAt": "2025-09-29T23:59:09",
+    "createdBy": "admin",
+    "modifiedAt": "2025-09-29T23:59:14",
+    "modifiedBy": "admin",
+    "isDeleted": false,
+    "children": null
+  },
+  "success": true,
+  "message": "获取成功",
+  "code": 200,
+  "traceId": null
+}
+
+4、添加部门，需要列出当前部门树形下拉框， 在弹框中使用下拉菜单选择一个父级菜单，最多三级，不能选择三级菜单作为父菜单
+接口地址：/api/admin/Department
+请求方式：POST
+请求参数：
+{
+  "parentId": 0,
+  "name": "技术支持部",
+  "abbreviation": "1",
+  "sort": 1,
+  "summary": "1111"
+}
+返回格式：
+{
+  "success": true,
+  "message": "部门创建成功",
+  "code": 200,
+  "traceId": null
+}
+
+5、编辑部门：
+接口地址：/api/admin/Department
+请求方式：PUT
+请求参数：
+{
+  "id": 203,
+  "parentId": 0,
+  "name": "运营部",
+  "sort": 1,
+  "summary": "1111"
+}
+返回格式：
+{
+  "success": true,
+  "message": "部门更新成功",
+  "code": 200,
+  "traceId": null
+}
+
+6、删除部门
+接口地址：/api/admin/Department
+请求方式：DELETE
+请求参数：
+{
+  "id":202
+}
+返回格式：
+{
+  "success": true,
+  "message": "部门删除成功",
+  "code": 200,
+  "traceId": null
+}
+ 
+ 
+ 

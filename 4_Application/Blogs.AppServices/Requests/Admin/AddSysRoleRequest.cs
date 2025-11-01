@@ -11,11 +11,6 @@ namespace Blogs.AppServices.Requests.Admin
     /// </summary>
     public class AddSysRoleRequest
     {
-
-        /// <summary>
-        /// 角色组Id
-        /// </summary>
-        public long ParentId { get; set; }
         ///<summary>
         ///  角色名称
         ///</summary>

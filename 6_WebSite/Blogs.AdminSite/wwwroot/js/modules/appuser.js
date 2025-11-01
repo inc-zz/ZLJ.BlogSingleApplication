@@ -5,16 +5,15 @@
  * @typedef { import('../types/user').UserListResponse } UserListResponse
  * @typedef { import('../types/user').UserResponse } UserResponse
  */
-layui.define(['layer', 'form', 'table', 'laypage', 'appuser-templates', 'core'], function (exports) {
+layui.define(['layer', 'form', 'table', 'laypage', 'appuser-template', 'core'], function (exports) {
 
     var $ = layui.$;
     var layer = layui.layer;
     var form = layui.form;
-    var templateManager = layui['appuser-templates'];
+    var templateManager = layui['appuser-template'];
     var core = layui.core;
     var http = core.http;
-
-    debugger
+     
     var UserManager = {
         // 配置参数
         config: {

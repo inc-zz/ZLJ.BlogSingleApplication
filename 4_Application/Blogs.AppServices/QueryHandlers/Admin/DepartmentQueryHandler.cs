@@ -17,7 +17,8 @@ namespace Blogs.AppServices.QueryHandlers.Admin
 {
     public class DepartmentQueryHandler : SqlSugarDbContext,
         IRequestHandler<GetDepartmentTreeQuery, List<DepartmentTreeDto>>,
-        IRequestHandler<GetDepartmentListQuery, PagedResult<SysDepartmentDto>>
+        IRequestHandler<GetDepartmentListQuery, PagedResult<SysDepartmentDto>>,
+        IRequestHandler<GetDepartmentInfoQuery, ResultObject<SysDepartmentDto>>
     {
 
         private readonly IDepartmentRepository _departmentRepository;
@@ -47,10 +48,12 @@ namespace Blogs.AppServices.QueryHandlers.Admin
             RefAsync<int> total = 0;
             var list = await DbContext.Queryable<SysDepartment>()
                 .WhereIF(request.DepId > 0, it => it.ParentId == request.DepId || it.Id == request.DepId)
-                .ToTreeAsync(it => it.Children, it => it.ParentId, 0);
+                .WhereIF(!string.IsNullOrWhiteSpace(request.Where), it => it.Name == request.Where)
+                .ToPageListAsync(request.PageIndex, request.PageSize, total);
 
             var jsonData = JsonConvert.SerializeObject(list);
             var newList = ConvertToFlatList(list, 0);
+
             var result = new PagedResult<SysDepartmentDto>
             {
                 code = 200,
@@ -100,5 +103,37 @@ namespace Blogs.AppServices.QueryHandlers.Admin
 
         }
 
+        /// <summary>
+        /// 获取部门详情
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<ResultObject<SysDepartmentDto>> Handle(GetDepartmentInfoQuery request, CancellationToken cancellationToken)
+        {
+            RefAsync<int> total = 0;
+            var list = await DbContext.Queryable<SysDepartment>()
+                .Where(it => it.Id == request.Id || it.ParentId == request.Id)
+                .ToListAsync();
+
+            var jsonData = JsonConvert.SerializeObject(list);
+            var newList = ConvertToFlatList(list, 0);
+            var parentNode = list.Where(it => it.Id == request.Id).FirstOrDefault();
+            if (parentNode == null)
+            {
+                return ResultObject<SysDepartmentDto>.Error(null, "部门不存在");
+            }
+            var dto = parentNode.Adapt<SysDepartmentDto>();
+            dto.Children = newList;
+            var result = new ResultObject<SysDepartmentDto>
+            {
+                code = 200,
+                message = "获取成功",
+                success = true,
+                data = dto
+            };
+            return result;
+        }
     }
 }

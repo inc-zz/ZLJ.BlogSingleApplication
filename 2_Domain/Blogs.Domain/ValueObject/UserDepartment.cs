@@ -5,22 +5,18 @@ using System.Text;
 namespace Blogs.Domain.ValueObject
 {
     /// <summary>
-    /// 
+    /// 用户部门信息
     /// </summary>
     public class UserDepartment
     {
         /// <summary>
-        /// 
+        /// 部门Id
         /// </summary>
-        public long DepartmentId { get; set; }
+        public long Id { get; set; }
         /// <summary>
-        /// 
+        /// 部门名称
         /// </summary>
-        public long ParentDepartmentId { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public string DepartmentName { get; set; }
+        public string Name { get; set; }
 
     }
 }

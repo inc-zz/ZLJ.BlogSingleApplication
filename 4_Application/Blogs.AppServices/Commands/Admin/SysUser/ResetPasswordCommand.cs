@@ -1,5 +1,6 @@
 ﻿using Blogs.AppServices.ModelValidator.Admin.User;
-using Blogs.AppServices.Requests.Admin; 
+using Blogs.AppServices.Requests.Admin;
+using Blogs.Core;
 using Microsoft.AspNetCore.Identity.Data;
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,8 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
     {
         public ResetPasswordCommand(ChangePasswordRequest param)
         {
-            this.Password = param.Password;
-            this.OldPassword = param.OldPassword;
+            this.Id = param.UserId;
+            this.Password = AESCryptHelper.Encrypt(param.Password);
         }
 
         public override bool IsValid()

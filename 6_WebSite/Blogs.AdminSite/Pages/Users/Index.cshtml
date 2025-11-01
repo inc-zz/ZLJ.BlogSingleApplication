@@ -4,9 +4,69 @@
     ViewData["Title"] = "用户管理";
     Layout = "_Layout";
 }
+<!-- 搜索和操作区域 -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">用户列表</h5>
+        <div>
+            <button class="btn btn-success btn-sm" id="addUserBtn">
+                <i class="fas fa-plus me-1"></i> 添加用户
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" id="refreshBtn">
+                <i class="fas fa-refresh me-1"></i> 刷新
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- 搜索表单 -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control form-control-sm" id="searchKeyword" placeholder="用户名/姓名/邮箱">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="searchRole">
+                    <option value="">全部角色</option>
+                   
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" id="searchStatus">
+                    <option value="">全部状态</option>
+                    <option value="1">正常</option>
+                    <option value="0">禁用</option>
+                </select>
+            </div>
+            <!-- ... existing code ... -->
+             <div class="col-md-3">
+                <button class="btn btn-primary btn-md" id="searchBtn">
+                    <i class="fas fa-search me-1"></i> 搜索
+                </button>
+                
+                <button class="btn btn-danger btn-md" id="batchDeleteBtn" disabled>
+                    <i class="fas fa-trash me-1"></i> 批量删除
+                </button>
+            </div>
+        </div>
 
-<!-- 主容器 -->
-<div id="userManagement"></div>
+        <!-- 用户表格 -->
+        <div class="table-responsive" id="tableUserListArea">
+           
+        </div>
+
+        <!-- 分页 -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div id="paginationInfo">显示第 1 到 10 条，共 0 条记录</div>
+            <nav>
+                <ul class="pagination pagination-sm" id="pagination">
+                    <!-- 分页将通过JavaScript动态生成 -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+ 
+<!-- 页面容器 -->
+<div id="appuser-container"></div>
 
 <!-- 初始化脚本 -->
 <script>
@@ -14,6 +74,7 @@
         layui.config({
             base: '/js/modules/'
         }).use(['appuser'], function() {
+            
             var appuser = layui.appuser;
             if (appuser && typeof appuser.init === 'function') {
                 appuser.init();

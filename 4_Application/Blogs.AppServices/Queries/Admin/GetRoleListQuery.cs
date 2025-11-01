@@ -12,8 +12,7 @@ namespace Blogs.AppServices.Queries.Admin
     {
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
-        public string? RoleName { get; set; }
-        public string? RoleCode { get; set; }
+        public string? SearchTerm { get; set; }
         public int? Status { get; set; }
     }
 }
