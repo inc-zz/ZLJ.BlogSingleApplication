@@ -167,7 +167,7 @@ namespace Blogs.AppServices.QueryHandlers.App
         }
 
         /// <summary>
-        ///首页文章分类列表
+        ///首页文章列表
         /// </summary>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
@@ -304,7 +304,9 @@ namespace Blogs.AppServices.QueryHandlers.App
 
         /// <summary>
         /// 增加文章浏览量
-        ///    
+        /// </summary>
+        /// <param name="articleId"></param>
+        /// <returns></returns>
         public async Task SetArticleViewCountAsync(long articleId)
         {
             var articleInfo = await DbContext.Queryable<BlogsArticle>().Where(it => it.Id == articleId).FirstAsync();

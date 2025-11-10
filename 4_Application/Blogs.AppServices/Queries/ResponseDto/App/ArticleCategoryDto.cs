@@ -20,10 +20,14 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
         /// 文章数量
         /// </summary>
         public int ArticleCount { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public string? Description { get; set; }
-
-        public string Slug { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string? Slug { get; set; }
 
     }
 }

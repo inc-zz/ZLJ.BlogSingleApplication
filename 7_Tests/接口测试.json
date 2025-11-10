@@ -858,4 +858,439 @@ parent是针对子集菜单配置，icon任意或者不设置
 }
  
  
- 
+ 在权限配置页面- menu-permissions ,左侧列出角色树
+接口地址：/api/admin/Role/all
+请求方式：GET
+返回数据
+{
+  "data": [
+    {
+      "id": 6,
+      "code": "Sybus",
+      "name": "统御者"
+    },
+    {
+      "id": 3,
+      "code": "verify",
+      "name": "审核员"
+    },
+    {
+      "id": 2,
+      "code": "publish",
+      "name": "编辑"
+    },
+    {
+      "id": 1,
+      "code": "sysadmin",
+      "name": "系统管理员"
+    }
+  ],
+  "success": true,
+  "message": "获取成功",
+  "code": 200,
+  "traceId": null
+}
+2、右侧列表获取每个菜单以及菜单配置的操作按钮，
+接口地址：/api/admin/AuthManager/menuActions
+请求方式：GET
+返回数据：
+{
+  "data": [ 
+    {
+      "menuId": 16,
+      "menuName": "评论管理",
+      "menuAuthButtons": [
+        {
+          "menuId": 16,
+          "buttonCode": "Create",
+          "buttonName": "创建",
+          "hasPermission": false
+        },
+        {
+          "menuId": 16,
+          "buttonCode": "Delete",
+          "buttonName": "删除",
+          "hasPermission": false
+        }
+      ],
+      "sysButtons": []
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+比如评论管理这个菜单，返回了创建和删除两个按钮，那么就显示
+评论管理：
+这里用一条水平线分割
+  Checkbox 创建(Create)   Checkbox删除(Delete)
+最顶层做一个权限，每个菜单旁边做一个checkbox，对应选择全部该菜单下面的按钮
+
+
+
+
+2、在右侧授权列表中需要调用2个接口，在每个菜单下面显示所有可选择的按钮，通过
+接口获取：
+接口地址：/api/admin/SysButton/available
+请求方式：GET
+返回格式：
+{
+  "data": [
+    {
+      "id": 10,
+      "code": "Update",
+      "name": "修改"
+    },
+    {
+      "id": 100001,
+      "code": "Create",
+      "name": "创建"
+    },
+    {
+      "id": 100007,
+      "code": "Audit",
+      "name": "审核"
+    },
+    {
+      "id": 100008,
+      "code": "BatchDelete",
+      "name": "批量删除"
+    },
+    {
+      "id": 100009,
+      "code": "BatchExport",
+      "name": "批量导出"
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+3、分配角色菜单权限，
+接口地址：/api/admin/AuthManager/setMenuAuth
+请求方式：PUT
+请求参数：
+{
+  "roleId": 2,
+  "roleMenus": [
+    {
+      "menuId": 3,
+      "buttonIds": [
+        100001
+      ]
+    }
+  ]
+}
+返回格式
+{
+  "success": true,
+  "message": "授权成功",
+  "code": 200,
+  "traceId": null
+}
+
+-------------------------------------------------------------------------------------------------------------------
+文章管理
+接口地址：/api/admin/Article/list
+请求方式：GET
+请求参数：CategoryId=文章分类&TagId=文章标签&SortBy=排序字段&PageIndex=1&PageSize=30&Where=文章标题or简介
+返回格式：
+{
+  "pageIndex": 1,
+  "pageSize": 1,
+  "total": 32,
+  "items": [
+    {
+      "id": 29604489367568,
+      "title": "关于发散性思维以及推导关联性思维",
+      "createdAt": "2025-10-31T13:27:48",
+      "createdBy": "zhenglijun",
+      "tags": "思维",
+      "summary": "想法瞬息万变，但是能抓住并逐步延伸思考下去很难，可以通过片段、阶段性提示来延伸思维",
+      "coverImage": null,
+      "categoryName": "感悟",
+      "viewCount": 2,
+      "likeCount": 0,
+      "commentCount": 0
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+对应字段标题以及展示顺序为：
+id（不需要列表展示，列表只需要展示序号）
+title（文章标题）
+tag（标签）
+summary（简介-注意显示字数不要超过20，多余省略在alt中显示）
+coverImage(暂时不用）
+viewCount：（浏览量）
+likeCount：（点赞数）
+commentCount:（评论数）
+createdAt:（创建时间）
+createdBy:（创建人）
+最后放置操作栏：查看/编辑/删除（采用图标显示）
+
+搜索区域包括：
+1、文章分类下拉框
+接口地址：/api/admin/Article/category
+请求方式：GET
+请求参数：TopCount=10
+返回数据：下拉显示name即可，搜索传入id到categoryId字段
+{
+  "data": [
+    {
+      "id": 1001,
+      "name": "后端开发",
+      "articleCount": 0,
+      "description": "研究.net、java、python等主流技术",
+      "slug": "1"
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+2）、文章标题、简介（文本框）
+3）、创建时间（使用时间区域搜索）
+4）、创建人（文本框）
+文章编辑创建、删除、查看
+1、文章编辑接口
+接口地址：/api/admin/Article
+请求方式：PUT
+请求参数：带id则是编辑，不带id则是创建
+{
+  "id": 0,
+  "title": "string",
+  "summary": "string",
+  "categoryId": 0,
+  "tags": "string",
+  "content": "文章内容-需要支持markdown格式和html格式，文章内容如果有图标需要调用图片上传接口",
+  "isPublish": true
+}
+返回格式：
+{
+  "success": true,
+  "message": "文章创建成功！",
+  "code": 200,
+  "traceId": null
+}
+
+2、文件上传接口
+接口地址：/api/admin/Article/upload
+参数：
+  { IFormFile File BusinessType=ArticleFiles(固定值) }
+
+返还格式：
+{
+  "data": {
+    "success": true,
+    "message": "文件上传成功",
+    "fileRecord": null,
+    "fileUrl": "https://localhost:7235/ArticleFiles/_哲风壁纸_山-草地_20251023005450785.png"
+  },
+  "success": true,
+  "message": "文件上传成功"
+}
+将返还的url嵌入到文章内容，不能影响文章排版
+
+3、文章删除接口
+接口地址：/api/admin/Article
+请求方式：DELETE
+请求参数：
+{
+  "id": 130754880472312
+}
+返回格式：
+{
+  "success": true,
+  "message": "删除成功！",
+  "code": 200,
+  "traceId": null
+}
+
+4、文章详情接口：
+接口地址：/api/admin/Article/detail
+请求方式：GET
+请求参数：ArticleId=文章id
+返回格式：
+
+  "data": {
+    "id": 131051023500536,
+    "title": "汉密尔顿与F1的故事",
+    "categoryId": 3,
+    "categoryName": "大模型",
+    "createdAt": "2025-10-22T12:57:19",
+    "createdBy": "zlj",
+    "summary": "汉密尔顿七冠王",
+    "tags": "111",
+    "content": "# 技术文档示例\n\n## 简介\n\n这是一篇技术文章的示例模板，",
+    "coverImage": null,
+    "viewCount": 13,
+    "likeCount": 0,
+    "commentCount": 0,
+    "shareCount": 0
+  },
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+根据以上4个接口，实现管理端文章管理。注意富文本编辑器的集成，富文本编辑器采用Vue-markdown，布局参考上图
+
+创建文章中分类数据从接口获取：
+接口地址：/api/admin/Article/category
+请求出参数:TopCount=10
+请求方式：GET
+返回格式：
+{
+  "data": [
+    {
+      "id": 1001,
+      "name": "后端开发",
+      "articleCount": 0,
+      "description": "研究.net、java、python等主流技术",
+      "slug": "1"
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+标签需要手输入和选择两种，可以选择比如 NetCore，Vue，React，JavaScript，Java，Go，其他
+创建文章页面使用100%宽度，需要铺满右侧。内容增加一个预览操作，必须集成富文本比较小
+
+
+分类管理接口：
+1、分类列表
+接口地址：/api/admin/Article/category
+请求方式：GET
+请求参数：PageIndex=1&PageSize=30&SearchTerm='分类名称查询'
+数据返回格式：
+{
+  "pageIndex": 1,
+  "pageSize": 1,
+  "total": 10,
+  "items": [
+    {
+      "id": 3,
+      "name": "大模型",
+      "description": "Python开发",
+      "sort": 1,
+      "status": 0,
+      "createdAt": "2025-10-12T07:42:14",
+      "createdBy": "zlj",
+      "modifiedAt": null,
+      "modifiedBy": null,
+      "statusName": "禁用"
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+2、创建分类/编辑分类
+接口地址：/api/admin/Article/category
+请求方式：POST
+请求参数：
+{
+  "id": 0,
+  "name": "分类名称",
+  "description": "分类描述",
+  "sort": 10,
+  "icon": "分类图标"
+}
+返回格式：
+{
+  "success": true,
+  "message": "文章分类创建成功",
+  "code": 200,
+  "traceId": null
+}
+
+3、删除分类
+接口地址：/api/admin/Article/category
+请求方式：DELETE
+请求参数:
+{
+  "id": 1001
+}
+返回格式：
+{
+  "success": true,
+  "message": "文章分类删除成功",
+  "code": 200,
+  "traceId": null
+}
+
+4、分类详情
+接口地址：/api/admin/Article/categories/id
+请求参数：id
+请求方式：GET
+返回数据
+{
+  "data": {
+    "id": 1005,
+    "name": "AI大模型",
+    "description": "研究数据库优化、NoSql、缓存、报表等",
+    "sort": 1,
+    "status": 0,
+    "createdAt": "2025-10-12T07:42:14",
+    "createdBy": "zlj",
+    "modifiedAt": null,
+    "modifiedBy": null,
+    "statusName": "禁用"
+  },
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+
+评论管理：
+1、评论数据列表：
+接口地址：/api/admin/Article/comment
+请求方式：GET
+请求参数：PageIndex=1&PageSize=30&SearchTerm='评论内容‘
+返回格式：
+{
+  "pageIndex": 1,
+  "pageSize": 1,
+  "total": 15,
+  "items": [
+    {
+      "id": 16,
+      "articleId": 29528043178000,
+      "content": "学到了~！",
+      "createdAt": "2025-10-29T20:08:22",
+      "createdBy": "zlj01",
+      "likeCount": 0,
+      "replies": null
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+2、删除评论
+接口地址：/api/admin/Article/comment
+请求方式：DELETE
+请求参数：
+{
+  "id": 1
+}
+返回格式：
+{
+  "success": true,
+  "message": "评论删除成功",
+  "code": 200,
+  "traceId": null
+}
+

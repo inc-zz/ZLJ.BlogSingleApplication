@@ -48,7 +48,7 @@ namespace Blogs.AppServices.CommandHandlers.App
                 var article = command.Adapt<BlogsArticle>();
                 if (command.Id > 0)
                 {
-                    article.ModifiedBy = CurrentAppUser.Instance.UserInfo.UserName;
+                    article.ModifiedBy = command.CreateBy;
                     await _appArticleRepository.UpdateArticleAsync(article);
                 }
                 else
@@ -56,7 +56,7 @@ namespace Blogs.AppServices.CommandHandlers.App
                     article.Id = new NCD.Common.IdWorkerUtils().NextId();
                     //创建人信息
                     article.CreatedAt = DateTime.Now;
-                    article.MarkAsCreated(CurrentAppUser.Instance.UserInfo.UserName);
+                    article.MarkAsCreated(command.CreateBy);
                     await _appArticleRepository.InsertArticleAsync(article);
                 }
                 return await Task.FromResult(true);

@@ -3,7 +3,7 @@ import type { ApiResponse, Tag, PageParams, PageData } from '@/types'
 
 // 获取标签列表
 export const getTagList = (params?: PageParams) => {
-  return request.get<ApiResponse<PageData<Tag>>>('/tags', { params })
+  return request.get<PageData<Tag>>('/api/admin/Article/tags', { params })
 }
 
 // 获取所有标签（不分页）

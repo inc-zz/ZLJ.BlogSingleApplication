@@ -19,6 +19,8 @@ namespace Blogs.Domain
         /// </summary>
         public ValidationResult ValidationResult { get; set; }
 
+        public string CreateBy { get; protected set; }
+
         /// <summary>
         /// 
         /// </summary>

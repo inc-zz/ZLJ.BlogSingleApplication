@@ -5,9 +5,9 @@ using System.Text;
 namespace Blogs.Domain.ValueObject
 {
     /// <summary>
-    /// 菜单
+    /// Code-Name模型
     /// </summary>
-    public class MenuObject
+    public class AuthButtonObject
     {
         /// <summary>
         /// 
@@ -16,14 +16,10 @@ namespace Blogs.Domain.ValueObject
         /// <summary>
         /// 
         /// </summary>
-        public string MenuCode { get; set; }
+        public string Code { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public string MenuName { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public string[] Buttons { get; set; }
+        public string Name { get; set; } 
     }
 }

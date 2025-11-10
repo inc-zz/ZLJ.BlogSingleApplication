@@ -60,14 +60,11 @@ namespace Blogs.WebApi.Controllers.App
         public async Task<ActionResult> GetArticleDetailAsync([FromQuery] ArticleIdRequest request)
         {
             var query = new GetArticleDetailQuery(request.ArticleId);
-
             var result = await _mediator.Send(query);
-
             if (result == null)
             {
                 return NotFound(ResultObject.Error("文章不存在"));
             }
-
             return new OkObjectResult(result);
         }
 
@@ -83,7 +80,6 @@ namespace Blogs.WebApi.Controllers.App
             {
                 TopCount = param.TopCount
             };
-
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
         }
@@ -217,7 +213,6 @@ namespace Blogs.WebApi.Controllers.App
             return new OkObjectResult(result);
         }
 
-
         /// <summary>
         /// 发布文章
         /// </summary>
@@ -226,6 +221,7 @@ namespace Blogs.WebApi.Controllers.App
         [HttpPost("publish")]
         public async Task<ActionResult> CreateArticleAsync([FromBody] CreateArticleRequest param)
         {
+            param.SetCreateBy(CurrentAppUser.Instance.UserInfo.UserName);
             CreateArticleCommand command = new CreateArticleCommand(param);
             // 发送命令并获取结果
             var result = await _mediator.Send(command);
@@ -257,7 +253,5 @@ namespace Blogs.WebApi.Controllers.App
         {
             return Ok(ResultObject.Success("状态修改成功！"));
         }
-
-
     }
 }

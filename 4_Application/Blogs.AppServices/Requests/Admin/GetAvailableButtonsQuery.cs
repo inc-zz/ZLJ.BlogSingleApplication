@@ -1,4 +1,5 @@
 ﻿using Blogs.AppServices.Queries.ResponseDto.Admin;
+using Blogs.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Blogs.AppServices.Requests.Admin
     /// <summary>
     /// 获取所有可用按钮查询（用于下拉选择）
     /// </summary>
-    public class GetAvailableButtonsQuery : IRequest<List<ButtonListDto>>
+    public class GetAvailableButtonsQuery : IRequest<ResultObject<List<DropDownlistDto>>>
     {
         public string Position { get; set; }
 

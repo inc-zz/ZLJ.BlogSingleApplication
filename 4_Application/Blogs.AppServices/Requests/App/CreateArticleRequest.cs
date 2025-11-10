@@ -22,5 +22,16 @@ namespace Blogs.AppServices.Requests.App
 
         public bool IsPublish { get; set; }
 
+        private string? CreateBy;
+        public void SetCreateBy(string userName)
+        {
+            this.CreateBy = userName;
+        }
+        public string GetCreateBy()
+        {
+            return this.CreateBy;
+        }
+
+
     }
 }

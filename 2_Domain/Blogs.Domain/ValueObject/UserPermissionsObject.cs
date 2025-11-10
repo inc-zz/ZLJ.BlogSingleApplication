@@ -23,11 +23,7 @@ namespace Blogs.Domain.Commands
         /// <summary>
         /// 是否超管
         /// </summary>
-        public long MenuId { get;  set; }
-        /// <summary>
-        /// 菜单
-        /// </summary>
-        public List<MenuObject> MenuList { get; set; }
+        public long MenuId { get;  set; } 
  
     }
   

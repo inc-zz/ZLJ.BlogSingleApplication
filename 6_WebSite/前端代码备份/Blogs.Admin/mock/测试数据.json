@@ -1,0 +1,161 @@
+以上为权限管理模块下的5个页面，分别是管理员列表、部门管理、菜单管理、角色管理、角色授权，根据页面设计完成UI实现。接口对应：
+管理员列表接口：
+    查询数据：
+        接口地址：/api/admin/User/list
+        请求参数：pageIndex=1&pageSize=10&where=""
+        请求方式：GET
+        返回结果：{
+        "pageIndex": 1,
+        "pageSize": 1,
+        "total": 7,
+        "items": [
+            {
+            "id": 100007,
+            "userName": "zhenglijun",
+            "realName": "zhenglijun",
+            "phoneNumber": "15816818890",
+            "email": "zhenglijun@sing.com",
+            "roles": null,
+            "status": "1",
+            "lastLoginTime": "2025-10-29T10:46:49",
+            "createdAt": "2025-10-25T07:57:58",
+            "description": ""
+            }
+        ],
+        "success": true,
+        "message": "200",
+        "code": 200
+        }
+    用户详情接口：
+        接口地址：/api/admin/User/detail
+        请求参数：id=100007
+        请求方式：GET
+        返回结果：
+        {
+        "data": {
+            "id": 100007,
+            "userName": "zhenglijun",
+            "realName": "zhenglijun",
+            "phoneNumber": "15816818890",
+            "email": "zhenglijun@sing.com",
+            "roles": null,
+            "status": "1",
+            "lastLoginTime": "2025-10-29T10:46:49",
+            "createdAt": "2025-10-25T07:57:58",
+            "description": ""
+        },
+        "success": true,
+        "message": "查询成功",
+        "code": 200
+        }
+    添加管理员接口：
+        接口地址：/api/admin/User
+        请求参数：
+        {
+        "userName": "admin2",
+        "password": "123456",
+        "departmentId": 部门id,
+        "description": "",
+        "email": "admin@sing.com",
+        "phoneNumber": "15816818898",
+        "realName": "admin",
+        "role": "角色id"
+        }
+        请求方式：POST
+        返回结果：{
+        "success": true,
+        "message": "处理成功",
+        "code": 200
+        }
+    编辑管理员接口：
+        接口地址：/api/admin/User
+        请求方式：PUT
+        请求参数：{
+        "id":100007 ,
+        "roleIds": "角色id",
+        "departmentId": "部门id",
+        "realName": "string",
+        "sex": 0,
+        "headPic": "string",
+        "phoneNumber": "string",
+        "email": "string",
+        "description": "string",
+        "status": 0
+        }
+        返回结果：
+        1、成功结果
+        {
+        "success": true,
+        "message": "处理成功",
+        "code": 200
+        }
+        2、验证失败结果
+        [
+        {
+            "domainNotificationId": "de5444b4-90d2-4455-86f2-8d364dd31b13",
+            "key": "domainNotice",
+            "value": "手机号不正确",
+            "version": 1,
+            "timestamp": "2025-10-29T13:31:49.2298384+08:00",
+            "messageType": "DomainNotification",
+            "aggregateId": 0
+        }]
+    删除管理员接口
+        接口地址：/api/admin/User
+        请求方式：DELETE
+        请求参数：{id:100007}
+        返回结果：
+        {
+        "success": true,
+        "message": "处理成功",
+        "code": 200
+        }
+    启用/禁用管理员接口
+        接口地址：/api/admin/User/status
+        请求方式：PUT
+        请求参数：{
+        "id": 0,
+        "status": 0
+        }
+        返回结果：
+        {
+        "success": true,
+        "message": "处理成功",
+        "code": 200
+        }
+    重置管理员密码接口
+        接口地址：/api/admin/User/resetPassword
+        请求方式：PUT
+        请求参数：{
+        "userId": 0,
+        "password": "123456",
+        "oldPassword": "123123"
+        }
+        返回结果：
+        {
+        "success": true,
+        "message": "处理成功",
+        "code": 200
+        }
+    设置用户角色接口：
+        接口地址：/api/admin/User/SetRoles
+        请求方式：PUT
+        请求参数：{id:100007,roleId:"角色id"}
+        返回结果：
+        {
+        "success": true,
+        "message": "处理成功",
+        "code": 200
+        }
+
+    
+{
+  "userName": "zhenglijun1",
+  "password": "123456",
+  "departmentJson": "{id:1,name:'销售部'}",
+  "userRoleJson": "{RoleId:1,RoleName:'系统管理员'}",
+  "description": "11111111111",
+  "email": "zhengljiun1@sing.com",
+  "phoneNumber": "15816818891",
+  "realName": "zhenglijun"
+}

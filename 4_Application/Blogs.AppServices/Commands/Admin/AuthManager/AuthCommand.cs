@@ -1,4 +1,5 @@
 ﻿using Blogs.AppServices.Queries.ResponseDto.Admin;
+using Blogs.AppServices.Requests.Admin;
 using Blogs.Domain;
 using System;
 using System.Collections.Generic;
@@ -18,13 +19,9 @@ namespace Blogs.AppServices.Commands.Admin.AuthManager
         /// </summary>
         public long RoleId { get; set; }
         /// <summary>
-        /// 角色名称
-        /// </summary>
-        public string? RoleName { get; set; }
-        /// <summary>
         /// 角色菜单
         /// </summary>
-        public List<RoleMenuDto> RoleMenu { get; set; } = new List<RoleMenuDto>();
+        public List<AuthMenuRequest> RoleMenus { get; set; } = new List<AuthMenuRequest>();
 
     }
 }

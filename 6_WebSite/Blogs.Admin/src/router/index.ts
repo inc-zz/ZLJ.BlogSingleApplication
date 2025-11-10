@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
     redirect: '/dashboard',
     children: [
       {
-        path: 'dashboard',
+        path: '/dashboard',
         name: 'Dashboard',
         component: () => import('@/views/dashboard/index.vue'),
         meta: {
@@ -44,6 +44,37 @@ const routes: RouteRecordRaw[] = [
             component: () => import('@/views/user-management/user-list.vue'),
             meta: {
               title: '用户列表',
+              requiresAuth: true,
+            },
+          },
+        ],
+      },
+      // 文章管理
+      {
+        path: '/admin/article',
+        name: 'ArticleManagement',
+        redirect: '/admin/article/categories',
+        meta: {
+          title: '文章管理',
+          icon: 'Document',
+          requiresAuth: true,
+        },
+        children: [
+          {
+            path: '/admin/article/categories',
+            name: 'CategoryManagement',
+            component: () => import('@/views/admin/article/CategoryManagement.vue'),
+            meta: {
+              title: '分类管理',
+              requiresAuth: true,
+            },
+          },
+          {
+            path: '/admin/article/comments',
+            name: 'CommentManagement',
+            component: () => import('@/views/admin/article/CommentManagement.vue'),
+            meta: {
+              title: '评论管理',
               requiresAuth: true,
             },
           },
@@ -118,7 +149,7 @@ const routes: RouteRecordRaw[] = [
       },
       // 内容管理
       {
-        path: 'content',
+        path: '/content',
         name: 'Content',
         redirect: '/content/articles',
         meta: {
@@ -128,7 +159,7 @@ const routes: RouteRecordRaw[] = [
         },
         children: [
           {
-            path: 'articles',
+            path: '/content/articles',
             name: 'Articles',
             component: () => import('@/views/articles/index.vue'),
             meta: {
@@ -137,7 +168,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'articles/create',
+            path: '/content/articles/create',
             name: 'ArticleCreate',
             component: () => import('@/views/articles/create.vue'),
             meta: {
@@ -147,7 +178,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'articles/edit/:id',
+            path: '/content/articles/edit/:id',
             name: 'ArticleEdit',
             component: () => import('@/views/articles/edit.vue'),
             meta: {
@@ -157,7 +188,17 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'categories',
+            path: '/content/articles/view/:id',
+            name: 'ArticleView',
+            component: () => import('@/views/articles/edit.vue'),
+            meta: {
+              title: '查看文章',
+              hidden: true,
+              requiresAuth: true,
+            },
+          },
+          {
+            path: '/content/categories',
             name: 'Categories',
             component: () => import('@/views/categories/index.vue'),
             meta: {
@@ -166,7 +207,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'tags',
+            path: '/content/tags',
             name: 'Tags',
             component: () => import('@/views/tags/index.vue'),
             meta: {
@@ -175,7 +216,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'comments',
+            path: '/content/comments',
             name: 'Comments',
             component: () => import('@/views/comments/index.vue'),
             meta: {
@@ -187,7 +228,7 @@ const routes: RouteRecordRaw[] = [
       },
       // 系统设置
       {
-        path: 'system',
+        path: '/system',
         name: 'System',
         redirect: '/system/basic',
         meta: {
@@ -197,7 +238,7 @@ const routes: RouteRecordRaw[] = [
         },
         children: [
           {
-            path: 'basic',
+            path: '/system/basic',
             name: 'BasicSettings',
             component: () => import('@/views/system/basic.vue'),
             meta: {
@@ -206,7 +247,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'seo',
+            path: '/system/seo',
             name: 'SeoSettings',
             component: () => import('@/views/system/seo.vue'),
             meta: {
@@ -215,7 +256,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'email',
+            path: '/system/email',
             name: 'EmailSettings',
             component: () => import('@/views/system/email.vue'),
             meta: {
@@ -224,7 +265,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'storage',
+            path: '/system/storage',
             name: 'StorageSettings',
             component: () => import('@/views/system/storage.vue'),
             meta: {
@@ -236,7 +277,7 @@ const routes: RouteRecordRaw[] = [
       },
       // 数据统计
       {
-        path: 'statistics',
+        path: '/statistics',
         name: 'Statistics',
         redirect: '/statistics/overview',
         meta: {
@@ -246,7 +287,7 @@ const routes: RouteRecordRaw[] = [
         },
         children: [
           {
-            path: 'overview',
+            path: '/statistics/overview',
             name: 'StatisticsOverview',
             component: () => import('@/views/statistics/overview.vue'),
             meta: {
@@ -255,7 +296,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'article',
+            path: '/statistics/article',
             name: 'ArticleStatistics',
             component: () => import('@/views/statistics/article.vue'),
             meta: {
@@ -264,7 +305,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'user',
+            path: '/statistics/user',
             name: 'UserStatistics',
             component: () => import('@/views/statistics/user.vue'),
             meta: {
@@ -273,7 +314,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'visit',
+            path: '/statistics/visit',
             name: 'VisitStatistics',
             component: () => import('@/views/statistics/visit.vue'),
             meta: {

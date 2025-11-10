@@ -4,112 +4,71 @@
       <div class="page-title">权限配置</div>
 
       <div class="permission-container">
-        <!-- 左侧菜单树 -->
-        <div class="menu-tree-panel">
+        <!-- 左侧角色树 -->
+        <div class="role-tree-panel">
           <div class="tree-header">
-            <span class="tree-title">菜单列表</span>
-            <el-button link type="primary" :icon="Refresh" @click="loadMenuTree">
+            <span class="tree-title">角色列表</span>
+            <el-button link type="primary" :icon="Refresh" @click="loadRoles">
               刷新
             </el-button>
           </div>
           <el-tree
-            ref="menuTreeRef"
-            :data="menuTreeData"
+            ref="roleTreeRef"
+            :data="roleTreeData"
             :props="{ children: 'children', label: 'name' }"
             node-key="id"
             :expand-on-click-node="false"
             default-expand-all
             highlight-current
-            @node-click="handleMenuClick"
+            @node-click="handleRoleClick"
           >
             <template #default="{ node, data }">
               <span class="custom-tree-node">
-                <el-icon v-if="data.icon"><component :is="data.icon" /></el-icon>
+                <el-icon><UserFilled /></el-icon>
                 <span>{{ node.label }}</span>
               </span>
             </template>
           </el-tree>
         </div>
 
-        <!-- 右侧按钮权限配置 -->
-        <div class="button-config-panel">
-          <div class="panel-header">
-            <div v-if="currentMenu" class="menu-info">
-              <el-tag type="primary" size="large">{{ currentMenu.name }}</el-tag>
-              <span class="menu-url">{{ currentMenu.url || '-' }}</span>
-            </div>
-            <div v-else class="empty-hint">
-              <el-empty description="请从左侧选择菜单" />
-            </div>
+        <!-- 右侧菜单权限配置 -->
+        <div class="menu-permission-panel">
+          <div v-if="!currentRole" class="empty-state">
+            <el-empty description="请从左侧选择角色" :image-size="120" />
           </div>
 
-          <div v-if="currentMenu" class="button-list">
-            <div class="section-title">
-              <el-icon><Key /></el-icon>
-              <span>按钮权限配置</span>
-            </div>
-
-            <el-alert
-              title="提示：勾选下方按钮为该菜单授予相应的操作权限"
-              type="info"
-              :closable="false"
-              style="margin-bottom: 20px"
-            />
-
-            <!-- 工具栏按钮 -->
-            <div class="button-section">
-              <div class="section-label">
-                <el-icon><Tools /></el-icon>
-                <span>工具栏按钮</span>
+          <div v-else class="permission-content" v-loading="loading">
+            <!-- 全选控制 -->
+            <div class="toolbar">
+              <el-checkbox
+                v-model="selectAll"
+                :indeterminate="isIndeterminate"
+                @change="handleSelectAllChange"
+              >
+                全选所有权限
+              </el-checkbox>
+              <div class="action-buttons">
+                <el-button @click="handleCancel">取消</el-button>
+                <el-button type="primary" :loading="saving" @click="handleSave">
+                  保存权限配置
+                </el-button>
               </div>
-              <el-checkbox-group v-model="selectedToolbarButtons" class="button-checkbox-group">
-                <el-checkbox 
-                  v-for="button in toolbarButtons" 
-                  :key="button.id" 
-                  :value="button.code"
-                  :label="button.code"
-                  :disabled="button.status === 0"
-                >
-                  <el-tag :type="getButtonTypeTag(button.buttonType)" size="small">
-                    {{ button.name }}
-                  </el-tag>
-                  <span class="button-code">({{ button.code }})</span>
-                  <span v-if="button.description" class="button-desc">- {{ button.description }}</span>
-                </el-checkbox>
-              </el-checkbox-group>
-              <el-empty v-if="toolbarButtons.length === 0" description="暂无工具栏按钮" :image-size="60" />
             </div>
 
-            <!-- 行操作按钮 -->
-            <div class="button-section">
-              <div class="section-label">
-                <el-icon><Menu /></el-icon>
-                <span>行操作按钮</span>
-              </div>
-              <el-checkbox-group v-model="selectedRowButtons" class="button-checkbox-group">
-                <el-checkbox 
-                  v-for="button in rowButtons" 
-                  :key="button.id" 
-                  :value="button.code"
-                  :label="button.code"
-                  :disabled="button.status === 0"
-                >
-                  <el-tag :type="getButtonTypeTag(button.buttonType)" size="small">
-                    {{ button.name }}
-                  </el-tag>
-                  <span class="button-code">({{ button.code }})</span>
-                  <span v-if="button.description" class="button-desc">- {{ button.description }}</span>
-                </el-checkbox>
-              </el-checkbox-group>
-              <el-empty v-if="rowButtons.length === 0" description="暂无行操作按钮" :image-size="60" />
-            </div>
+            <!-- 菜单权限树 -->
+            <div class="menu-tree-list">
+              <template v-for="(menu, index) in menuPermissionTree" :key="menu.menuId">
+                <MenuPermissionItem
+                  :menu="menu"
+                  :menu-selections="menuSelections"
+                  :button-selections="buttonSelections"
+                  :is-last-child="index === menuPermissionTree.length - 1"
+                  @menu-change="handleMenuSelectChange"
+                  @button-change="handleButtonChange"
+                />
+              </template>
 
-            <!-- 保存按钮 -->
-            <div class="action-footer">
-              <el-button @click="handleCancel">取消</el-button>
-              <el-button type="primary" :loading="saving" @click="handleSave">
-                保存权限配置
-              </el-button>
+              <el-empty v-if="menuPermissionTree.length === 0" description="暂无菜单权限数据" />
             </div>
           </div>
         </div>
@@ -119,133 +78,494 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, onMounted, defineComponent, h } from 'vue'
+import { ElMessage, ElCheckbox, ElCheckboxGroup, ElDivider } from 'element-plus'
 import {
   Refresh,
-  Key,
-  Tools,
-  Menu,
+  UserFilled,
 } from '@element-plus/icons-vue'
-import { getMenuTree, type MenuTreeNode } from '@/api/menu'
-import { getButtonList, type SysButton } from '@/api/button'
+import { getAllRoles, getMenuPermissionTree, setRoleMenuAuth, type Role, type MenuPermissionNode, type MenuActionButton } from '@/api/role'
 
-const menuTreeRef = ref()
-const menuTreeData = ref<MenuTreeNode[]>([])
-const currentMenu = ref<MenuTreeNode | null>(null)
-const allButtons = ref<SysButton[]>([])
-const selectedToolbarButtons = ref<string[]>([])
-const selectedRowButtons = ref<string[]>([])
-const saving = ref(false)
+// 菜单权限项组件
+const MenuPermissionItem = defineComponent({
+  name: 'MenuPermissionItem',
+  props: {
+    menu: {
+      type: Object as () => MenuPermissionNode,
+      required: true
+    },
+    menuSelections: {
+      type: Object as () => Record<number, boolean>,
+      required: true
+    },
+    buttonSelections: {
+      type: Object as () => Record<number, string[]>,
+      required: true
+    },
+    level: {
+      type: Number,
+      default: 0
+    },
+    isLastChild: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['menu-change', 'button-change'],
+  setup(props, { emit }) {
+    // 判断菜单是否为半选状态
+    const isMenuIndeterminate = () => {
+      if (!props.buttonSelections[props.menu.menuId]) return false
+      const selectedCount = props.buttonSelections[props.menu.menuId].length
+      const totalCount = props.menu.menuButtons.length
+      return selectedCount > 0 && selectedCount < totalCount
+    }
 
-// 工具栏按钮（position为toolbar或both）
-const toolbarButtons = computed(() => {
-  return allButtons.value.filter(btn => 
-    btn.position === 'toolbar' || btn.position === 'both'
-  )
-})
+    const handleMenuChange = () => {
+      emit('menu-change', props.menu)
+    }
 
-// 行操作按钮（position为row或both）
-const rowButtons = computed(() => {
-  return allButtons.value.filter(btn => 
-    btn.position === 'row' || btn.position === 'both'
-  )
-})
+    const handleButtonChange = () => {
+      emit('button-change', props.menu)
+    }
 
-// 获取按钮类型对应的标签类型
-const getButtonTypeTag = (buttonType: string) => {
-  const typeMap: Record<string, any> = {
-    primary: 'primary',
-    success: 'success',
-    warning: 'warning',
-    danger: 'danger',
-    info: 'info',
-    default: '',
+    return () => {
+      const { menu, level, isLastChild } = props
+      const hasButtons = menu.menuButtons && menu.menuButtons.length > 0
+      const hasChildren = menu.children && menu.children.length > 0
+
+      return h('div', { class: 'menu-permission-item' }, [
+        // 菜单项（包含按钮的菜单）
+        hasButtons ? h('div', { 
+          class: 'menu-item',
+          style: { marginLeft: `${level * 24}px` }
+        }, [
+          // 菜单头部 - 只显示菜单名称和checkbox
+          h('div', { class: 'menu-header' }, [
+            h(ElCheckbox, {
+              modelValue: props.menuSelections[menu.menuId],
+              indeterminate: isMenuIndeterminate(),
+              'onUpdate:modelValue': (val: boolean) => {
+                props.menuSelections[menu.menuId] = val
+                handleMenuChange()
+              }
+            }, {
+              default: () => h('span', { class: 'menu-name' }, menu.name)
+            })
+          ]),
+          // 按钮权限 - 直接显示在菜单下方，添加左边距
+          h('div', { 
+            class: 'button-permissions',
+            style: { marginLeft: '24px' }
+          }, [
+            h(ElCheckboxGroup, {
+              modelValue: props.buttonSelections[menu.menuId] || [],
+              class: 'button-checkbox-group',
+              'onUpdate:modelValue': (val: string[]) => {
+                props.buttonSelections[menu.menuId] = val
+                handleButtonChange()
+              }
+            }, {
+              default: () => menu.menuButtons.map(btn =>
+                h(ElCheckbox, {
+                  key: btn.buttonCode,
+                  value: btn.buttonCode
+                }, {
+                  default: () => `${btn.buttonName}(${btn.buttonCode})`
+                })
+              )
+            })
+          ])
+        ]) : (
+          // 父级菜单（没有按钮只有子菜单）
+          hasChildren ? h('div', { 
+            class: 'parent-menu',
+            style: { marginLeft: `${level * 24}px` }
+          }, [
+            h('div', { class: 'parent-menu-header' }, [
+              h(ElCheckbox, {
+                modelValue: props.menuSelections[menu.menuId],
+                indeterminate: isMenuIndeterminate(),
+                'onUpdate:modelValue': (val: boolean) => {
+                  props.menuSelections[menu.menuId] = val
+                  handleMenuChange()
+                }
+              }, {
+                default: () => h('span', { class: 'parent-menu-name' }, menu.name)
+              })
+            ])
+          ]) : null
+        ),
+        // 子菜单
+        hasChildren ? menu.children.map((child, index) =>
+          h(MenuPermissionItem, {
+            key: child.menuId,
+            menu: child,
+            menuSelections: props.menuSelections,
+            buttonSelections: props.buttonSelections,
+            level: level + 1,
+            isLastChild: index === menu.children.length - 1,
+            onMenuChange: (menu: MenuPermissionNode) => emit('menu-change', menu),
+            onButtonChange: (menu: MenuPermissionNode) => emit('button-change', menu)
+          })
+        ) : null
+      ])
+    }
   }
-  return typeMap[buttonType] || ''
+})
+
+const loading = ref(false)
+const saving = ref(false)
+const roleTreeRef = ref()
+const roles = ref<Role[]>([])
+const currentRole = ref<Role | null>(null)
+const menuPermissionTree = ref<MenuPermissionNode[]>([])
+
+// 角色树数据（将角色列表转为树结构）
+const roleTreeData = ref<any[]>([])
+
+// 菜单选择状态（menuId -> boolean）
+const menuSelections = reactive<Record<number, boolean>>({})
+
+// 按钮选择状态（menuId -> buttonCode[]）
+const buttonSelections = reactive<Record<number, string[]>>({})
+
+// 全选状态
+const selectAll = ref(false)
+const isIndeterminate = ref(false)
+
+// 加载角色列表
+const loadRoles = async () => {
+  try {
+    roles.value = await getAllRoles()
+    // 将角色列表转为树结构（单层）
+    roleTreeData.value = roles.value.map(role => ({
+      id: role.id,
+      name: role.name,
+      code: role.code,
+      children: []
+    }))
+  } catch (error) {
+    console.error('加载角色列表失败:', error)
+    ElMessage.error('加载角色列表失败')
+  }
 }
 
-const handleMenuClick = (data: MenuTreeNode) => {
-  currentMenu.value = data
-  // TODO: 加载该菜单已配置的按钮权限
-  // 临时清空选中
-  selectedToolbarButtons.value = []
-  selectedRowButtons.value = []
+// 递归初始化菜单选择状态
+const initMenuSelections = (menus: MenuPermissionNode[]) => {
+  menus.forEach(menu => {
+    if (menu.menuButtons && menu.menuButtons.length > 0) {
+      // 初始化按钮选择
+      const selectedButtons = menu.menuButtons
+        .filter(btn => btn.hasPermission)
+        .map(btn => btn.buttonCode)
+      buttonSelections[menu.menuId] = selectedButtons
+      
+      // 初始化菜单选择状态
+      menuSelections[menu.menuId] = selectedButtons.length === menu.menuButtons.length && menu.menuButtons.length > 0
+    }
+    
+    // 递归处理子菜单
+    if (menu.children && menu.children.length > 0) {
+      initMenuSelections(menu.children)
+    }
+  })
+}
+
+// 加载菜单权限数据
+const loadMenuPermissions = async (roleId: number) => {
+  loading.value = true
+  try {
+    menuPermissionTree.value = await getMenuPermissionTree(roleId)
+    
+    // 初始化选择状态
+    initMenuSelections(menuPermissionTree.value)
+    
+    // 更新全选状态
+    updateSelectAllState()
+  } catch (error) {
+    console.error('加载菜单权限失败:', error)
+    ElMessage.error('加载菜单权限失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 角色点击事件
+const handleRoleClick = (data: any) => {
+  const role = roles.value.find(r => r.id === data.id)
+  if (role) {
+    currentRole.value = role
+    loadMenuPermissions(role.id)
+  }
+}
+
+// 菜单选择改变
+const handleMenuSelectChange = (menu: MenuPermissionNode) => {
+  const isSelected = menuSelections[menu.menuId]
   
-  ElMessage.info(`已选择菜单：${data.name}，待后端接口完成后可保存配置`)
+  // 如果菜单有按钮，则切换按钮选择状态
+  if (menu.menuButtons && menu.menuButtons.length > 0) {
+    if (isSelected) {
+      // 全选该菜单下所有按钮
+      buttonSelections[menu.menuId] = menu.menuButtons.map(btn => btn.buttonCode)
+    } else {
+      // 取消全选
+      buttonSelections[menu.menuId] = []
+    }
+  }
+  
+  // 如果菜单有子菜单，则递归切换子菜单的选择状态
+  if (menu.children && menu.children.length > 0) {
+    const toggleChildren = (children: MenuPermissionNode[], selected: boolean) => {
+      children.forEach(child => {
+        if (child.menuButtons && child.menuButtons.length > 0) {
+          menuSelections[child.menuId] = selected
+          buttonSelections[child.menuId] = selected ? child.menuButtons.map(btn => btn.buttonCode) : []
+        }
+        if (child.children && child.children.length > 0) {
+          toggleChildren(child.children, selected)
+        }
+      })
+    }
+    toggleChildren(menu.children, isSelected)
+  }
+  
+  updateSelectAllState()
 }
 
+// 按钮选择改变
+const handleButtonChange = (menu: MenuPermissionNode) => {
+  const selectedCount = buttonSelections[menu.menuId]?.length || 0
+  const totalCount = menu.menuButtons.length
+  
+  // 更新当前菜单选择状态
+  menuSelections[menu.menuId] = selectedCount === totalCount && totalCount > 0
+  
+  // 更新父菜单的选择状态
+  updateParentMenuState(menu.menuId)
+  
+  updateSelectAllState()
+}
+
+// 更新父菜单状态（向上递归）
+const updateParentMenuState = (childMenuId: number) => {
+  // 在整个树中查找父菜单
+  const findParentAndUpdate = (menus: MenuPermissionNode[], targetChildId: number): boolean => {
+    for (const menu of menus) {
+      // 检查当前菜单的子菜单中是否包含目标菜单
+      if (menu.children && menu.children.length > 0) {
+        const hasChild = menu.children.some(child => child.menuId === targetChildId)
+        
+        if (hasChild) {
+          // 找到了父菜单，检查所有子菜单的选择状态
+          const allChildrenSelected = menu.children.every(child => {
+            if (child.menuButtons && child.menuButtons.length > 0) {
+              const selectedCount = buttonSelections[child.menuId]?.length || 0
+              return selectedCount > 0 || menuSelections[child.menuId]
+            }
+            return false
+          })
+          
+          const anyChildSelected = menu.children.some(child => {
+            if (child.menuButtons && child.menuButtons.length > 0) {
+              const selectedCount = buttonSelections[child.menuId]?.length || 0
+              return selectedCount > 0 || menuSelections[child.menuId]
+            }
+            return false
+          })
+          
+          // 如果任何子菜单被选中，父菜单也应该被选中
+          if (anyChildSelected) {
+            menuSelections[menu.menuId] = allChildrenSelected
+          } else {
+            menuSelections[menu.menuId] = false
+          }
+          
+          // 继续向上更新父菜单的父菜单
+          updateParentMenuState(menu.menuId)
+          return true
+        }
+        
+        // 递归查找
+        if (findParentAndUpdate(menu.children, targetChildId)) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+  
+  findParentAndUpdate(menuPermissionTree.value, childMenuId)
+}
+
+// 递归全选/取消全选菜单
+const toggleAllMenus = (menus: MenuPermissionNode[], selected: boolean) => {
+  menus.forEach(menu => {
+    if (menu.menuButtons && menu.menuButtons.length > 0) {
+      menuSelections[menu.menuId] = selected && menu.menuButtons.length > 0
+      buttonSelections[menu.menuId] = selected ? menu.menuButtons.map(btn => btn.buttonCode) : []
+    }
+    if (menu.children && menu.children.length > 0) {
+      toggleAllMenus(menu.children, selected)
+    }
+  })
+}
+
+// 全选改变
+const handleSelectAllChange = (value: boolean) => {
+  toggleAllMenus(menuPermissionTree.value, value)
+  isIndeterminate.value = false
+}
+
+// 递归计算总按钮数
+const countTotalButtons = (menus: MenuPermissionNode[]): number => {
+  return menus.reduce((sum, menu) => {
+    let count = menu.menuButtons?.length || 0
+    if (menu.children && menu.children.length > 0) {
+      count += countTotalButtons(menu.children)
+    }
+    return sum + count
+  }, 0)
+}
+
+// 更新全选状态
+const updateSelectAllState = () => {
+  const totalButtons = countTotalButtons(menuPermissionTree.value)
+  const selectedButtons = Object.values(buttonSelections).reduce((sum, buttons) => sum + buttons.length, 0)
+  
+  if (selectedButtons === 0) {
+    selectAll.value = false
+    isIndeterminate.value = false
+  } else if (selectedButtons === totalButtons) {
+    selectAll.value = true
+    isIndeterminate.value = false
+  } else {
+    selectAll.value = false
+    isIndeterminate.value = true
+  }
+}
+
+// 取消
 const handleCancel = () => {
-  currentMenu.value = null
-  selectedToolbarButtons.value = []
-  selectedRowButtons.value = []
+  if (currentRole.value) {
+    loadMenuPermissions(currentRole.value.id)
+  }
 }
 
+// 保存
 const handleSave = async () => {
-  if (!currentMenu.value) {
-    ElMessage.warning('请先选择菜单')
+  if (!currentRole.value) {
+    ElMessage.warning('请先选择角色')
     return
   }
 
-  const allSelectedButtons = [
-    ...selectedToolbarButtons.value,
-    ...selectedRowButtons.value,
-  ]
+  // 递归收集所有选中的权限
+  const collectPermissions = (menus: MenuPermissionNode[]): any[] => {
+    const result: any[] = []
+    menus.forEach(menu => {
+      // 收集当前菜单的按钮权限
+      if (menu.menuButtons && menu.menuButtons.length > 0) {
+        const selected = buttonSelections[menu.menuId] || []
+        if (selected.length > 0) {
+          // 将按钮Code转换为按钮ID
+          // buttonCode格式: "100001" 或 "Create"
+          const buttonIds = selected.map(code => {
+            const btn = menu.menuButtons.find(b => b.buttonCode === code)
+            if (!btn) {
+              console.warn(`找不到按钮: ${code} in menu ${menu.menuId}`);
+              return 0;
+            }
+            
+            // 尝试从buttonId获取，如果没有则从buttonCode解析数字ID
+            if (btn.buttonId) {
+              return btn.buttonId;
+            }
+            
+            // buttonCode可能是纯数字字符串（如"100001"）或文本（如"Create"）
+            // 如果是纯数字字符串，直接转换
+            const numericId = parseInt(btn.buttonCode, 10);
+            if (!isNaN(numericId) && numericId > 0) {
+              return numericId;
+            }
+            
+            console.error(`无法获取按钮ID: buttonCode=${btn.buttonCode}, buttonId=${btn.buttonId}`, btn);
+            return 0;
+          }).filter(id => id > 0)
+          
+          if (buttonIds.length > 0) {
+            result.push({
+              menuId: menu.menuId,
+              buttonIds,
+            })
+          }
+        }
+      }
+      
+      // 递归收集子菜单的权限
+      if (menu.children && menu.children.length > 0) {
+        const childPermissions = collectPermissions(menu.children)
+        result.push(...childPermissions)
+        
+        // 如果有子菜单选中了权限，且父菜单没有按钮，也要包含父菜单
+        if (childPermissions.length > 0 && (!menu.menuButtons || menu.menuButtons.length === 0)) {
+          // 父菜单没有按钮，但需要在请求中标识（用空数组）
+          const alreadyAdded = result.some(r => r.menuId === menu.menuId)
+          if (!alreadyAdded) {
+            result.push({
+              menuId: menu.menuId,
+              buttonIds: []
+            })
+          }
+        }
+      }
+    })
+    return result
+  }
 
-  if (allSelectedButtons.length === 0) {
+  const roleMenus = collectPermissions(menuPermissionTree.value)
+
+  console.log('=== 保存权限配置 DEBUG ===');
+  console.log('buttonSelections:', buttonSelections);
+  console.log('menuPermissionTree:', menuPermissionTree.value);
+  console.log('collected roleMenus:', roleMenus);
+  console.log('========================');
+
+  // 检查是否有选中的按钮（而不是检查roleMenus数组）
+  const totalSelectedButtons = Object.values(buttonSelections).reduce((sum, buttons) => sum + buttons.length, 0)
+  
+  if (totalSelectedButtons === 0) {
     ElMessage.warning('请至少选择一个按钮权限')
     return
   }
 
+  console.log('保存权限配置:', {
+    roleId: currentRole.value.id,
+    roleMenus,
+    totalSelectedButtons,
+  })
+
   saving.value = true
   try {
-    // TODO: 调用保存接口
-    // await saveMenuButtonPermission({
-    //   menuId: currentMenu.value.id,
-    //   buttonCodes: allSelectedButtons,
-    // })
-    
-    // 模拟保存
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    ElMessage.success(`已为菜单【${currentMenu.value.name}】保存权限配置（待接口对接）`)
-    console.log('保存配置:', {
-      menuId: currentMenu.value.id,
-      menuName: currentMenu.value.name,
-      toolbarButtons: selectedToolbarButtons.value,
-      rowButtons: selectedRowButtons.value,
-      allButtons: allSelectedButtons,
+    await setRoleMenuAuth({
+      roleId: currentRole.value.id,
+      roleMenus,
     })
-  } catch (error) {
+    
+    ElMessage.success(`已为角色【${currentRole.value.name}】保存权限配置`)
+    
+    // 重新加载权限数据
+    await loadMenuPermissions(currentRole.value.id)
+  } catch (error: any) {
     console.error('保存失败:', error)
+    ElMessage.error(error.message || '保存失败')
   } finally {
     saving.value = false
   }
 }
 
-const loadMenuTree = async () => {
-  try {
-    menuTreeData.value = await getMenuTree()
-  } catch (error) {
-    console.error('加载菜单树失败:', error)
-  }
-}
-
-const loadButtons = async () => {
-  try {
-    const result = await getButtonList({
-      PageIndex: 1,
-      PageSize: 1000, // 加载所有按钮
-    })
-    allButtons.value = result.data.items || []
-  } catch (error) {
-    console.error('加载按钮列表失败:', error)
-  }
-}
-
 onMounted(() => {
-  loadMenuTree()
-  loadButtons()
+  loadRoles()
 })
 </script>
 
@@ -262,7 +582,8 @@ onMounted(() => {
     gap: 20px;
     height: calc(100vh - 200px);
 
-    .menu-tree-panel {
+    // 左侧角色树 - 与菜单管理样式一致
+    .role-tree-panel {
       width: 280px;
       flex-shrink: 0;
       border: 1px solid #e4e7ed;
@@ -302,130 +623,151 @@ onMounted(() => {
       }
     }
 
-    .button-config-panel {
+    // 右侧菜单权限配置
+    .menu-permission-panel {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
 
-      .panel-header {
-        margin-bottom: 20px;
-
-        .menu-info {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-
-          .menu-url {
-            color: #909399;
-            font-size: 14px;
-          }
-        }
-
-        .empty-hint {
-          height: 200px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
+      .empty-state {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      .button-list {
+      .permission-content {
         flex: 1;
-        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
 
-        .section-title {
+        // 工具栏
+        .toolbar {
           display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          color: #303133;
           margin-bottom: 16px;
           padding-bottom: 12px;
-          border-bottom: 2px solid #409eff;
+          border-bottom: 1px solid #e4e7ed;
 
-          .el-icon {
-            color: #409eff;
-          }
-        }
-
-        .button-section {
-          margin-bottom: 32px;
-          padding: 16px;
-          background-color: #f5f7fa;
-          border-radius: 8px;
-
-          .section-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
+          :deep(.el-checkbox) {
+            font-size: 15px;
             font-weight: 500;
-            color: #606266;
-            margin-bottom: 12px;
 
-            .el-icon {
-              color: #67c23a;
+            .el-checkbox__label {
+              color: #303133;
             }
           }
 
-          .button-checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          .action-buttons {
+            display: flex;
             gap: 12px;
-
-            :deep(.el-checkbox) {
-              margin-right: 0;
-              padding: 8px 12px;
-              background-color: #fff;
-              border: 1px solid #dcdfe6;
-              border-radius: 4px;
-              transition: all 0.3s;
-
-              &:hover {
-                border-color: #409eff;
-                background-color: #ecf5ff;
-              }
-
-              &.is-checked {
-                border-color: #409eff;
-                background-color: #ecf5ff;
-              }
-
-              &.is-disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-              }
-
-              .el-checkbox__label {
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                white-space: nowrap;
-
-                .button-code {
-                  color: #909399;
-                  font-size: 12px;
-                }
-
-                .button-desc {
-                  color: #909399;
-                  font-size: 12px;
-                  margin-left: 4px;
-                }
-              }
-            }
           }
         }
 
-        .action-footer {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          padding: 16px 0;
-          border-top: 1px solid #e4e7ed;
-          margin-top: 20px;
+        // 菜单树列表
+        .menu-tree-list {
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding-right: 4px;
+
+          // 菜单权限项
+          .menu-permission-item {
+            // 父级菜单（没有按钮只有子菜单）
+            .parent-menu {
+              margin-bottom: 8px;
+
+              .parent-menu-header {
+                :deep(.el-checkbox) {
+                  font-weight: 600;
+                  font-size: 15px;
+                  color: #303133;
+
+                  .el-checkbox__label {
+                    .parent-menu-name {
+                      color: #303133;
+                    }
+                  }
+                }
+              }
+            }
+
+            // 菜单项（包含按钮）
+            .menu-item {
+              margin-bottom: 12px;
+              padding: 0;
+              background-color: transparent;
+
+              // 菜单标题
+              .menu-header {
+                margin-bottom: 8px;
+
+                :deep(.el-checkbox) {
+                  font-weight: 500;
+                  font-size: 14px;
+
+                  .el-checkbox__label {
+                    .menu-name {
+                      color: #303133;
+                    }
+                  }
+                }
+              }
+
+              // 按钮权限区域
+              .button-permissions {
+                .button-checkbox-group {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                  gap: 8px;
+                  margin-bottom: 8px;
+
+                  :deep(.el-checkbox) {
+                    margin-right: 0;
+                    padding: 6px 12px;
+                    background-color: #f0f9ff;
+                    border: 1px solid #bfdbfe;
+                    border-radius: 4px;
+                    transition: all 0.3s;
+
+                    &:hover {
+                      border-color: #409eff;
+                      background-color: #dbeafe;
+                    }
+
+                    &.is-checked {
+                      border-color: #409eff;
+                      background-color: #dbeafe;
+                      font-weight: 500;
+                    }
+
+                    .el-checkbox__label {
+                      font-size: 13px;
+                      color: #1e40af;
+                    }
+                  }
+                }
+
+                .no-buttons {
+                  text-align: center;
+                  padding: 12px;
+                  color: #909399;
+                  font-size: 13px;
+                  background-color: #f5f7fa;
+                  border-radius: 4px;
+                }
+              }
+            }
+
+            // 分割线样式
+            :deep(.el-divider) {
+              margin: 16px 0;
+              border-color: #e5e7eb;
+            }
+          }
         }
       }
     }

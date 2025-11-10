@@ -44,7 +44,7 @@ namespace Blogs.WebApi.Controllers.Admin
             if (result == null)
                 return NotFound(ResultObject.Error("按钮不存在"));
 
-            return Ok(ResultObject<ButtonDetailDto>.Success(result));
+            return Ok(result);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Blogs.WebApi.Controllers.Admin
         public async Task<ActionResult> GetAvailableButtons([FromQuery] string position = null)
         {
             var result = await _mediator.Send(new GetAvailableButtonsQuery(position));
-            return Ok(ResultObject<List<ButtonListDto>>.Success(result));
+            return Ok(result);
         }
 
         /// <summary>

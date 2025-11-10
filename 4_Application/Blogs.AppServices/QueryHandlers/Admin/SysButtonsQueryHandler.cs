@@ -20,8 +20,8 @@ namespace Blogs.AppServices.QueryHandlers.Admin
     /// </summary>
     public class SysButtonsQueryHandler : SqlSugarDbContext,
         IRequestHandler<GetButtonListQuery, PagedResult<ButtonListDto>>,
-        IRequestHandler<GetButtonDetailQuery, ButtonDetailDto>,
-        IRequestHandler<GetAvailableButtonsQuery, List<ButtonListDto>>
+        IRequestHandler<GetButtonDetailQuery, ResultObject<ButtonDetailDto>>,
+        IRequestHandler<GetAvailableButtonsQuery, ResultObject<List<DropDownlistDto>>>
     {
         private readonly ILogger<SysButtonsQueryHandler> _logger;
 
@@ -74,7 +74,7 @@ namespace Blogs.AppServices.QueryHandlers.Admin
         /// <summary>
         /// 获取按钮详情
         /// </summary>
-        public async Task<ButtonDetailDto> Handle(GetButtonDetailQuery request, CancellationToken cancellationToken)
+        public async Task<ResultObject<ButtonDetailDto>> Handle(GetButtonDetailQuery request, CancellationToken cancellationToken)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace Blogs.AppServices.QueryHandlers.Admin
 
                 button.RelatedMenus = relatedMenus;
 
-                return button;
+                return ResultObject<ButtonDetailDto>.Success(button);
             }
             catch (Exception ex)
             {
@@ -123,7 +123,7 @@ namespace Blogs.AppServices.QueryHandlers.Admin
         /// <summary>
         /// 获取所有可用按钮
         /// </summary>
-        public async Task<List<ButtonListDto>> Handle(GetAvailableButtonsQuery request, CancellationToken cancellationToken)
+        public async Task<ResultObject<List<DropDownlistDto>>> Handle(GetAvailableButtonsQuery request, CancellationToken cancellationToken)
         {
             try
             {
@@ -137,22 +137,15 @@ namespace Blogs.AppServices.QueryHandlers.Admin
 
                 var buttons = await query
                     .OrderBy(b => b.SortOrder)
-                    .Select(b => new ButtonListDto
+                    .Select(b => new DropDownlistDto
                 {
                     Id = b.Id,
                     Code = b.Code,
-                    Name = b.Name,
-                    Description = b.Description,
-                    Icon = b.Icon,
-                    ButtonType = b.ButtonType,
-                    Position = b.Position,
-                    Status = b.Status,
-                    CreatedAt = b.CreatedAt,
-                    CreatedBy = b.CreatedBy
+                    Name = b.Name
                 })
                 .ToListAsync();
 
-                return buttons;
+                return ResultObject<List<DropDownlistDto>>.Success(buttons);
             }
             catch (Exception ex)
             {

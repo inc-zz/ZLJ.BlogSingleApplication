@@ -140,8 +140,8 @@ const handlePageChange = (page: number, pageSize: number) => {
 const loadData = async (page = 1, pageSize = 10) => {
   loading.value = true
   try {
-    const res = await getCategoryList({ page, pageSize })
-    tableData.value = res.list
+    const res = await getCategoryList({ pageIndex: page, pageSize: pageSize })
+    tableData.value = res.items
     total.value = res.total
   } catch (error) {
     console.error('加载数据失败:', error)

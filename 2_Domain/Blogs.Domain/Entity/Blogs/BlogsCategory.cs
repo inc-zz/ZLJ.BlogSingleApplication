@@ -18,28 +18,26 @@ namespace Blogs.Domain.Entity.Blogs
         /// </summary>
         public string BusType { get; private set; }
         public string Description { get; private set; }
-        public string Slug { get; private set; } // URL友好名称
+        public string? Slug { get; private set; } // URL友好名称
         public int Sort { get; private set; }
 
-        // 导航属性
-        private readonly List<BlogsArticle> _articles = new();
-        public virtual IReadOnlyCollection<BlogsArticle> Articles => _articles.AsReadOnly();
+        //// 导航属性
+        //private readonly List<BlogsArticle> _articles = new();
+
+        //public virtual IReadOnlyCollection<BlogsArticle> Articles => _articles.AsReadOnly();
 
         public BlogsCategory() { }
 
-        public BlogsCategory(long id, string name, string slug, string description = null,
-            int sort = 0)
+        public BlogsCategory(string name, string description = null, int sort = 0)
         {
             Name = name;
-            Slug = slug;
             Description = description;
             Sort = sort;
         }
 
-        public void Update(string name, string slug, string description = null, int? sort = null)
+        public void Update(string name, string description = null, int? sort = null)
         {
             Name = name;
-            Slug = slug;
             Description = description;
 
             if (sort.HasValue)

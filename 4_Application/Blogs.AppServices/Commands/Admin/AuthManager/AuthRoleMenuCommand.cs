@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Blogs.AppServices.ModelValidator.Admin.AuthManager;
+using Blogs.AppServices.Requests.Admin;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +10,16 @@ namespace Blogs.AppServices.Commands.Admin.AuthManager
 {
     public class AuthRoleMenuCommand : AuthCommand
     {
-        public AuthRoleMenuCommand()
+        public AuthRoleMenuCommand(AuthRoleMenuRequest request)
         {
+            this.RoleId = request.RoleId;
+            this.RoleMenus = request.RoleMenus;
             
         }
         public override bool IsValid()
         {
-            return this.RoleMenu != null && this.RoleMenu.Count > 0;
+           var result = new AuthRoleMenuCommandValidation().Validate(this); 
+            return result.IsValid;
         }
     }
 }

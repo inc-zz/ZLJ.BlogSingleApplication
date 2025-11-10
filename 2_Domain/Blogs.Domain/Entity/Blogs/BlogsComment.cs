@@ -18,7 +18,7 @@ namespace Blogs.Domain.Entity.Blogs
         public long ReplyToUserId { get; private set; }
 
         public string Content { get; private set; }
-        public CommentStatusEnum Status { get; private set; }
+        public int Status { get; private set; }
         public int LikeCount { get; private set; }
 
         public BlogsComment()

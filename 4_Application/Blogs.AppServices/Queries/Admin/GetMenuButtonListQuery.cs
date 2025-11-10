@@ -12,9 +12,12 @@ namespace Blogs.AppServices.Queries.Admin
     /// <summary>
     /// 获取菜单按钮列表
     /// </summary>
-    public class GetMenuButtonListQuery: IRequest<ResultObject<List<AuthMenuButtonDto>>>
+    public class GetMenuButtonListQuery: IRequest<ResultObject<List<SysMenuTreeButtonsDto>>>
     {
-        public string? MenuName { get; set; }
+        /// <summary>
+        /// 角色Id
+        /// </summary>
+        public long? RoleId { get; set; }
 
     }
 }

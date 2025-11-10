@@ -10,6 +10,8 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
     public class MenuButtonDto
     {
         public long MenuId { get; set; }
+
+        public long ButtonId { get; set; }
         /// <summary>
         /// 按钮代码
         /// </summary>

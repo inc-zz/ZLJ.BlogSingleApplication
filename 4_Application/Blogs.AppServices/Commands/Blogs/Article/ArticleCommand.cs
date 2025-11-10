@@ -90,7 +90,7 @@ namespace Blogs.AppServices.Commands.Blogs.Article
         /// <param name="isTop"></param>
         /// <param name="isRecommend"></param>
         /// <param name="categoryId"></param>
-        public void SetArticleInfo(long? id, string title, string summary, string content, string tags, long? categoryId, string? coverImage)
+        public void SetArticleInfo(long? id, string title, string summary, string content, string tags, long? categoryId, string? coverImage,string? createUser)
         {
             if (id.HasValue)
             {
@@ -105,6 +105,7 @@ namespace Blogs.AppServices.Commands.Blogs.Article
             this.IsTop = true;
             this.IsRecommend = false;
             this.CategoryId = categoryId;
+            this.CreateBy = createUser;
         }
 
         /// <summary>

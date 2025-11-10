@@ -20,7 +20,7 @@ namespace Blogs.AppServices.QueryHandlers.Admin
     /// 授权管理查询执行处理器
     /// </summary>
     public class AuthManagerQueryHandler : SqlSugarDbContext,
-      IRequestHandler<GetMenuButtonListQuery, ResultObject<List<AuthMenuButtonDto>>>
+      IRequestHandler<GetMenuButtonListQuery, ResultObject<List<SysMenuTreeButtonsDto>>>
     {
         private readonly IAppUserRepository _appUserRepository;
         public AuthManagerQueryHandler(IAppUserRepository appUserRepository)
@@ -35,44 +35,68 @@ namespace Blogs.AppServices.QueryHandlers.Admin
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<ResultObject<List<AuthMenuButtonDto>>> Handle(GetMenuButtonListQuery request, CancellationToken cancellationToken)
+        public async Task<ResultObject<List<SysMenuTreeButtonsDto>>> Handle(GetMenuButtonListQuery request, CancellationToken cancellationToken)
         {
             var list = await DbContext.Queryable<SysMenu>()
-                .Where(it => it.IsDeleted == 0)
-                .Select(it => new AuthMenuButtonDto
-                {
-                    MenuId = it.Id,
-                    MenuName = it.Name
-                }).ToListAsync();
+              .Where(it => it.IsDeleted == 0)
+              .OrderByDescending(x => x.Sort)
+              .Select(it => new SysMenuTreeButtonsDto
+              {
+                  MenuId = it.Id,
+                  ParentId = it.ParentId,
+                  Name = it.Name,
+                  Icon = it.Icon
+              })
+              .ToListAsync(cancellationToken);
 
-            var menuId = list.Select(it => it.MenuId).ToList();
+            var menuIds = list.Where(it => it.ParentId > 0).Select(it => it.MenuId).ToList();
             var menuButtonList = await DbContext.Queryable<SysMenuButton, SysButtons>
-                ((a, b) => a.ButtonId == b.Id).Where((a, b) => menuId.Contains(a.MenuId))
+                ((a, b) => a.ButtonId == b.Id).Where((a, b) => menuIds.Contains(a.MenuId))
                 .Select((a, b) => new MenuButtonDto
                 {
                     MenuId = a.MenuId,
+                    ButtonId = b.Id,
                     ButtonCode = b.Code,
                     ButtonName = b.Name
-
                 }).ToListAsync();
 
             var buttonList = await DbContext.Queryable<SysButtons>()
                 .Where(it => it.IsDeleted == 0)
-                .OrderByDescending(o=>o.SortOrder)
+                .OrderByDescending(o => o.SortOrder)
                 .Select(w => new AuthSysButtonDto
                 {
                     Id = w.Id,
                     Code = w.Code,
                     Name = w.Name
                 }).ToListAsync();
-            foreach (var item in list)
+
+            //获取当前角色拥有的按钮权限
+            var roleAuthButtonList = await DbContext.Queryable<SysRoleMenuAuth>()
+                .Where(it => it.RoleId == request.RoleId)
+                .ToListAsync();
+
+            var rootNode = list.Where(it => it.ParentId == 0).ToList();
+            foreach (var item in rootNode)
             {
-                var menuButtons = menuButtonList.Where(it => it.MenuId == item.MenuId).ToList();
-                item.MenuAuthButtons = menuButtons;
+                var childNodes = list.Where(it => it.ParentId == item.MenuId)
+                    .Select(gt => new SysMenuTreeButtonsDto
+                {
+                    MenuId = gt.MenuId,
+                    Name = gt.Name,
+                    Icon = gt.Icon,
+                    HasPermissions = roleAuthButtonList.Any(it=>it.MenuId == gt.MenuId)
+                }).ToList();
+                foreach (var child in childNodes)
+                {
+                    var menuButtons = menuButtonList.Where(it => it.MenuId == child.MenuId).ToList();
+                    child.MenuButtons = menuButtons;
+                    child.HasPermissions = roleAuthButtonList.Any(it=>it.MenuId == child.MenuId);   
+                }
+                item.Children = childNodes;
             }
-            return ResultObject<List<AuthMenuButtonDto>>.Success(list);
+
+            return ResultObject<List<SysMenuTreeButtonsDto>>.Success(list);
 
         }
-
     }
 }
