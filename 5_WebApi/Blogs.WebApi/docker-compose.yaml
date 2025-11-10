@@ -11,7 +11,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=blogsdb;User=root;Password=your_mysql_root_password;SslMode=Preferred;
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=blogsdb;User=root;Password=Zlj@123;SslMode=Preferred;
       - Redis__Host=redis
       - Redis__Port=6379
       - Redis__InstanceName=blogs_cache
@@ -27,7 +27,7 @@ services:
     image: mysql:8.0
     container_name: blogs-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: your_mysql_root_password
+      MYSQL_ROOT_PASSWORD: Zlj@123
       MYSQL_DATABASE: blogsdb
     ports:
       - "3308:3306"
