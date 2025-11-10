@@ -7,7 +7,6 @@ services:
     container_name: blogs-webapi
     ports:
       - "8080:8080"
-      # - "8081:8081"  # 暂时注释，避免端口冲突
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
@@ -15,7 +14,7 @@ services:
       - Redis__Host=redis
       - Redis__Port=6379
       - Redis__InstanceName=blogs_cache
-      - Redis__Password=  # 如果你没设密码，留空或删除
+      - Redis__Password= 
     depends_on:
       - mysql
       - redis
