@@ -36,6 +36,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -136,6 +137,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
  
 #region JWT配置
 var jwtConfig = AppConfig.GetConfigModel<JwtConfig>("JwtConfig");
+Console.WriteLine(JsonConvert.SerializeObject(jwtConfig));
 
 // 注册JWT服务
 //builder.Services.AddScoped<IJwtService, JwtService>();
@@ -258,14 +260,19 @@ builder.Services.AddOpenIddict()
         // 加密和签名配置
         if (builder.Environment.IsDevelopment())
         {
-            options.AddDevelopmentEncryptionCertificate()
-                   .AddDevelopmentSigningCertificate();
+            // 开发环境：使用临时密钥
+            options.AddEphemeralEncryptionKey()
+                   .AddEphemeralSigningKey();
         }
         else
         {
-            // 生产环境使用真实的证书
-            // options.AddEncryptionCertificate(certificate)
-            //        .AddSigningCertificate(certificate);
+            // 使用生成的证书
+            var certificatePath = "/var/lib/jenkins/workspace/ssl/encryption-certificate.pfx";
+            var certificatePassword = Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD") ?? "";
+
+            // 示例1: 从文件加载
+            options.AddEncryptionCertificate(new X509Certificate2(certificatePath, certificatePassword));
+            options.AddSigningCertificate(new X509Certificate2(certificatePath, certificatePassword));
         }
 
         // 配置令牌生命周期
