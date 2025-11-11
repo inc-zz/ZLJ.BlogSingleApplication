@@ -260,6 +260,8 @@ builder.Services.AddOpenIddict()
         // 加密和签名配置
         if (builder.Environment.IsDevelopment())
         {
+            Console.WriteLine("=====================开发环境：使用临时密钥===============");
+
             // 开发环境：使用临时密钥
             options.AddEphemeralEncryptionKey()
                    .AddEphemeralSigningKey();
@@ -280,7 +282,8 @@ builder.Services.AddOpenIddict()
                 var certificate = new X509Certificate2(certificatePath, certificatePassword);
                 Console.WriteLine($"证书主题: {certificate.Subject}");
                 Console.WriteLine($"证书有效期: {certificate.NotBefore} 到 {certificate.NotAfter}");
-                Console.WriteLine("证书加载成功！");
+                Console.WriteLine("证书加载成功！"); 
+
             }
             catch (Exception ex)
             {
