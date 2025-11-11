@@ -136,8 +136,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
  
 #region JWT配置
 var jwtConfig = AppConfig.GetConfigModel<JwtConfig>("JwtConfig");
-Console.WriteLine("JwtConfig=================================================");
-Console.WriteLine(JsonConvert.SerializeObject(jwtConfig));
 
 // 注册JWT服务
 //builder.Services.AddScoped<IJwtService, JwtService>();
