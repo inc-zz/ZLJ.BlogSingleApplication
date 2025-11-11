@@ -28,13 +28,25 @@
   <ItemGroup>
     <ProjectReference Include="..\..\4_Application\Blogs.AppServices\Blogs.AppServices.csproj" />
   </ItemGroup>
-
-  
+  <!--证书  -->
+  <ItemGroup>
+    <None Update="encryption-certificate.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
     
   <ItemGroup>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  
+    
+  <ItemGroup>
+    <None Update="encryption-certificate.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

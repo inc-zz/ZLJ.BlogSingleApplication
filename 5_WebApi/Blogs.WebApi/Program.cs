@@ -270,26 +270,11 @@ builder.Services.AddOpenIddict()
         else
         {
 
-            // 使用生成的证书（无密码）
-            var certificatePath = Path.Combine(builder.Environment.ContentRootPath, "certs", "encryption-certificate.pfx");
-            var certificatePassword = Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD") ?? "";
+            // 推荐：使用 ContentRootPath（容器中是 /app）
+            var certificatePath = Path.Combine(builder.Environment.ContentRootPath, "encryption-certificate.pfx");
 
-            // 对于无密码证书，建议显式传 null 而非空字符串（更可靠）
-            X509Certificate2 LoadCertificate(string path, string? password)
-            {
-                try
-                {
-                    // 先尝试用提供的密码（包括空字符串）
-                    return new X509Certificate2(path, password);
-                }
-                catch (CryptographicException) when (string.IsNullOrEmpty(password))
-                {
-                    // 如果密码为空且失败，尝试传 null（某些系统要求）
-                    return new X509Certificate2(path, (string?)null);
-                }
-            }
-
-            var certificate = LoadCertificate(certificatePath, certificatePassword);
+            // 无密码证书：传 null 更可靠
+            var certificate = new X509Certificate2(certificatePath, (string)null);
 
             options.AddEncryptionCertificate(certificate);
             options.AddSigningCertificate(certificate);
