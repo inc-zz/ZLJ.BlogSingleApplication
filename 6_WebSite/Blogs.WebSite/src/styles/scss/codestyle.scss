@@ -1,0 +1,130 @@
+/* ==================== 代码块基础样式 ==================== */
+.code-block {
+  position: relative;
+  margin: 1.5em 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background-color: #f8f9fa; /* 极浅灰白 */
+  font-family: 'Courier New', monospace;
+  line-height: 1.6;
+  padding: 1rem;
+  border-left: 4px solid #3498db; /* 默认蓝色边框 */
+}
+
+/* 语言标签 */
+.code-block .language-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: #3498db;
+  color: white;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* 不同语言对应不同边框颜色 */
+.code-block[data-language="bash"] {
+  border-left-color: #2c3e50; /* 深蓝 */
+}
+.code-block[data-language="csharp"] {
+  border-left-color: #2196F3; /* 蓝 */
+}
+.code-block[data-language="javascript"] {
+  border-left-color: #FFD700; /* 黄金 */
+}
+.code-block[data-language="python"] {
+  border-left-color: #3575A7; /* 青蓝 */
+}
+.code-block[data-language="java"] {
+  border-left-color: #0074D9; /* 蓝 */
+}
+.code-block[data-language="html"] {
+  border-left-color: #E91E63; /* 粉红 */
+}
+.code-block[data-language="css"] {
+  border-left-color: #9C27B0; /* 紫 */
+}
+.code-block[data-language="json"] {
+  border-left-color: #4CAF50; /* 绿 */
+}
+.code-block[data-language="sql"] {
+  border-left-color: #F44336; /* 红 */
+}
+.code-block[data-language="yaml"] {
+  border-left-color: #FF9800; /* 橙 */
+}
+
+/* 代码内容 */
+.code-block pre {
+  margin: 0;
+  overflow-x: auto;
+  background: none;
+  padding: 0;
+  word-break: break-all;
+}
+
+.code-block code {
+  font-size: 14px;
+  color: #2c3e50;
+  display: block;
+}
+
+/* 行号（可选） */
+.code-block .line-numbers {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  color: #90a4ae;
+  font-size: 0.85rem;
+  padding-top: 1rem;
+  pointer-events: none;
+  user-select: none;
+}
+
+.code-block .line-numbers span {
+  display: block;
+  height: 1.6rem;
+  line-height: 1.6rem;
+  text-align: right;
+  padding-right: 8px;
+}
+
+/* 滚动条样式（美化） */
+.code-block::-webkit-scrollbar {
+  width: 6px;
+}
+.code-block::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.code-block::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+.code-block::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 暗黑模式支持（可选） */
+@media (prefers-color-scheme: dark) {
+  .code-block {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    border-left-color: #3498db;
+  }
+  .code-block .language-tag {
+    background-color: #3498db;
+    color: white;
+  }
+  .code-block code {
+    color: #d4d4d4;
+  }
+  .code-block .line-numbers {
+    color: #888;
+  }
+}
