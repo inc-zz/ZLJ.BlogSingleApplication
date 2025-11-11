@@ -37,7 +37,7 @@ namespace Blogs.WebApi.Controllers.Admin
             _mediator = mediator;
             _notificationHandler = notifications as DomainNotificationHandler;
         }
-
+         
         /// <summary>
         /// 管理员列表
         /// </summary>
