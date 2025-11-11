@@ -273,6 +273,19 @@ builder.Services.AddOpenIddict()
             // 示例1: 从文件加载
             options.AddEncryptionCertificate(new X509Certificate2(certificatePath, certificatePassword));
             options.AddSigningCertificate(new X509Certificate2(certificatePath, certificatePassword));
+
+
+            try
+            {
+                var certificate = new X509Certificate2(certificatePath, certificatePassword);
+                Console.WriteLine($"证书主题: {certificate.Subject}");
+                Console.WriteLine($"证书有效期: {certificate.NotBefore} 到 {certificate.NotAfter}");
+                Console.WriteLine("证书加载成功！");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"证书加载失败: {ex.Message}");
+            }
         }
 
         // 配置令牌生命周期
@@ -338,6 +351,8 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+
+
 // 配置授权
 builder.Services.AddAuthorization(options =>
 {
