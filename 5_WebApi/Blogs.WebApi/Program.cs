@@ -1,4 +1,4 @@
-﻿using OpenIddict.Validation.AspNetCore; 
+﻿using OpenIddict.Validation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Blogs.AppServices.AppServices.implement;
@@ -37,6 +37,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -134,7 +135,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     return ConnectionMultiplexer.Connect(configuration);
 });
 #endregion
- 
+
 #region JWT配置
 var jwtConfig = AppConfig.GetConfigModel<JwtConfig>("JwtConfig");
 Console.WriteLine(JsonConvert.SerializeObject(jwtConfig));
@@ -176,7 +177,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(AppUserCommandHandler).Assembly);
     //cfg.RegisterServicesFromAssembly(typeof(RoleQueryHandler).Assembly);
 });
- 
+
 #endregion
 
 #region 数据迁移-表结构生成
@@ -268,27 +269,33 @@ builder.Services.AddOpenIddict()
         }
         else
         {
-            // 使用生成的证书
-            var certificatePath = "/var/lib/jenkins/workspace/ssl/encryption-certificate.pfx";
+
+            // 使用生成的证书（无密码）
+            var certificatePath = Path.Combine(builder.Environment.ContentRootPath, "certs", "encryption-certificate.pfx");
             var certificatePassword = Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD") ?? "";
 
-            // 示例1: 从文件加载
-            options.AddEncryptionCertificate(new X509Certificate2(certificatePath, certificatePassword));
-            options.AddSigningCertificate(new X509Certificate2(certificatePath, certificatePassword));
-
-
-            try
+            // 对于无密码证书，建议显式传 null 而非空字符串（更可靠）
+            X509Certificate2 LoadCertificate(string path, string? password)
             {
-                var certificate = new X509Certificate2(certificatePath, certificatePassword);
-                Console.WriteLine($"证书主题: {certificate.Subject}");
-                Console.WriteLine($"证书有效期: {certificate.NotBefore} 到 {certificate.NotAfter}");
-                Console.WriteLine("证书加载成功！"); 
+                try
+                {
+                    // 先尝试用提供的密码（包括空字符串）
+                    return new X509Certificate2(path, password);
+                }
+                catch (CryptographicException) when (string.IsNullOrEmpty(password))
+                {
+                    // 如果密码为空且失败，尝试传 null（某些系统要求）
+                    return new X509Certificate2(path, (string?)null);
+                }
+            }
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"证书加载失败: {ex.Message}");
-            }
+            var certificate = LoadCertificate(certificatePath, certificatePassword);
+
+            options.AddEncryptionCertificate(certificate);
+            options.AddSigningCertificate(certificate);
+
+            // 可选：打印验证信息
+            Console.WriteLine($"✅ 证书加载成功！主题: {certificate.Subject}");
         }
 
         // 配置令牌生命周期
@@ -382,7 +389,7 @@ if (!string.IsNullOrEmpty(redisConnectionString))
 // 配置 Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug() // 设置全局最小日志级别
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning) 
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.FromLogContext() // 从日志上下文中丰富属性
     .WriteTo.Console() // 同时输出到控制台
     .WriteTo.File(
