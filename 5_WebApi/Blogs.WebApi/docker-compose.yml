@@ -6,10 +6,10 @@ services:
     image: blogs-webapi:latest
     container_name: blogs-webapi
     ports:
-      - "8080:8080"
+      - "8083:8083"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=http://+:8083
       - ConnectionStrings__Default=Server=mysql;Port=3306;Database=blogsdb;User=root;Password=Zlj@123;SslMode=Preferred;
       - Redis__Host=redis
       - Redis__Port=6379
