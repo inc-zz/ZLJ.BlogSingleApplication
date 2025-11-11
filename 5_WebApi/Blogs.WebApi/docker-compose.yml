@@ -40,6 +40,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: blogs-redis
+    command: ["redis-server", "--bind", "0.0.0.0"]
     ports:
       - "6377:6379"
     volumes:
@@ -54,4 +55,4 @@ volumes:
 
 networks:
   app-network:
-    driver: bridge
+    external: true
