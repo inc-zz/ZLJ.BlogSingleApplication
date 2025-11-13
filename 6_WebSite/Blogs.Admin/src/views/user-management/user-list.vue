@@ -188,8 +188,8 @@ import {
 
 const loading = ref(false)
 const submitLoading = ref(false)
-const tableData = ref([])
-const selectedRows = ref([])
+const tableData = ref<any[]>([])
+const selectedRows = ref<any[]>([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const isView = ref(false)
@@ -334,41 +334,7 @@ const loadData = async () => {
     // TODO: 调用真实API
     // 模拟数据
     await new Promise((resolve) => setTimeout(resolve, 500))
-    tableData.value = [
-      {
-        id: '29219497415184',
-        userName: 'zhangsan',
-        realName: '张三',
-        phoneNumber: '13800138000',
-        email: 'zhangsan@example.com',
-        role: 'user',
-        status: 1,
-        lastLoginTime: '2025/10/29 10:20:35',
-        createTime: '2025/10/22 20:35:31',
-      },
-      {
-        id: '29219840909840',
-        userName: 'lisi',
-        realName: '李四',
-        phoneNumber: '13800138001',
-        email: 'lisi@example.com',
-        role: 'vip',
-        status: 1,
-        lastLoginTime: '2025/10/28 15:30:00',
-        createTime: '2025/10/22 20:46:42',
-      },
-      {
-        id: '35514340842008',
-        userName: 'wangwu',
-        realName: '王五',
-        phoneNumber: '13800138002',
-        email: 'wangwu@example.com',
-        role: 'user',
-        status: 0,
-        lastLoginTime: '',
-        createTime: '2025/10/22 20:22:33',
-      },
-    ]
+    tableData.value = []
     pagination.total = 3
   } catch (error) {
     console.error('加载数据失败:', error)

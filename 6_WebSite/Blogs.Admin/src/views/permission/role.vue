@@ -47,7 +47,7 @@
         :loading="loading"
         row-key="id"
       >
-        <el-table-column type="index" label="序号" width="80" :index="(index) => (pagination.pageIndex - 1) * pagination.pageSize + index + 1" />
+        <el-table-column type="index" label="序号" width="80" :index="(index: number) => (pagination.pageIndex - 1) * pagination.pageSize + index + 1" />
         <el-table-column prop="name" label="角色名称" width="150" />
         <el-table-column prop="code" label="角色编码" width="150" />
         <el-table-column prop="isSystem" label="类型" width="100">
@@ -519,11 +519,11 @@ const handleAuthSubmit = async () => {
   authLoading.value = true
   try {
     // 收集菜单权限
-    const menuPermissions = collectMenuPermissions(menuTreeData.value)
+    const roleMenus = collectMenuPermissions(menuTreeData.value)
     
     await setRoleMenuAuth({
       roleId: currentRole.value.id,
-      menuPermissions,
+      roleMenus,
     })
     
     ElMessage.success('权限配置成功')

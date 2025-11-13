@@ -11,18 +11,27 @@ using SQLitePCL;
 namespace Blogs.WebApi.Controllers
 {
     /// <summary>
-    /// 测试控制器 
+    /// 测试控制器 1
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [AllowAnonymous]
+    [Route("api/admin/[controller]")]
     public class TestController : ControllerBase
     {
         private ILogger<TestController> _logger;
+        private readonly IConfiguration _configuration;
         private readonly IAppUserRepository _appUserRepository;
-        public TestController(ILogger<TestController> logger,IAppUserRepository appUserRepository)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="appUserRepository"></param>
+        /// <param name="configuration"></param>
+        public TestController(ILogger<TestController> logger,IAppUserRepository appUserRepository, IConfiguration configuration )
         {
             _logger = logger;
             _appUserRepository = appUserRepository;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -66,25 +75,26 @@ namespace Blogs.WebApi.Controllers
         }
 
         /// <summary>
-        /// 
+        /// 读取配置项目
         /// </summary>
         /// <returns></returns>
         [HttpGet("user1")]
         public string GetUser()
         {
-            try
-            {
+            var conn = _configuration.GetSection("CorsConfig").Value;
+            return conn;
 
-                var user = _appUserRepository.GetById(string.IsNullOrEmpty("1") ? 0 : long.Parse("1"));
-                return JsonConvert.SerializeObject(user);
-            }
-            catch (Exception e)
-            {
-
-                throw;
-            }
         }
-
+        /// <summary>
+        /// 运行环境
+        /// </summary>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        [HttpGet("env")]
+        public string GetEnvironment([FromServices] IWebHostEnvironment env)
+        {
+            return $"Current Environment: {env.EnvironmentName}";
+        }
 
     }
 }

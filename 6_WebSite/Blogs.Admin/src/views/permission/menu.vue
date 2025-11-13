@@ -231,7 +231,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import {
   Search,
   Delete,
@@ -323,7 +322,7 @@ watch(dialogVisible, (newVal) => {
 // 加载可用按钮列表
 const loadAvailableButtons = async () => {
   try {
-    const data = await getButtonList({ PageIndex: 1, PageSize: 100 })
+    const data = await getButtonList({ pageIndex: 1, pageSize: 100 })
     availableButtons.value = data?.items || []
   } catch (error) {
     console.error('加载按钮列表失败:', error)

@@ -57,7 +57,7 @@ import { getTagList, createTag, updateTag, deleteTag } from '@/api/tag'
 import type { Tag } from '@/types'
 
 const loading = ref(false)
-const tableData = ref([])
+const tableData = ref<Tag[]>([])
 const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新建标签')
@@ -128,8 +128,8 @@ const handlePageChange = (page: number, pageSize: number) => {
 const loadData = async (page = 1, pageSize = 10) => {
   loading.value = true
   try {
-    const res = await getTagList({ page, pageSize })
-    tableData.value = res.list
+    const res = await getTagList({ pageIndex: page, pageSize: pageSize })
+    tableData.value = res.items
     total.value = res.total
   } catch (error) {
     console.error('加载数据失败:', error)

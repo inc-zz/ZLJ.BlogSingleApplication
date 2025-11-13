@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 
-type Category = {
+export type Category = {
   id: number;
   name: string;
   description: string;
@@ -14,7 +14,9 @@ type Category = {
   statusName: string;
 };
 
-type PaginatedResponse<T> = {
+export type Comment=[];
+
+export type PaginatedResponse<T> = {
   pageIndex: number;
   pageSize: number;
   total: number;
@@ -35,3 +37,4 @@ export const fetchCategories = (
     params: { PageIndex: pageIndex, PageSize: pageSize, SearchTerm: searchTerm },
   });
 };
+

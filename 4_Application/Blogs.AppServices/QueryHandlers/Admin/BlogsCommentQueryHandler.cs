@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.QueryHandlers.Admin
 {
+    /// <summary>
+    /// 博客评论查询处理器
+    /// </summary>
     public class BlogsCommentQueryHandler : SqlSugarDbContext,
     IRequestHandler<GetBlogsCommentListQuery, PagedResult<BlogsCommentDto>>
     {
@@ -34,6 +37,7 @@ namespace Blogs.AppServices.QueryHandlers.Admin
                 {
                     Id = c.Id,
                     ArticleId = c.ArticleId,
+                    ArticleTitle = a.Title,
                     Content = c.Content,
                     CreatedBy = c.CreatedBy,
                     LikeCount = c.LikeCount,

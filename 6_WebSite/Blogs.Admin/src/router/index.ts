@@ -49,37 +49,6 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-      // 文章管理
-      {
-        path: '/admin/article',
-        name: 'ArticleManagement',
-        redirect: '/admin/article/categories',
-        meta: {
-          title: '文章管理',
-          icon: 'Document',
-          requiresAuth: true,
-        },
-        children: [
-          {
-            path: '/admin/article/categories',
-            name: 'CategoryManagement',
-            component: () => import('@/views/admin/article/CategoryManagement.vue'),
-            meta: {
-              title: '分类管理',
-              requiresAuth: true,
-            },
-          },
-          {
-            path: '/admin/article/comments',
-            name: 'CommentManagement',
-            component: () => import('@/views/admin/article/CommentManagement.vue'),
-            meta: {
-              title: '评论管理',
-              requiresAuth: true,
-            },
-          },
-        ],
-      },
       // 权限管理
       {
         path: '/permission',
@@ -348,8 +317,9 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const userStore = useUserStore()
+  
   const title = to.meta.title as string
   
   // 设置页面标题

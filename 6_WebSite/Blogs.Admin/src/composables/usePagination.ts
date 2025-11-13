@@ -19,7 +19,7 @@ export function usePagination<T = any>() {
         pageSize: pageSize.value,
         ...params,
       })
-      data.value = result.list
+      data.value = result.items
       total.value = result.total
     } catch (error) {
       console.error('加载数据失败:', error)

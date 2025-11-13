@@ -64,7 +64,7 @@ import { getCategoryList, createCategory, updateCategory, deleteCategory } from 
 import type { Category } from '@/types'
 
 const loading = ref(false)
-const tableData = ref([])
+const tableData = ref<Category[]>([])
 const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新建分类')

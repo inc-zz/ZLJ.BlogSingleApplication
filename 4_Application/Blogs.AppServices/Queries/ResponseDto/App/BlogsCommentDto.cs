@@ -14,6 +14,8 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
 
         public long ArticleId { get; set; }
 
+        public string ArticleTitle { get; set; }
+
         public string Content { get; set; }
 
         public DateTime CreatedAt { get; set; }

@@ -14,7 +14,7 @@ using Blogs.Domain.IRepositorys.Blogs;
 using Blogs.Domain.IServices;
 using Blogs.Domain.Notices;
 using Blogs.Infrastructure;
-using Blogs.Infrastructure.Context; 
+using Blogs.Infrastructure.Context;
 using Blogs.Infrastructure.OpenIdDict;
 using Blogs.Infrastructure.Repositorys.Admin;
 using Blogs.Infrastructure.Repositorys.Blogs;
@@ -131,6 +131,7 @@ builder.Services.AddHttpContextAccessor();
 #region 注册Redis连接
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
+    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
     var configuration = AppConfig.GetSettingString("ConnectionStrings:RedisConnection");
     return ConnectionMultiplexer.Connect(configuration);
 });
@@ -267,7 +268,7 @@ builder.Services.AddOpenIddict()
             options.AddEphemeralEncryptionKey()
                    .AddEphemeralSigningKey();
         }
-        else
+        else if (builder.Environment.IsProduction())
         {
 
             // 推荐：使用 ContentRootPath（容器中是 /app）

@@ -47,8 +47,8 @@ const handleDelete = (row: any) => {
   console.log('删除', row)
 }
 
-const handlePageChange = (page: number, pageSize: number) => {
-  loadData(page, pageSize)
+const handlePageChange = (_page: number, _pageSize: number) => {
+  loadData();
 }
 
 const loadData = async () => {

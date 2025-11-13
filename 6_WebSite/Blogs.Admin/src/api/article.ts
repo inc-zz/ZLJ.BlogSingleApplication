@@ -73,6 +73,23 @@ export interface UploadResponse {
   fileUrl: string
 }
 
+// 评论列表项
+export interface CommentListItem {
+  id: number
+  articleId: number
+  articleTitle: string
+  content: string
+  createdAt: string
+  createdBy: string
+  likeCount: number
+  replies: any
+}
+
+// 评论列表请求参数
+export interface CommentListParams extends PageParams {
+  SearchTerm?: string
+}
+
 // 获取文章列表
 export const getArticleList = (params: ArticleListParams) => {
   return request.get<ArticleListItem[]>('/api/admin/Article/list', { params })
@@ -117,4 +134,14 @@ export const uploadArticleImage = (file: File) => {
       'Content-Type': 'multipart/form-data'
     }
   })
+}
+
+// 获取评论列表
+export const getCommentList = (params: CommentListParams) => {
+  return request.get('/api/admin/Article/comment', { params })
+}
+
+// 删除评论
+export const deleteComment = (id: number) => {
+  return request.delete('/api/admin/Article/comment', { data: { id } })
 }

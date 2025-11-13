@@ -8,7 +8,7 @@ export interface Menu {
   name: string
   url: string
   sort: number
-  iCon: string | null
+  icon: string | null
   buttons?: string | number[]
   type?: number
   children: Menu[] | null
@@ -18,7 +18,7 @@ export interface Menu {
 export interface MenuTreeNode {
   id: number
   name: string
-  iCon: string
+  icon: string
   children: MenuTreeNode[] | null
 }
 

@@ -237,7 +237,6 @@ import {
 import {
   getDepartmentList,
   getDepartmentTree,
-  getDepartmentDetail,
   createDepartment,
   updateDepartment,
   deleteDepartment,
