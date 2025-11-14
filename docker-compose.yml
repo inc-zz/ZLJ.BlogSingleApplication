@@ -21,6 +21,35 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+  # ========== 前端 Admin 管理后台 ==========
+  admin-frontend:
+    build:
+      context: ./6_WebSite/Blogs.Admin
+      dockerfile: Dockerfile
+    image: blogs-admin:latest
+    container_name: blogs-admin
+    ports:
+      - "8085:80"
+    depends_on:
+      - webapi
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ========== 前端 Website 用户站点 ==========
+  website-frontend:
+    build:
+      context: ./6_WebSite/Blogs.WebSite
+      dockerfile: Dockerfile
+    image: blogs-website:latest
+    container_name: blogs-website
+    ports:
+      - "8086:80"
+    depends_on:
+      - webapi
+    restart: unless-stopped
+    networks:
+      - app-network
 
   mysql:
     image: mysql:8.0
