@@ -1,11 +1,3 @@
-# 构建阶段
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --silent    #安装依赖包
-COPY . .
-RUN npm run build        # 生成 dist 目录
-
 # 运行阶段
 FROM nginx:alpine
 # 动态生成 nginx 配置（支持 SPA）
