@@ -21,7 +21,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-  # ========== 前端 Admin 管理后台 ==========
   admin-frontend:
     build:
       context: ./6_WebSite/Blogs.Admin
@@ -35,8 +34,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-
-  # ========== 前端 Website 用户站点 ==========
   website-frontend:
     build:
       context: ./6_WebSite/Blogs.WebSite
