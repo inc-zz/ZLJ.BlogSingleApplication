@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Blogs.Domain;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blogs.AppServices.Queries.ResponseDto.Admin
+namespace Blogs.AppServices.Commands.Admin.SysConfig
 {
-    public class BlogsSettingsDto
+    public abstract class BlogSettingsCommand : Command
     {
         public long Id { get; set; }
         public string? Title { get;  set; }
@@ -16,6 +17,6 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         public string? BusType { get;  set; }
         public string? Content { get;  set; }
         public int Status { get;  set; }
-        public string? StatusName { get;  set; }
+
     }
 }

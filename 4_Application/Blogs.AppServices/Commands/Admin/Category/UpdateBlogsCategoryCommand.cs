@@ -1,4 +1,5 @@
 ﻿using Blogs.AppServices.ModelValidator.Admin.Category;
+using Blogs.AppServices.Requests.Admin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,10 @@ namespace Blogs.AppServices.Commands.Admin.Category
 {
     public class UpdateBlogsCategoryCommand : BlogsCategoryCommand
     {
-        public UpdateBlogsCategoryCommand(long id)
+        public UpdateBlogsCategoryCommand(long id, SetBlogsConfigRequest request)
         {
             Id = id;
+
         }
 
         public override bool IsValid()

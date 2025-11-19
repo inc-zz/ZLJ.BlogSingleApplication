@@ -216,29 +216,11 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: '/system/seo',
-            name: 'SeoSettings',
-            component: () => import('@/views/system/seo.vue'),
+            path: '/system/dictionary',
+            name: 'DictionarySettings',
+            component: () => import('@/views/system/dictionary.vue'),
             meta: {
-              title: 'SEO设置',
-              requiresAuth: true,
-            },
-          },
-          {
-            path: '/system/email',
-            name: 'EmailSettings',
-            component: () => import('@/views/system/email.vue'),
-            meta: {
-              title: '邮件设置',
-              requiresAuth: true,
-            },
-          },
-          {
-            path: '/system/storage',
-            name: 'StorageSettings',
-            component: () => import('@/views/system/storage.vue'),
-            meta: {
-              title: '存储设置',
+              title: '字典配置',
               requiresAuth: true,
             },
           },

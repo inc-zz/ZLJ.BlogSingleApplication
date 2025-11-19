@@ -1,4 +1,5 @@
-﻿using Blogs.AppServices.Requests.App;
+﻿using Blogs.AppServices.Requests.Admin;
+using Blogs.AppServices.Requests.App;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Blogs.AppServices.Commands.Blogs.Settings
 {
     public class UpdateBlogSettingCommand: BlogsSettingCommand
     {
-        public UpdateBlogSettingCommand(UpdateBlogSettingRequest request)
+        public UpdateBlogSettingCommand(SetBlogsConfigRequest request)
         {
             this.Id = request.Id;
             this.Title = request.Title;

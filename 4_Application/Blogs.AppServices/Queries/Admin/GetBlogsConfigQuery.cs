@@ -9,8 +9,11 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Queries.Admin
 {
-    public class GetBlogsSettingsQuery : IRequest<PagedResult<BlogsSettingsDto>>
+    public class GetBlogsConfigQuery : IRequest<PagedResult<BlogsSettingsDto>>
     {
+        public int PageIndex { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string? Where { get; set; }
         /// <summary>
         /// 配置项
         /// </summary>

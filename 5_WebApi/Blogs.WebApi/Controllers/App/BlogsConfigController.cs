@@ -1,6 +1,7 @@
 ﻿using Blogs.AppServices.Commands.Blogs.Article;
 using Blogs.AppServices.Commands.Blogs.Settings;
 using Blogs.AppServices.Queries.App;
+using Blogs.AppServices.Requests.Admin;
 using Blogs.AppServices.Requests.App;
 using Blogs.Core.Models;
 using Blogs.Domain.EventNotices;
@@ -70,9 +71,9 @@ namespace Blogs.WebApi.Controllers.App
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<ActionResult> CreateBlogSettingAsync([FromBody] UpdateBlogSettingRequest param)
+        public async Task<ActionResult> CreateBlogSettingAsync([FromBody] SetBlogsConfigRequest param)
         {
-            UpdateBlogSettingCommand command = new UpdateBlogSettingCommand(param);
+            var command = new UpdateBlogSettingCommand(param);
             // 发送命令并获取结果
             var result = await _mediator.Send(command);
             if (result)

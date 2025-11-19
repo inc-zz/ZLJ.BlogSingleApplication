@@ -51,9 +51,7 @@ namespace Blogs.AppServices.QueryHandlers.Admin
                 .WhereIF(!string.IsNullOrWhiteSpace(request.Where), it => it.Name == request.Where)
                 .ToPageListAsync(request.PageIndex, request.PageSize, total);
 
-            var jsonData = JsonConvert.SerializeObject(list);
             var newList = ConvertToFlatList(list, 0);
-
             var result = new PagedResult<SysDepartmentDto>
             {
                 code = 200,

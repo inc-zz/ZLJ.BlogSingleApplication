@@ -46,7 +46,7 @@ namespace Blogs.AppServices.CommandHandlers.App
                 return false;
             }
             settings.SetEntity(request.Title, request.Summary, request.Url,
-                request.Tags, request.BusType, request.Content, request.Status);
+                request.Tags, request.BusType, request.Content,1);
             var result = await DbContext.Updateable(settings).ExecuteCommandAsync();
 
             return result > 0;
