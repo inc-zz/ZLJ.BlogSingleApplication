@@ -14,34 +14,32 @@ services:
       - Redis__Host=redis
       - Redis__Port=6379
       - Redis__InstanceName=blogs_cache
-      - Redis__Password= 
+      - Redis__Password=
     depends_on:
       - mysql
       - redis
     restart: unless-stopped
     networks:
       - app-network
-  admin-frontend:
+
+  blogs-admin:
     build:
       context: ./6_WebSite/Blogs.Admin
       dockerfile: Dockerfile
     image: blogs-admin:latest
     container_name: blogs-admin
-    ports:
-      - "8085:80"
     depends_on:
       - webapi
     restart: unless-stopped
     networks:
       - app-network
-  website-frontend:
+
+  blogs-website:
     build:
       context: ./6_WebSite/Blogs.WebSite
       dockerfile: Dockerfile
     image: blogs-website:latest
     container_name: blogs-website
-    ports:
-      - "8086:80"
     depends_on:
       - webapi
     restart: unless-stopped
@@ -75,10 +73,27 @@ services:
     networks:
       - app-network
 
+  nginx:
+    image: nginx:alpine
+    container_name: blogs-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/lib/jenkins/workspace/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /var/lib/jenkins/workspace/certs:/etc/nginx/certs:ro
+      - /var/lib/jenkins/workspace/nginx/html:/usr/share/nginx/html:ro
+    depends_on:
+      - blogs-admin
+      - blogs-website
+    restart: unless-stopped
+    networks:
+      - app-network
+
 volumes:
   mysql-data:
   redis-data:
 
 networks:
   app-network:
-    external: true  
+    external: true
