@@ -281,7 +281,7 @@ builder.Services.AddOpenIddict()
             options.AddSigningCertificate(certificate);
 
             // 可选：打印验证信息
-            Console.WriteLine($"✅ 证书加载成功！主题: {certificate.Subject}");
+            Console.WriteLine($"证书加载成功！主题: {certificate.Subject}");
         }
 
         // 配置令牌生命周期

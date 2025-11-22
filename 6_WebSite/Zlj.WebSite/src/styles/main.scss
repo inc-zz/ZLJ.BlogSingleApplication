@@ -1,0 +1,72 @@
+// 护眼蓝色主题配色方案
+:root {
+  --primary-color: #1a5fb4;
+  --primary-dark: #0d3b66;
+  --secondary-color: #aaffff;
+  --accent-color: #f0f8ff;
+  --text-color: #333;
+  --text-light: #666;
+  --background-color: #ffffff;
+  --background-light: #f8f9fa;
+  --border-color: #ddd;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+// 重置样式
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary-color);
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+// 容器样式
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+// 主体内容布局
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 70px; // 为固定头部留出空间
+}
+
+.main-content {
+  flex: 1;
+}
+
+// 响应式工具类
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .main-layout {
+    padding-top: 70px;
+  }
+}
