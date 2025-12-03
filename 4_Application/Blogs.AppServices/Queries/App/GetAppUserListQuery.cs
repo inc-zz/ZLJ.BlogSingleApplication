@@ -13,6 +13,8 @@ namespace Blogs.AppServices.Queries.App
     {
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+        public int Status { get; set; } = 1;  
+        public string Where { get; set; } = string.Empty;   
         public string? SortBy { get; set; }
         public bool SortDescending { get; set; }
     }

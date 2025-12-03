@@ -7,7 +7,7 @@ namespace Blogs.WebApi.Middleware
     // <summary>
     /// 全局异常处理过滤器
     /// 捕获所有未处理的异常并格式化为统一响应
-    /// </summary>
+    ///</summary>
     public class GlobalExceptionFilter : IAsyncExceptionFilter
     {
         private readonly ILogger<GlobalExceptionFilter> _logger;

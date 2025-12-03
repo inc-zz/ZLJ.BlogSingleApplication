@@ -1,6 +1,6 @@
 ﻿using Blogs.AppServices.Commands.Blogs.User;
 using Blogs.AppServices.ModelValidator.Blogs.User;
-using Blogs.AppServices.Requests.App;
+using Blogs.AppServices.Requests.Admin;
 using Blogs.Core;
 using NCD.Common;
 using System;
@@ -9,18 +9,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blogs.AppServices.Commands.Blogs.AppUser
+namespace Blogs.AppServices.Commands.Admin.AppUser
 {
     public class CreateAppUserCommand : AppUserCommand
     {
-
         /// <summary>
         /// 初始化新增用户
         /// </summary>
-        public CreateAppUserCommand(AddAppUserRequest param)
+        public CreateAppUserCommand(CreateUserRequest param)
         {
             Id = new IdWorkerUtils().NextId();
-            Account = param.UserName;
+            Account = param.Account;
             Password = AESCryptHelper.Encrypt(param.Password); //可选择非对称加密
             Email = param.Email;
         }
@@ -34,5 +33,7 @@ namespace Blogs.AppServices.Commands.Blogs.AppUser
             ValidationResult = new CreateAppUserCommandValidation().Validate(this);
             return ValidationResult.IsValid;
         }
+
+
     }
 }

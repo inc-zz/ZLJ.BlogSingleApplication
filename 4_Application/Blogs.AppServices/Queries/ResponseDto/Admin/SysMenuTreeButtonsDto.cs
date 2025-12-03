@@ -13,7 +13,6 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
     {
         public long MenuId { get; set; }
         public long ParentId { get; set; }   
-        public int Sort {  get; set; }
         public string? Name { get; set; }
         public string? Icon { get; set; }
         public bool HasPermissions { get; set; }

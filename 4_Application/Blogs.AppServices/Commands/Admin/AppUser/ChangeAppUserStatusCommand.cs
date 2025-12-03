@@ -1,21 +1,22 @@
-﻿using Blogs.Core.Models;
+﻿using Blogs.AppServices.Commands.Blogs.User;
+using Blogs.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blogs.AppServices.Commands.Blogs.User
+namespace Blogs.AppServices.Commands.Admin.AppUser
 {
     public class ChangeAppUserStatusCommand : AppUserCommand, IRequest<bool>
     {
         public ChangeAppUserStatusCommand(long id)
         {
-            this.Id = id;
+            Id = id;
         }
         public override bool IsValid()
         {
-            return this.Id > 0;
+            return Id > 0;
         }
     }
 }

@@ -24,14 +24,14 @@ namespace Blogs.Domain.IRepositorys.Blogs
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <param name="searchTerm"></param>
-        /// <param name="isActive"></param>
+        /// <param name="isDeleted"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<(IEnumerable<BlogsUser> Users, int TotalCount)> GetAppUserListAsync(
         int pageIndex,
         int pageSize,
         string searchTerm = null,
-        bool? isActive = null,
+        int? isDeleted = null,
         CancellationToken cancellationToken = default);
 
     }

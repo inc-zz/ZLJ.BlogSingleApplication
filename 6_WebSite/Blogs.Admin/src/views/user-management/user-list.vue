@@ -5,8 +5,8 @@
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item>
           <el-input
-            v-model="searchForm.keyword"
-            placeholder="用户名/姓名/邮箱"
+            v-model="searchForm.Where"
+            placeholder="用户名/邮箱"
             clearable
             style="width: 250px"
           >
@@ -17,38 +17,24 @@
         </el-form-item>
         <el-form-item>
           <el-select
-            v-model="searchForm.role"
-            placeholder="全部角色"
-            clearable
-            style="width: 150px"
-          >
-            <el-option label="普通用户" value="user" />
-            <el-option label="VIP用户" value="vip" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-select
-            v-model="searchForm.status"
+            v-model="searchForm.Status"
             placeholder="全部状态"
             clearable
             style="width: 150px"
           >
-            <el-option label="启用" value="1" />
-            <el-option label="禁用" value="0" />
+            <el-option label="启用" :value="1" />
+            <el-option label="禁用" :value="0" />
           </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button :icon="Delete" @click="handleBatchDelete" :disabled="selectedRows.length === 0">
-            批量删除
-          </el-button>
+          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
 
       <!-- 操作栏 -->
       <div class="toolbar">
         <el-button type="primary" :icon="Plus" @click="handleCreate">添加用户</el-button>
-        <el-button :icon="Refresh" @click="handleRefresh">刷新</el-button>
       </div>
 
       <!-- 表格 -->
@@ -57,29 +43,22 @@
         stripe
         border
         :loading="loading"
-        @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="id" label="ID" width="100" />
-        <el-table-column prop="userName" label="用户名" width="150" />
+        <el-table-column type="index" label="序号" width="80" align="center" />
+        <el-table-column prop="account" label="用户名" width="150" />
         <el-table-column prop="realName" label="姓名" width="120" />
-        <el-table-column prop="phoneNumber" label="手机号" width="150" />
         <el-table-column prop="email" label="邮箱" min-width="200" />
-        <el-table-column prop="role" label="角色" width="120">
-          <template #default="{ row }">
-            <el-tag v-if="row.role === 'admin'" type="danger">管理员</el-tag>
-            <el-tag v-else>{{ row.role || '普通用户' }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row.status === 1" type="success">启用</el-tag>
-            <el-tag v-else type="info">禁用</el-tag>
-          </template>
-        </el-table-column>
+        <el-table-column prop="lastLoginIp" label="最近登录IP" width="150" />
         <el-table-column prop="lastLoginTime" label="最近登录" width="180" />
-        <el-table-column prop="createTime" label="注册时间" width="180" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column prop="statusName" label="状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 1 ? 'success' : 'danger'">
+              {{ row.statusName }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="注册时间" width="180" />
+        <el-table-column label="操作" width="280" fixed="right" align="center">
           <template #default="{ row }">
             <el-button
               link
@@ -101,12 +80,20 @@
             </el-button>
             <el-button
               link
+              :type="row.status === 1 ? 'warning' : 'success'"
+              size="small"
+              @click="handleToggleStatus(row)"
+            >
+              {{ row.status === 1 ? '禁用' : '启用' }}
+            </el-button>
+            <el-button
+              link
               type="danger"
               size="small"
-              :icon="Delete"
-              @click="handleDelete(row)"
+              :icon="Key"
+              @click="handleResetPassword(row)"
             >
-              删除
+              重置密码
             </el-button>
           </template>
         </el-table-column>
@@ -114,7 +101,7 @@
 
       <!-- 分页 -->
       <el-pagination
-        v-model:current-page="pagination.page"
+        v-model:current-page="pagination.pageIndex"
         v-model:page-size="pagination.pageSize"
         :total="pagination.total"
         :page-sizes="[10, 20, 50, 100]"
@@ -139,34 +126,71 @@
         :rules="formRules"
         label-width="100px"
       >
-        <el-form-item label="用户名" prop="userName">
-          <el-input v-model="formData.userName" :disabled="isView" />
+        <el-form-item label="用户名" prop="account" v-if="!isEdit">
+          <el-input v-model="formData.account" :disabled="isView" placeholder="请输入用户名" />
         </el-form-item>
-        <el-form-item label="真实姓名" prop="realName">
-          <el-input v-model="formData.realName" :disabled="isView" />
+        <el-form-item label="密码" prop="password" v-if="!isEdit && !isView">
+          <el-input v-model="formData.password" type="password" placeholder="请输入密码" show-password />
         </el-form-item>
-        <el-form-item label="手机号" prop="phoneNumber">
-          <el-input v-model="formData.phoneNumber" :disabled="isView" />
+        <el-form-item label="姓名" prop="realName">
+          <el-input v-model="formData.realName" :disabled="isView" placeholder="请输入姓名" />
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
-          <el-input v-model="formData.email" :disabled="isView" />
+          <el-input v-model="formData.email" :disabled="isView" placeholder="请输入邮箱" />
         </el-form-item>
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="formData.role" :disabled="isView" style="width: 100%">
-            <el-option label="普通用户" value="user" />
-            <el-option label="VIP用户" value="vip" />
-          </el-select>
+        <el-form-item label="手机号" prop="phoneNumber">
+          <el-input v-model="formData.phoneNumber" :disabled="isView" placeholder="请输入手机号" />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="formData.status" :disabled="isView">
-            <el-radio :value="1">启用</el-radio>
-            <el-radio :value="0">禁用</el-radio>
-          </el-radio-group>
+        <el-form-item label="备注" prop="remark" v-if="isEdit || isView">
+          <el-input v-model="formData.remark" type="textarea" :rows="3" :disabled="isView" placeholder="请输入备注" />
+        </el-form-item>
+        <el-form-item label="最近登录IP" v-if="isView">
+          <el-input v-model="formData.lastLoginIp" disabled />
+        </el-form-item>
+        <el-form-item label="最近登录" v-if="isView">
+          <el-input v-model="formData.lastLoginTime" disabled />
+        </el-form-item>
+        <el-form-item label="状态" v-if="isView">
+          <el-tag :type="formData.status === 1 ? 'success' : 'danger'">
+            {{ formData.statusName }}
+          </el-tag>
+        </el-form-item>
+        <el-form-item label="注册时间" v-if="isView">
+          <el-input v-model="formData.createdAt" disabled />
         </el-form-item>
       </el-form>
       <template #footer v-if="!isView">
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 重置密码对话框 -->
+    <el-dialog
+      v-model="resetPasswordVisible"
+      title="重置密码"
+      width="400px"
+    >
+      <el-form
+        ref="resetPasswordFormRef"
+        :model="resetPasswordForm"
+        :rules="resetPasswordRules"
+        label-width="80px"
+      >
+        <el-form-item label="新密码" prop="password">
+          <el-input 
+            v-model="resetPasswordForm.password" 
+            type="password" 
+            placeholder="请输入新密码" 
+            show-password 
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="resetPasswordVisible = false">取消</el-button>
+        <el-button type="primary" :loading="resetPasswordLoading" @click="handleResetPasswordSubmit">
           确定
         </el-button>
       </template>
@@ -179,111 +203,176 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   Search,
-  Delete,
   Plus,
   Refresh,
   View,
   Edit,
+  Key,
 } from '@element-plus/icons-vue'
+import type { PageData } from '@/types'
+import {
+  getAppUserList,
+  createAppUser,
+  getAppUserInfo,
+  toggleAppUserStatus,
+  updateAppUser,
+  resetAppUserPassword,
+  type AppUser,
+} from '@/api/appUser'
 
 const loading = ref(false)
 const submitLoading = ref(false)
-const tableData = ref<any[]>([])
-const selectedRows = ref<any[]>([])
+const resetPasswordLoading = ref(false)
+const tableData = ref<AppUser[]>([])
 const dialogVisible = ref(false)
+const resetPasswordVisible = ref(false)
 const dialogTitle = ref('')
 const isView = ref(false)
+const isEdit = ref(false)
 const formRef = ref<FormInstance>()
+const resetPasswordFormRef = ref<FormInstance>()
 
 const pagination = reactive({
-  page: 1,
+  pageIndex: 1,
   pageSize: 10,
   total: 0,
 })
 
 const searchForm = reactive({
-  keyword: '',
-  role: '',
-  status: '',
+  Where: '',
+  Status: undefined as number | undefined,
 })
 
 const formData = reactive({
-  id: '',
-  userName: '',
+  id: 0,
+  account: '',
+  password: '',
   realName: '',
   phoneNumber: '',
   email: '',
-  role: 'user',
+  remark: '',
+  avatar: '',
+  lastLoginIp: '',
+  lastLoginTime: '',
   status: 1,
+  statusName: '',
+  createdAt: '',
+})
+
+const resetPasswordForm = reactive({
+  id: 0,
+  password: '',
 })
 
 const formRules: FormRules = {
-  userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
-  phoneNumber: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' },
-  ],
+  account: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
   ],
 }
 
+const resetPasswordRules: FormRules = {
+  password: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, message: '密码至少 6 位', trigger: 'blur' },
+  ],
+}
+
 const handleSearch = () => {
-  pagination.page = 1
+  pagination.pageIndex = 1
   loadData()
 }
 
-const handleRefresh = () => {
+const handleReset = () => {
+  searchForm.Where = ''
+  searchForm.Status = undefined
+  pagination.pageIndex = 1
   loadData()
 }
 
 const handleCreate = () => {
   dialogTitle.value = '添加用户'
   isView.value = false
+  isEdit.value = false
   resetForm()
   dialogVisible.value = true
 }
 
-const handleView = (row: any) => {
+const handleView = async (row: AppUser) => {
   dialogTitle.value = '查看用户'
   isView.value = true
-  Object.assign(formData, row)
-  dialogVisible.value = true
+  isEdit.value = false
+  
+  try {
+    const res = await getAppUserInfo(row.id) as any
+    const userInfo = res.data || res
+    Object.assign(formData, userInfo)
+    dialogVisible.value = true
+  } catch (error) {
+    console.error('获取用户详情失败:', error)
+    ElMessage.error('获取用户详情失败')
+  }
 }
 
-const handleEdit = (row: any) => {
+const handleEdit = async (row: AppUser) => {
   dialogTitle.value = '编辑用户'
   isView.value = false
-  Object.assign(formData, row)
-  dialogVisible.value = true
+  isEdit.value = true
+  
+  try {
+    const res = await getAppUserInfo(row.id) as any
+    const userInfo = res.data || res
+    Object.assign(formData, userInfo)
+    dialogVisible.value = true
+  } catch (error) {
+    console.error('获取用户详情失败:', error)
+    ElMessage.error('获取用户详情失败')
+  }
 }
 
-const handleDelete = (row: any) => {
-  ElMessageBox.confirm(`确定要删除用户 ${row.userName} 吗？`, '提示', {
+const handleToggleStatus = (row: AppUser) => {
+  const action = row.status === 1 ? '禁用' : '启用'
+  ElMessageBox.confirm(`确定要${action}用户 ${row.account} 吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
-  }).then(() => {
-    ElMessage.success('删除成功')
-    loadData()
+  }).then(async () => {
+    try {
+      await toggleAppUserStatus(row.id)
+      ElMessage.success(`${action}成功`)
+      loadData()
+    } catch (error) {
+      console.error(`${action}失败:`, error)
+    }
   })
 }
 
-const handleBatchDelete = () => {
-  ElMessageBox.confirm(`确定要删除选中的 ${selectedRows.value.length} 个用户吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  }).then(() => {
-    ElMessage.success('删除成功')
-    loadData()
-  })
+const handleResetPassword = (row: AppUser) => {
+  resetPasswordForm.id = row.id
+  resetPasswordForm.password = ''
+  resetPasswordVisible.value = true
 }
 
-const handleSelectionChange = (selection: any[]) => {
-  selectedRows.value = selection
+const handleResetPasswordSubmit = async () => {
+  if (!resetPasswordFormRef.value) return
+
+  await resetPasswordFormRef.value.validate(async (valid) => {
+    if (valid) {
+      resetPasswordLoading.value = true
+      try {
+        await resetAppUserPassword(resetPasswordForm)
+        ElMessage.success('密码重置成功')
+        resetPasswordVisible.value = false
+      } catch (error) {
+        console.error('重置密码失败:', error)
+      } finally {
+        resetPasswordLoading.value = false
+      }
+    }
+  })
 }
 
 const handlePageChange = () => {
@@ -297,9 +386,28 @@ const handleSubmit = async () => {
     if (valid) {
       submitLoading.value = true
       try {
-        // TODO: 调用API
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        ElMessage.success(formData.id ? '更新成功' : '创建成功')
+        if (isEdit.value) {
+          // 编辑用户
+          await updateAppUser({
+            id: formData.id,
+            email: formData.email,
+            phoneNumber: formData.phoneNumber,
+            remark: formData.remark,
+            avatar: formData.avatar,
+          })
+          ElMessage.success('更新成功')
+        } else {
+          // 添加用户
+          await createAppUser({
+            account: formData.account,
+            password: formData.password,
+            realName: formData.realName,
+            email: formData.email,
+            phoneNumber: formData.phoneNumber,
+            remark: formData.remark,
+          })
+          ElMessage.success('创建成功')
+        }
         dialogVisible.value = false
         loadData()
       } catch (error) {
@@ -318,24 +426,33 @@ const handleDialogClosed = () => {
 
 const resetForm = () => {
   Object.assign(formData, {
-    id: '',
-    userName: '',
+    id: 0,
+    account: '',
+    password: '',
     realName: '',
     phoneNumber: '',
     email: '',
-    role: 'user',
+    remark: '',
+    avatar: '',
+    lastLoginIp: '',
+    lastLoginTime: '',
     status: 1,
+    statusName: '',
+    createdAt: '',
   })
 }
 
 const loadData = async () => {
   loading.value = true
   try {
-    // TODO: 调用真实API
-    // 模拟数据
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    tableData.value = []
-    pagination.total = 3
+    const res = (await getAppUserList({
+      pageIndex: pagination.pageIndex,
+      pageSize: pagination.pageSize,
+      Status: searchForm.Status,
+      Where: searchForm.Where,
+    })) as any as PageData<AppUser>
+    tableData.value = res.items
+    pagination.total = res.total
   } catch (error) {
     console.error('加载数据失败:', error)
   } finally {

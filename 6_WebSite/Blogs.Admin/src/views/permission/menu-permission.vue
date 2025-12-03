@@ -255,15 +255,22 @@ const loadRoles = async () => {
 // 递归初始化菜单选择状态
 const initMenuSelections = (menus: MenuPermissionNode[]) => {
   menus.forEach(menu => {
+    // 根据 hasPermissions 设置菜单选中状态
+    menuSelections[menu.menuId] = menu.hasPermissions || false
+    
+    // 初始化按钮权限选择
     if (menu.menuButtons && menu.menuButtons.length > 0) {
-      // 初始化按钮选择
+      // 根据按钮的 hasPermission 属性筛选已授权的按钮
       const selectedButtons = menu.menuButtons
         .filter(btn => btn.hasPermission)
         .map(btn => btn.buttonCode)
       buttonSelections[menu.menuId] = selectedButtons
       
-      // 初始化菜单选择状态
-      menuSelections[menu.menuId] = selectedButtons.length === menu.menuButtons.length && menu.menuButtons.length > 0
+      // 如果有按钮被选中，但菜单未选中，则需要根据按钮状态更新菜单选中状态
+      // 如果所有按钮都被选中，则菜单也应该被选中
+      if (selectedButtons.length === menu.menuButtons.length && menu.menuButtons.length > 0) {
+        menuSelections[menu.menuId] = true
+      }
     }
     
     // 递归处理子菜单

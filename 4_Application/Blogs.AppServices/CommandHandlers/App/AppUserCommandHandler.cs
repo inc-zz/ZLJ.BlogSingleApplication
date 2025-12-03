@@ -1,4 +1,6 @@
-﻿using Blogs.AppServices.Commands.Blogs.User;
+﻿using Blogs.AppServices.Commands.Admin.AppUser;
+using Blogs.AppServices.Commands.Admin.SysUser;
+using Blogs.AppServices.Commands.Blogs.User;
 using Blogs.Core.Entity.Blogs;
 using Blogs.Core.Enums;
 using Blogs.Domain.IRepositorys.Blogs;
@@ -14,7 +16,9 @@ namespace Blogs.AppServices.CommandHandlers.App
     /// </summary>
     public class AppUserCommandHandler : AppCommandHandler,
         IRequestHandler<CreateAppUserCommand, bool>,
-        IRequestHandler<UpdateAppUserCommand, bool>
+        IRequestHandler<UpdateAppUserCommand, bool>,
+        IRequestHandler<ChangeAppUserStatusCommand, bool>,
+        IRequestHandler<ResetAppUserPasswordCommand, bool> 
     {
         private readonly IMediatorHandler _eventBus;
         private readonly IHttpContextAccessor _httpContext;
@@ -51,7 +55,6 @@ namespace Blogs.AppServices.CommandHandlers.App
             }
             try
             {
-
                 var user = command.Adapt<BlogsUser>();
                 user.Id = new IdWorkerUtils().NextId();
 
@@ -87,27 +90,78 @@ namespace Blogs.AppServices.CommandHandlers.App
                 NotifyValidationErrors(command);
                 return await Task.FromResult(false);
             }
-            try
-            {
-                var user = await _userRepository.GetByIdAsync(command.Id);
-                if(user == null)
-                {
-                    return await Task.FromResult(false);
-                }
-                //头像设置
-                user.SetAvatar(command.Avatar);
-                user.SetEmail(command.Email);
 
-                var isTrue = await _userRepository.UpdateAsync(user);
-                if (isTrue)
-                    return await Task.FromResult(true);
-            }
-            catch (Exception e)
+            var user = await _userRepository.GetByIdAsync(command.Id);
+            if (user == null)
             {
-                Console.WriteLine(e.Message);
-                throw;
+                return await Task.FromResult(false);
             }
-            return await Task.FromResult(false);
+            //头像设置
+            user.SetAvatar(command.Avatar);
+            user.SetEmail(command.Email);
+            user.Description = command.Description;
+
+            var isTrue = await _userRepository.UpdateAsync(user);
+            return isTrue;
+        }
+
+        /// <summary>
+        /// 启用/禁用用户
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<bool> Handle(ChangeAppUserStatusCommand command, CancellationToken cancellationToken)
+        {
+            if (!command.IsValid())
+            {
+                NotifyValidationErrors(command);
+                return await Task.FromResult(false);
+            }
+
+            var user = await _userRepository.GetByIdAsync(command.Id);
+            if (user == null)
+            {
+                return await Task.FromResult(false);
+            }
+            if (command.Status == 1)
+            {
+                user.Enable();
+            }
+            else
+            {
+                user.Disable();
+            }
+
+            var isTrue = await _userRepository.UpdateAsync(user);
+            return isTrue;
+
+        }
+
+        /// <summary>
+        /// 重置用户密码
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<bool> Handle(ResetAppUserPasswordCommand command, CancellationToken cancellationToken)
+        {
+            if (!command.IsValid())
+            {
+                NotifyValidationErrors(command);
+                return false;
+            }
+            var user = await _userRepository.GetByIdAsync(command.Id);
+            if (user == null)
+            {
+                return false;
+            }
+            user.ResetPwd(command.NewPassword);
+
+            var isTrue = await _userRepository.UpdateAsync(user);
+            return isTrue;
         }
 
     }

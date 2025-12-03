@@ -33,11 +33,14 @@ namespace Blogs.AppServices.QueryHandlers.App
                  .Where(u => u.Id == request.Id)
                  .FirstAsync();
 
+            var userData = userInfo.Adapt<BlogsUserDto>();
+            userData.Status = userInfo.IsDeleted == 1 ? 0 : 1;  
+            userData.StatusName = userData.Status == 0 ? "禁用" : "启用";
             return new ResultObject<BlogsUserDto>
             {
                 code = 200,
                 message = "查询成功",
-                data = userInfo.Adapt<BlogsUserDto>(),
+                data = userData,
                 success = true
             };
 

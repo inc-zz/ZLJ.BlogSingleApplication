@@ -65,6 +65,21 @@ namespace Blogs.Core.Entity.Blogs
             Email = email;
         }
 
+        public void Disable()
+        {
+            IsDeleted = 1;
+        }
+
+        public void Enable()
+        {
+            IsDeleted = 0;
+        }
+
+        public void ResetPwd(string newPwd)
+        {
+            Password = newPwd;
+        }
+
         //// 导航属性
         //private readonly List<BlogsArticle> _articles = new();
         //public virtual IReadOnlyCollection<BlogsArticle> Articles => _articles.AsReadOnly();

@@ -38,22 +38,22 @@ namespace Blogs.Infrastructure.Repositorys.Blogs
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <param name="searchTerm"></param>
-        /// <param name="isActive"></param>
+        /// <param name="isDeleted"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public async Task<(IEnumerable<BlogsUser> Users, int TotalCount)> GetAppUserListAsync(
         int pageIndex,
         int pageSize,
         string searchTerm = null,
-        bool? isActive = null,
+        int? isDeleted = null,
         CancellationToken cancellationToken = default)
         {
             var query = base.Context.Queryable<BlogsUser>();
             if (!string.IsNullOrEmpty(searchTerm))
                 query = query.Where(u => u.Account.Contains(searchTerm) || u.Email.Contains(searchTerm));
 
-            if (isActive.HasValue)
-                query = query.Where(u => u.IsDeleted == 0);
+            if (isDeleted.HasValue)
+                query = query.Where(u => u.IsDeleted == isDeleted);
 
             var totalCount = await query.CountAsync(cancellationToken);
             var skip = (pageIndex - 1) * pageSize;

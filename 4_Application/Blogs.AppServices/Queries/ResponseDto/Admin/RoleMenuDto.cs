@@ -14,9 +14,17 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         /// </summary>
         public long MenuId { get; set; }
         /// <summary>
+        /// 上级菜单
+        /// </summary>
+        public long ParentId { get; set; }
+        /// <summary>
         /// 菜单名称
         /// </summary>
         public string? MenuName { get; set; }
+        /// <summary>
+        /// 是否拥有权限
+        /// </summary>
+        public bool HasPermission { get; set; }
         /// <summary>
         /// 菜单按钮
         /// </summary>

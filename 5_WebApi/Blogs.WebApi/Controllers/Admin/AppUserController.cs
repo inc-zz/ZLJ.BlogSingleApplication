@@ -1,9 +1,8 @@
-﻿using Blogs.AppServices.Commands.Blogs.User;
+﻿using Blogs.AppServices.Commands.Admin.AppUser;
+using Blogs.AppServices.Commands.Blogs.User;
 using Blogs.AppServices.Queries.App;
-using Blogs.AppServices.Requests.App;
+using Blogs.AppServices.Requests.Admin;
 using Blogs.Core.Models;
-using Blogs.Domain.EventNotices;
-using Blogs.Domain.Notices;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,19 +39,18 @@ namespace Blogs.WebApi.Controllers.Admin
         /// </summary>
         /// <returns></returns>
         [HttpGet("list")]
-        public async Task<ActionResult> GetUserListAsync([FromQuery] PageParam param)
+        public async Task<ActionResult> GetUserListAsync([FromQuery] GetAppUserListRequest param)
         {
             // 创建查询对象
             var query = new GetAppUserListQuery
             {
                 PageIndex = param.PageIndex,
-                PageSize = param.PageSize
+                PageSize = param.PageSize,
+                Status = param.Status,
+                Where = param.Where
             };
-            _logger.LogInformation("================查询用户列表===============");
-
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
-
         }
 
         /// <summary>
@@ -81,32 +79,47 @@ namespace Blogs.WebApi.Controllers.Admin
         {
             var command = new ChangeAppUserStatusCommand(param.Id);
             var result = await _mediator.Send(command);
-            return new OkObjectResult(result);
+            return Ok(ResultObject.Success(result ? "处理成功" : "处理失败"));
+        }
+
+        /// <summary>
+        /// 添加用户
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPost("create")]
+        public async Task<ActionResult> UpdateUserAsync([FromBody] CreateUserRequest param)
+        {
+            var command = new CreateAppUserCommand(param);
+            var result = await _mediator.Send(command);
+            return Ok(ResultObject.Success(result ? "处理成功" : "处理失败"));
         }
 
         /// <summary>
         /// 修改用户
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="param"></param>
         /// <returns></returns>
         [HttpPut("update")]
         public async Task<ActionResult> UpdateUserAsync([FromBody] UpdateAppUserRequest param)
         {
-            var command = new UpdateAppUserCommand(param);
+            var command = new UpdateAppUserCommand(param.Id, param.Email, param.Avatar, param.PhoneNumber, param.Remark);
             var result = await _mediator.Send(command);
-            return new OkObjectResult(result);
+            return Ok(ResultObject.Success(result ? "处理成功" : "处理失败"));
         }
 
         /// <summary>
         /// 重置密码
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPut("resetpwd")]
-        public async Task<ActionResult> ResetUserPasswordAsync([FromBody] ResetAppUserPasswordCommand command)
+        public async Task<ActionResult> ResetUserPasswordAsync([FromBody] ResetAppUserPasswordRequest request)
         {
+            var command = new ResetAppUserPasswordCommand(request.Id, request.Password);
             var result = await _mediator.Send(command);
-            return Ok();
+            return Ok(ResultObject.Success(result ? "处理成功" : "处理失败"));
         }
+
     }
 }

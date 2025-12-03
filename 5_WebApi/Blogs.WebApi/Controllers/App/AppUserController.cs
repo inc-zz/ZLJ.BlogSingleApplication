@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using Blogs.AppServices.Commands.Admin.SysUser;
+using Blogs.AppServices.Commands.Blogs.AppUser;
 using Blogs.AppServices.Commands.Blogs.User;
 using Blogs.AppServices.Queries.App;
 using Blogs.AppServices.Requests.Admin;
@@ -57,7 +58,6 @@ namespace Blogs.WebApi.Controllers.App
                 if (result.IsSuccess())
                 {
                     _logger.LogInformation("User {Account} logged in successfully", request.Account);
-
                     return Ok(result);
                 }
                 else
@@ -96,6 +96,19 @@ namespace Blogs.WebApi.Controllers.App
                 var notifications = _notificationHandler.GetNotifications();
                 return BadRequest(notifications);
             }
+        }
+
+        /// <summary>
+        /// 更新个人信息
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("update")]
+        public async Task<ActionResult> SetUserInfoAsync([FromBody] EditAppUserRequest request)
+        {
+            var updateAppUserCommand = new UpdateAppUserCommand(request.Id,request.Email,request.Avatar,request.Remark,request.PhoneNumber);
+            var result = await _mediator.Send(updateAppUserCommand);
+            return Ok(ResultObject.Success("处理成功"));
         }
 
         /// <summary>
@@ -144,19 +157,6 @@ namespace Blogs.WebApi.Controllers.App
                 return Unauthorized("Invalid token");
             }
         }
-
-        /// <summary>
-        /// 更新个人信息
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut("update")]
-        public async Task<ActionResult> SetUserInfoAsync(UpdateAppUserRequest request)
-        {
-            var updateAppUserCommand = new UpdateAppUserCommand(request);
-            var result = await _mediator.Send(updateAppUserCommand);
-            return Ok(ResultObject.Success("处理成功"));
-        }
-
+   
     }
 }

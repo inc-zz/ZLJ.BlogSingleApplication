@@ -1294,3 +1294,106 @@ createdBy:（创建人）
   "traceId": null
 }
 
+
+App用户相关接口
+1、用户列表
+	接口地址：/api/admin/AppUser/list
+	请求方式：GET
+	请求参数：PageIndex=1&PageSize=10&Status=用户状态（0禁用，1启用）&Where=用户名or邮箱
+	返回格式：
+{
+  "pageIndex": 1,
+  "pageSize": 1,
+  "total": 5,
+  "items": [
+    {
+      "id": 29219497415184,
+      "account": "zlj02",
+      "realName": "zlj02",
+      "email": "zlj01@sing.com",
+      "bio": null,
+      "lastLoginIp": "127.0.0.1",
+      "lastLoginTime": "2025-10-22T20:35:50",
+      "status": 1,
+      "statusName": "启用",
+      "createdAt": "2025-10-22T20:35:31",
+      "createdBy": null
+    }
+  ],
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+
+2、添加用户
+        接口地址：/api/admin/AppUser/create
+	请求方式：POST，
+	请求参数：
+	{
+  "account": "zlj04",
+  "password": "123456",
+  "realName": "zlj04",
+  "remark": "测试用户",
+  "email": "zlj04@sing.com",
+  "phoneNumber": "15816819918"
+}
+	返回格式：
+	{
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+3、用户详情：
+	接口地址：api/admin/AppUser/info
+	请求方式：GET
+	请求参数：Id= 29219497415184（用户Id）
+	返回格式：{
+  "data": {
+    "id": 29219497415184,
+    "account": "zlj02",
+    "realName": null,
+    "email": "zlj01@sing.com",
+    "bio": null,
+    "lastLoginIp": "127.0.0.1",
+    "lastLoginTime": "2025-10-22T20:35:50",
+    "status": 1,
+    "statusName": "启用",
+    "createdAt": "2025-10-22T20:35:31",
+    "createdBy": null
+  },
+  "success": true,
+  "message": "查询成功",
+  "code": 200,
+  "traceId": null
+}
+4、启用/禁用用户
+	接口地址：api/admin/AppUser/status
+	请求方式：PUT
+	请求参数：Id=29219497415184（用户Id）
+	返回格式：
+{
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+5、修改用户：
+	接口地址：api/admin/AppUser/update
+	请求方式：PUT
+	请求参数：{
+  	"id": 29219497415184,
+  	"remark": "112233",
+ 	 "email": "112233@sing.com",
+ 	 "phoneNumber": "15816818822",
+  	"avatar": "/user/photo/20251201/12312321312.png"
+	}
+	返回格式：
+	{
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}
+6、

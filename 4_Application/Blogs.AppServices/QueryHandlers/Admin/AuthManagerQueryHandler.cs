@@ -29,7 +29,7 @@ namespace Blogs.AppServices.QueryHandlers.Admin
         }
 
         /// <summary>
-        /// 查询
+        /// 查询角色菜单按钮权限
         /// </summary>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>

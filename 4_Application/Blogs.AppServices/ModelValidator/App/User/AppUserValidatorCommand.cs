@@ -20,6 +20,11 @@ namespace Blogs.AppServices.ModelValidator.App.User
             _userValidatorService = new AppUserValidatorService();
         }
 
+        protected void ValidateId()
+        {
+            RuleFor(x => x.Id).GreaterThan(0).WithMessage("用户Id不能为空");
+        }
+
         /// <summary>
         /// 验证账号
         /// </summary>
@@ -45,12 +50,27 @@ namespace Blogs.AppServices.ModelValidator.App.User
         {
             RuleFor(x => x.Password)
             .NotEmpty().WithMessage("密码不能为空")
-            .MinimumLength(6).WithMessage("密码长度不能少于6位")
-            //.MaximumLength(20).WithMessage("密码长度不能超过20位")
+            .MinimumLength(6).WithMessage("密码长度不能少于6位") 
             .Matches(@"^(?=.*[a-zA-Z])(?=.*\d)").WithMessage("密码必须包含字母和数字")
             .Matches(@"^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?]*$").WithMessage("密码包含非法字符")
             .Must(password => !IsCommonPassword(password)).WithMessage("密码过于简单，请使用更复杂的密码");
         }
+
+        protected void ValidatePassword2()
+        {
+            RuleFor(x => x.OldPassword).NotEmpty().WithMessage("旧密码不能为空");
+            RuleFor(x => x).Must((x, cancellation) =>
+            {
+                return x.Password == x.OldPassword;
+            }).WithMessage("新密码与旧密码不能相同");
+        }
+
+
+        /// <summary>
+        /// 验证简单密码模式
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
         private bool IsCommonPassword(string password)
         {
             var commonPasswords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)

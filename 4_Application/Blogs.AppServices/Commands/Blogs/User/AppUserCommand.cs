@@ -18,6 +18,8 @@ namespace Blogs.AppServices.Commands.Blogs.User
         /// 密码
         /// </summary>
         public string Password { get; protected set; }
+
+        public string? OldPassword { get; protected set; }
         /// <summary>
         /// Sex
         /// </summary>
@@ -38,6 +40,10 @@ namespace Blogs.AppServices.Commands.Blogs.User
         /// Email
         /// </summary>
         public string? Email { get; protected set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ? Description { get; protected set; }
 
 
     }

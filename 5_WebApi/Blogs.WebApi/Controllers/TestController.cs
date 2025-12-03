@@ -96,5 +96,6 @@ namespace Blogs.WebApi.Controllers
             return $"Current Environment: {env.EnvironmentName}";
         }
 
+
     }
 }

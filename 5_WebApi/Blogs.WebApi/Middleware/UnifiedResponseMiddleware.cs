@@ -14,18 +14,15 @@ public class UnifiedResponseMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<UnifiedResponseMiddleware> _logger;
     private readonly IWebHostEnvironment _environment;
-    private readonly IMediatorHandler _bus;
 
     public UnifiedResponseMiddleware(
         RequestDelegate next,
         ILogger<UnifiedResponseMiddleware> logger,
-        IWebHostEnvironment environment,
-        IMediatorHandler bus)
+        IWebHostEnvironment environment)
     {
         _next = next;
         _logger = logger;
         _environment = environment;
-        _bus = bus;
     }
 
     public async Task InvokeAsync(
