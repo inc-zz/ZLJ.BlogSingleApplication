@@ -7,6 +7,7 @@ using Blogs.Domain.Entity.Admin;
 using Blogs.Domain.IRepositorys.Blogs;
 using Dm.util;
 using Mapster;
+using Newtonsoft.Json;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -57,46 +58,97 @@ namespace Blogs.AppServices.QueryHandlers.Admin
                     MenuId = a.MenuId,
                     ButtonId = b.Id,
                     ButtonCode = b.Code,
-                    ButtonName = b.Name
+                    ButtonName = b.Name,
+
                 }).ToListAsync();
 
-            var buttonList = await DbContext.Queryable<SysButtons>()
-                .Where(it => it.IsDeleted == 0)
-                .OrderByDescending(o => o.SortOrder)
-                .Select(w => new AuthSysButtonDto
-                {
-                    Id = w.Id,
-                    Code = w.Code,
-                    Name = w.Name
-                }).ToListAsync();
 
             //获取当前角色拥有的按钮权限
             var roleAuthButtonList = await DbContext.Queryable<SysRoleMenuAuth>()
                 .Where(it => it.RoleId == request.RoleId)
+                .Select(wt => new RoleMenuButtonAuthDto
+                {
+                    MenuId = wt.MenuId,
+                    RoleId = wt.RoleId,
+                    ButtonPermissions = wt.ButtonPermissions
+                })
                 .ToListAsync();
+
+            foreach (var item in roleAuthButtonList)
+            {
+                if (!string.IsNullOrWhiteSpace(item.ButtonPermissions))
+                {
+                    try
+                    {
+                        var buttonList = JsonConvert.DeserializeObject<List<MenuButtonDto>>(item.ButtonPermissions);
+                        item.MenuButtons = buttonList;
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
+
+            foreach (var item in menuButtonList)
+            {
+                var roleAuthModel = roleAuthButtonList.FirstOrDefault(it => it.MenuId == item.MenuId && it.RoleId == request.RoleId);
+                if (roleAuthModel != null)
+                {
+                    item.HasPermission = true;
+
+                    if (roleAuthModel?.MenuButtons != null && roleAuthModel?.MenuButtons?.Count > 0)
+                    {
+                        foreach (var button in roleAuthModel.MenuButtons)
+                        {
+                            if (button.ButtonId == item.ButtonId)
+                            {
+                                item.HasPermission = true;
+                            }
+                        }
+                    }
+                }
+            }
 
             var rootNode = list.Where(it => it.ParentId == 0).ToList();
             foreach (var item in rootNode)
             {
                 var childNodes = list.Where(it => it.ParentId == item.MenuId)
                     .Select(gt => new SysMenuTreeButtonsDto
-                {
-                    MenuId = gt.MenuId,
-                    Name = gt.Name,
-                    Icon = gt.Icon,
-                    HasPermissions = roleAuthButtonList.Any(it=>it.MenuId == gt.MenuId)
-                }).ToList();
+                    {
+                        MenuId = gt.MenuId,
+                        Name = gt.Name,
+                        Icon = gt.Icon,
+                        HasPermissions = roleAuthButtonList.Any(it => it.MenuId == gt.MenuId)
+                    }).ToList();
+
                 foreach (var child in childNodes)
                 {
                     var menuButtons = menuButtonList.Where(it => it.MenuId == child.MenuId).ToList();
+                    //当前菜单所有的按钮
                     child.MenuButtons = menuButtons;
-                    child.HasPermissions = roleAuthButtonList.Any(it=>it.MenuId == child.MenuId);   
+                    child.HasPermissions = roleAuthButtonList.Any(it => it.MenuId == child.MenuId);
                 }
+
+                item.HasPermissions = roleAuthButtonList.Any(it => it.MenuId == item.MenuId);
                 item.Children = childNodes;
             }
 
-            return ResultObject<List<SysMenuTreeButtonsDto>>.Success(list);
+            return ResultObject<List<SysMenuTreeButtonsDto>>.Success(rootNode);
 
         }
     }
+
+    public class RoleMenuButtonAuthDto
+    {
+
+        public long MenuId { get; set; }
+
+        public long RoleId { get; set; }
+
+        public string ButtonPermissions { get; set; }
+
+        public List<MenuButtonDto> MenuButtons { get; set; }
+
+    }
+
 }

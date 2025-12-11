@@ -66,6 +66,8 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 }
 
                 // 使用 Mapster 更新实体，避免手动赋值
+                entity.Status = 1;
+                entity.IsDeleted = 0;
                 command.Adapt(entity);
                 entity.MarkAsModified(CurrentUser.Instance.UserInfo.UserName);
 

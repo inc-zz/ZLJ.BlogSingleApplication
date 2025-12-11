@@ -63,9 +63,7 @@ namespace Blogs.Core.DtoModel.Admin
     {
         public long? UserId { get; set; }
         public long RoleId { get; set; }
-
         public string? Name { get; set; }
-
         public string? Code { get; set; }
     }
 }

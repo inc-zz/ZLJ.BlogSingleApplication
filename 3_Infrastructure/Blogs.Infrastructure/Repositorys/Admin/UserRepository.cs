@@ -58,7 +58,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
         } 
         
         /// <summary>
-        /// 
+        /// 用户名获取用户信息
         /// </summary>
         /// <param name="userName"></param>
         /// <returns></returns>
@@ -67,18 +67,17 @@ namespace Blogs.Infrastructure.Repositorys.Admin
             var conn = base.Context.CurrentConnectionConfig.ConnectionString;
             try
             {
-                var userList = await base.Context.Queryable<SysUser>().ToListAsync();
-
-                var conn2 = dbContext.DbContext.CurrentConnectionConfig.ConnectionString;
                 var user = await dbContext.DbContext.Queryable<SysUser>()
-                    .Where(it => it.UserName == userName).FirstAsync();
-                return user;
+                  .Includes(u => u.Department)
+                  .Includes(u => u.UserRoles)
+                  .Where(it => it.UserName == userName)
+                  .FirstAsync();
 
+                return user;
             }
             catch (Exception e)
             {
-
-                throw;
+                throw new Exception("获取用户信息失败");
             }
         }
 
@@ -93,7 +92,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
         }
 
         /// <summary>
-        /// 
+        /// 记录登录失败次数
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>

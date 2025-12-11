@@ -162,8 +162,12 @@ namespace Blogs.AppServices.CommandHandlers.Admin
                 //菜单不存在
                 return false;
             }
-            menuInfo.SoftDelete();
-            var result = await DbContext.Updateable(menuInfo).ExecuteCommandAsync();
+            var isAuth  = await DbContext.Queryable<SysRoleMenuAuth>().Where(it=>it.MenuId == command.Id).AnyAsync();
+            if (isAuth)
+            {
+
+            }
+            var result = await DbContext.Deleteable(menuInfo).ExecuteCommandAsync();
             return result > 0;
         }
 

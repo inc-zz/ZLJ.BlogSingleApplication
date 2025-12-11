@@ -4,6 +4,7 @@ using Blogs.Common.DtoModel.Admin;
 using Blogs.Core;
 using Blogs.Core.DtoModel.Admin;
 using Blogs.Core.Models;
+using Blogs.Domain.Entity.Admin;
 using Blogs.Domain.IRepositorys.Admin;
 using Blogs.Domain.IServices;
 using Blogs.Domain.Notices;
@@ -34,7 +35,7 @@ namespace Blogs.AppServices.CommandHandlers
             DomainNotificationHandler notificationHandler,
             ILogger<UserLoginCommandHandler> logger,
             IRedisCacheService redisCache)
-             : base(notificationHandler,logger)
+             : base(notificationHandler, logger)
         {
             _userRepository = userRepository;
             _authService = authService;
@@ -110,7 +111,8 @@ namespace Blogs.AppServices.CommandHandlers
             await _userRepository.ResetLoginFailedCountAsync(user.Id);
 
             // 更新最后登录信息
-            await _userRepository.UpdateLastLoginInfoAsync(user.Id, "127.0.0.1", DateTime.Now);
+            var ipAddress = IPHelper.GetIp();
+            await _userRepository.UpdateLastLoginInfoAsync(user.Id, ipAddress, DateTime.Now);
 
             // 生成访问令牌 (使用OpenIddict)
             var tokenResult = await _openIddictService.GenerateTokenAsync(user);
@@ -118,11 +120,38 @@ namespace Blogs.AppServices.CommandHandlers
             // 返回登录结果
             var loginResult = new LoginResultDto
             {
-                UserInfo = user.Adapt<AdminLoginUserDto>(),
                 AccessToken = tokenResult.AccessToken,
                 RefreshToken = tokenResult.RefreshToken,
                 ExpiresIn = tokenResult.Expiration
             };
+
+
+            var userDepartment = new Dictionary<string, string>();
+            userDepartment.Add(user.Department.Id.ToString(), user.Department.Name);
+            loginResult.UserInfo = new AdminLoginUserDto
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                RealName = user.RealName,
+                Department = userDepartment
+            };
+
+            var roleIds = user.UserRoles?.Select(r => r.RoleId).ToList() ?? null;
+            if (roleIds != null && roleIds?.Count > 0)
+            {
+                var rawDict = await DbContext.Queryable<SysRole>()
+                    .Where(it => roleIds.Contains(it.Id))
+                    .Select(gt => new { gt.Id, gt.Name })
+                    .ToDictionaryAsync(k => k.Id, v => v.Name);
+                Dictionary<long, string> userRoles = rawDict
+                .ToDictionary(
+                    kv => long.Parse(kv.Key),
+                    kv => kv.Value?.ToString() ?? ""
+                );
+                loginResult.UserInfo.UserRole = userRoles;
+            }
+
             return ResultObject<LoginResultDto>.Success(loginResult, "登录成功");
         }
 

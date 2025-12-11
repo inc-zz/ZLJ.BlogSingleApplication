@@ -17,7 +17,6 @@ namespace Blogs.Domain.Entity.Admin
 
         public SysRoleMenuAuth()
         {
-                
         }
 
         ///<summary>
@@ -32,6 +31,5 @@ namespace Blogs.Domain.Entity.Admin
         ///  菜单授权按钮
         ///</summary>
         public string? ButtonPermissions { set; get; }
-
     }
 }

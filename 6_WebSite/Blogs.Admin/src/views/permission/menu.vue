@@ -262,7 +262,6 @@ const dialogTitle = ref('')
 const isEdit = ref(false)
 const isView = ref(false)
 const formRef = ref<FormInstance>()
-const menuTreeRef = ref()
 const currentParentId = ref<number | null>(null)
 
 const pagination = reactive({
@@ -588,10 +587,27 @@ const loadData = async () => {
 
 const loadMenuTree = async () => {
   try {
-    menuTreeData.value = await getMenuTree()
+    const data = await getMenuTree()
+    // 后端已返回正确的树形结构，清理并赋值
+    menuTreeData.value = sanitizeMenuTree(data)
   } catch (error) {
     console.error('加载菜单树失败:', error)
+    menuTreeData.value = []
   }
+}
+
+// 清理菜单树数据（移除图标名称的空格和无效字符）
+const sanitizeMenuTree = (nodes: any[]): MenuTreeNode[] => {
+  if (!Array.isArray(nodes)) return []
+  
+  return nodes.map(node => ({
+    id: node.id,
+    name: node.name,
+    icon: node.icon ? node.icon.trim() : '',
+    children: node.children && Array.isArray(node.children) 
+      ? sanitizeMenuTree(node.children) 
+      : null
+  }))
 }
 
 onMounted(() => {

@@ -198,87 +198,12 @@
         </el-button>
       </template>
     </el-dialog>
-
-    <!-- 权限配置对话框 -->
-    <el-dialog
-      v-model="authDialogVisible"
-      title="权限配置"
-      width="900px"
-      @closed="handleAuthDialogClosed"
-    >
-      <div class="auth-header">
-        <el-alert
-          :title="`正在为角色【${currentRole?.name}】配置权限`"
-          type="info"
-          :closable="false"
-        />
-      </div>
-      
-      <div class="auth-content">
-        <div class="permission-modules">
-          <div 
-            v-for="module in menuTreeData" 
-            :key="module.menuId" 
-            class="module-item"
-          >
-            <div class="module-header">
-              <el-checkbox 
-                v-model="module.hasPermission"
-                @change="handleModuleCheck(module)"
-              >
-                <span class="module-name">{{ module.menuName }}</span>
-              </el-checkbox>
-            </div>
-            
-            <div class="module-content" v-if="module.children && module.children.length > 0">
-              <div 
-                v-for="subMenu in module.children" 
-                :key="subMenu.menuId"
-                class="submenu-item"
-              >
-                <div class="submenu-header">
-                  <el-checkbox 
-                    v-model="subMenu.hasPermission"
-                    @change="handleSubMenuCheck(subMenu, module)"
-                  >
-                    <span class="submenu-name">{{ subMenu.menuName }}</span>
-                    <span class="submenu-url">{{ subMenu.menuUrl }}</span>
-                  </el-checkbox>
-                </div>
-                
-                <div 
-                  class="button-permissions" 
-                  v-if="subMenu.hasPermission"
-                >
-                  <el-checkbox-group v-model="subMenu.selectedButtons">
-                    <el-checkbox 
-                      v-for="btn in availableButtons" 
-                      :key="btn.code"
-                      :label="btn.code"
-                      :value="btn.code"
-                    >
-                      {{ btn.name }}
-                    </el-checkbox>
-                  </el-checkbox-group>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <template #footer>
-        <el-button @click="authDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="authLoading" @click="handleAuthSubmit">
-          保存权限
-        </el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   Search,
@@ -295,24 +220,19 @@ import {
   createRole,
   updateRole,
   deleteRole,
-  getRoleAuth,
-  setRoleMenuAuth,
   type Role,
-  type MenuPermission,
 } from '@/api/role'
+
+const router = useRouter()
 
 const loading = ref(false)
 const submitLoading = ref(false)
-const authLoading = ref(false)
 const tableData = ref<Role[]>([])
 const dialogVisible = ref(false)
-const authDialogVisible = ref(false)
 const dialogTitle = ref('')
 const isView = ref(false)
 const isEdit = ref(false)
 const formRef = ref<FormInstance>()
-const currentRole = ref<Role | null>(null)
-const menuTreeData = ref<any[]>([])
 
 const pagination = reactive({
   pageIndex: 1,
@@ -346,16 +266,6 @@ const formRules: FormRules = {
   ],
   isSystem: [{ required: true, message: '请选择角色类型', trigger: 'change' }],
 }
-
-// 可用按钮权限
-const availableButtons = [
-  { code: 'Create', name: '新增' },
-  { code: 'Update', name: '修改' },
-  { code: 'Delete', name: '删除' },
-  { code: 'Select', name: '查询' },
-  { code: 'Insert', name: '导入' },
-  { code: 'Export', name: '导出' },
-]
 
 const handleSearch = () => {
   pagination.pageIndex = 1
@@ -424,115 +334,14 @@ const handleDelete = (row: Role) => {
   })
 }
 
-const handleAuth = async (row: Role) => {
-  currentRole.value = row
-  authDialogVisible.value = true
-  try {
-    const data = await getRoleAuth(row.id)
-    // 构建模块结构
-    menuTreeData.value = buildModuleStructure(data)
-  } catch (error) {
-    console.error('获取权限失败:', error)
-  }
-}
-
-// 构建模块结构
-const buildModuleStructure = (list: MenuPermission[]) => {
-  const modules: any[] = []
-  const map = new Map()
-  
-  // 初始化所有节点
-  list.forEach(item => {
-    map.set(item.menuId, {
-      ...item,
-      children: [],
-      selectedButtons: item.buttonPermissions || [],
-    })
-  })
-  
-  // 构建模块结构
-  list.forEach(item => {
-    const node = map.get(item.menuId)
-    if (item.parentId === 0) {
-      // 一级菜单（模块）
-      modules.push(node)
-    } else {
-      // 二级菜单
-      const parent = map.get(item.parentId)
-      if (parent) {
-        parent.children.push(node)
-      }
+const handleAuth = (row: Role) => {
+  // 跳转到权限配置页面，传入角色ID
+  router.push({
+    path: '/permission/menu-permission',
+    query: {
+      roleId: row.id.toString()
     }
   })
-  
-  return modules
-}
-
-// 模块复选框变化
-const handleModuleCheck = (module: any) => {
-  // 当模块被选中时，选中所有子菜单
-  if (module.children && module.children.length > 0) {
-    module.children.forEach((child: any) => {
-      child.hasPermission = module.hasPermission
-    })
-  }
-}
-
-// 子菜单复选框变化
-const handleSubMenuCheck = (subMenu: any, module: any) => {
-  // 当子菜单被取消选中时，清空按钮权限
-  if (!subMenu.hasPermission) {
-    subMenu.selectedButtons = []
-  }
-  
-  // 检查模块是否应该被选中
-  if (module.children && module.children.length > 0) {
-    const hasChecked = module.children.some((child: any) => child.hasPermission)
-    module.hasPermission = hasChecked
-  }
-}
-
-// 收集菜单权限数据
-const collectMenuPermissions = (modules: any[]): any[] => {
-  const permissions: any[] = []
-  
-  modules.forEach(module => {
-    // 处理子菜单
-    if (module.children && module.children.length > 0) {
-      module.children.forEach((subMenu: any) => {
-        if (subMenu.hasPermission) {
-          permissions.push({
-            menuId: subMenu.menuId,
-            buttonCodes: subMenu.selectedButtons || [],
-          })
-        }
-      })
-    }
-  })
-  
-  return permissions
-}
-
-const handleAuthSubmit = async () => {
-  if (!currentRole.value) return
-  
-  authLoading.value = true
-  try {
-    // 收集菜单权限
-    const roleMenus = collectMenuPermissions(menuTreeData.value)
-    
-    await setRoleMenuAuth({
-      roleId: currentRole.value.id,
-      roleMenus,
-    })
-    
-    ElMessage.success('权限配置成功')
-    authDialogVisible.value = false
-  } catch (error) {
-    console.error('权限配置失败:', error)
-  } finally {
-    authLoading.value = false
-  }
 }
 
 const handlePageChange = () => {
@@ -579,11 +388,6 @@ const handleSubmit = async () => {
 const handleDialogClosed = () => {
   formRef.value?.resetFields()
   resetForm()
-}
-
-const handleAuthDialogClosed = () => {
-  currentRole.value = null
-  menuTreeData.value = []
 }
 
 const resetForm = () => {

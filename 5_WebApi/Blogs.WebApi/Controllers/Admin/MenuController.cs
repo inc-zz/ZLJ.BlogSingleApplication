@@ -6,6 +6,7 @@ using Blogs.Core.Models;
 using Blogs.Domain.Entity.Admin;
 using Blogs.Domain.EventNotices;
 using Blogs.Domain.Notices;
+using Blogs.Infrastructure.Context;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -128,6 +129,7 @@ namespace Blogs.WebApi.Controllers.Admin
                 var notifications = _notificationHandler.GetNotifications();
                 return BadRequest(notifications);
             }
-        }
+        } 
+
     }
 }

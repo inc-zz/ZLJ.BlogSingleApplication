@@ -79,13 +79,16 @@
 
 <script setup lang="ts">
 // @ts-nocheck - Complex type compatibility with Element Plus h() render function
-import { ref, reactive, onMounted, defineComponent, h } from 'vue'
+import { ref, reactive, onMounted, defineComponent, h, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElCheckbox, ElCheckboxGroup } from 'element-plus'
 import {
   Refresh,
   UserFilled,
 } from '@element-plus/icons-vue'
 import { getAllRoles, getMenuPermissionTree, setRoleMenuAuth, type Role, type MenuPermissionNode } from '@/api/role'
+
+const route = useRoute()
 
 // 菜单权限项组件
 const MenuPermissionItem = defineComponent({
@@ -572,8 +575,30 @@ const handleSave = async () => {
   }
 }
 
-onMounted(() => {
-  loadRoles()
+onMounted(async () => {
+  await loadRoles()
+  
+  // 检查是否有角色ID查询参数
+  const roleIdParam = route.query.roleId
+  if (roleIdParam) {
+    const roleId = parseInt(roleIdParam as string, 10)
+    if (!isNaN(roleId)) {
+      // 查找对应的角色
+      const targetRole = roles.value.find(r => r.id === roleId)
+      if (targetRole) {
+        // 设置当前角色
+        currentRole.value = targetRole
+        // 加载菜单权限
+        await loadMenuPermissions(roleId)
+        
+        // 选中左侧树节点
+        await nextTick()
+        if (roleTreeRef.value) {
+          roleTreeRef.value.setCurrentKey(roleId)
+        }
+      }
+    }
+  }
 })
 </script>
 

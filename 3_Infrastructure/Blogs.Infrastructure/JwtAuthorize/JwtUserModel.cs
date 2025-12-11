@@ -25,7 +25,11 @@ namespace Blogs.Domain
         /// <summary>
         /// 用户角色
         /// </summary>
-        public string? Role { get; set; }
+        public string? Roles { get; set; }
+        /// <summary>
+        /// 平台
+        /// </summary>
+        public string? Platform { get; set; }
         ///<summary>
         ///  描述
         ///</summary>

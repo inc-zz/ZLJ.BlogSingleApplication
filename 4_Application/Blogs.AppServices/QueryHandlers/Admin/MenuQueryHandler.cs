@@ -2,6 +2,7 @@
 using Blogs.AppServices.Queries.ResponseDto.Admin;
 using Blogs.Core.Models;
 using Blogs.Domain.Entity.Admin;
+using Humanizer;
 using Mapster;
 using Newtonsoft.Json;
 using Polly;
@@ -19,7 +20,8 @@ namespace Blogs.AppServices.QueryHandlers.Admin
     public class MenuQueryHandler : SqlSugarDbContext,
        IRequestHandler<GetMenuListQuery, PagedResult<SysMenuDto>>,
        IRequestHandler<GetMenuTreeQuery, ResultObject<List<SysMenuTreeDto>>>,
-       IRequestHandler<GetMenuInfoQuery, ResultObject<SysMenuDto>>
+       IRequestHandler<GetMenuInfoQuery, ResultObject<SysMenuDto>>,
+       IRequestHandler<GetRoleMenuAuthQuery, ResultObject<List<RoleMenuDto>>>
     {
         /// <summary>
         /// 获取菜单列表（分页）
@@ -101,10 +103,45 @@ namespace Blogs.AppServices.QueryHandlers.Admin
                     .Where((b, r) => r.MenuId == menu.Id).ToListAsync();
 
                 dto.Buttons = menuButtons.Select(it => it.Id).ToArray();
-        
+
             }
 
             return ResultObject<SysMenuDto>.Success(dto);
+        }
+
+        /// <summary>
+        /// 获取角色菜单
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<ResultObject<List<RoleMenuDto>>> Handle(GetRoleMenuAuthQuery request, CancellationToken cancellationToken)
+        {
+            var menuList = await DbContext.Queryable<SysMenu, SysRoleMenuAuth>((m, rm) =>
+                new JoinQueryInfos(
+                    JoinType.Left, m.Id == rm.MenuId
+                ))
+                .Where((m, rm) => request.RoleIds.Contains(rm.RoleId.ToString()) && m.IsDeleted == 0)
+                .Select((m, rm) => new RoleMenuDto
+                {
+                    MenuId = m.Id,
+                    MenuName = m.Name,
+                    HasPermission = true,
+                    ParentId = m.ParentId
+                })
+                .ToListAsync(cancellationToken);
+
+            var list = menuList.Where(it => it.ParentId == 0).Select(gt => new RoleMenuDto
+            {
+                MenuId = gt.MenuId,
+                MenuName = gt.MenuName,
+                ParentId = 0,
+                HasPermission = gt.HasPermission,
+                Children = menuList.Where(x => x.ParentId == gt.MenuId).ToList() ?? new List<RoleMenuDto>()
+            }).ToList();
+
+            return ResultObject<List<RoleMenuDto>>.Success(list);
         }
 
         /// <summary>

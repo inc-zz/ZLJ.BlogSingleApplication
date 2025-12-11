@@ -4,6 +4,7 @@ using Blogs.AppServices.Requests.Admin;
 using Blogs.Core.Models;
 using Blogs.Domain.EventNotices;
 using Blogs.Domain.Notices;
+using Blogs.Infrastructure.Context;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -60,6 +61,19 @@ namespace Blogs.WebApi.Controllers.Admin
                 var notifications = _notificationHandler.GetNotifications();
                 return BadRequest(notifications);
             }
+        }
+
+        /// <summary>
+        /// 角色菜单列表-左侧导航
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("menus")]
+        public async Task<ActionResult> GetRoleMenuAsync()
+        {
+            var roleIds = CurrentUser.Instance.UserInfo.Roles;
+            var query = new GetRoleMenuAuthQuery(roleIds);
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blogs.Core.DtoModel.Admin;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,5 +25,13 @@ namespace Blogs.Common.DtoModel.Admin
         /// 邮箱
         /// </summary>
         public string? Email { get; set; }
+        /// <summary>
+        /// 角色
+        /// </summary>
+        public Dictionary<long, string>? UserRole { get; set; }
+        /// <summary>
+        /// 部门
+        /// </summary>
+        public Dictionary<string,string>? Department { get; set; }
     }
 }

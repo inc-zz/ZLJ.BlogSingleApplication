@@ -26,8 +26,8 @@ namespace Blogs.AppServices.Queries.ResponseDto.Admin
         /// </summary>
         public bool HasPermission { get; set; }
         /// <summary>
-        /// 菜单按钮
+        /// 子菜单
         /// </summary>
-        public List<MenuButtonDto> Buttons { get; set; } = new List<MenuButtonDto>();
+        public List<RoleMenuDto> Children { get; set; } = new List<RoleMenuDto>();
     }
 }

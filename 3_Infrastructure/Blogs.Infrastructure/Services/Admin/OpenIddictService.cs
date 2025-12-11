@@ -3,6 +3,7 @@ using Blogs.Core.Models;
 using Blogs.Domain;
 using Blogs.Domain.Entity.Admin;
 using Blogs.Infrastructure.Context;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -93,7 +94,8 @@ namespace Blogs.Infrastructure.Services.Admin
 
                 // 将令牌存储到 Redis
                 var userId = user.Id.ToString();
-                await StoreTokensInRedisAsync(principal, userId, accessToken, refreshToken);
+                var userRole = string.Join(",", user.UserRoles.Select(it => it.RoleId));
+                await StoreTokensInRedisAsync(principal, userId, accessToken, refreshToken, userRole);
 
                 return TokenResult.Success(accessToken, refreshToken, DateTime.Now.AddHours(24));
             }
@@ -297,7 +299,7 @@ namespace Blogs.Infrastructure.Services.Admin
         /// <param name="accessToken"></param>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        private async Task StoreTokensInRedisAsync(ClaimsPrincipal principal, string userId, string accessToken, string refreshToken)
+        private async Task StoreTokensInRedisAsync(ClaimsPrincipal principal, string userId, string accessToken, string refreshToken, string userRole)
         {
             // 构建数据对象
             var userData = new UserTokenData
@@ -306,7 +308,7 @@ namespace Blogs.Infrastructure.Services.Admin
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 UserName = principal.FindFirstValue(ClaimTypes.Name) ?? "",
-                Role = principal.FindFirstValue(ClaimTypes.Role) ?? "user"
+                Role = userRole
             };
 
             // 使用 JSON 序列化确保类型安全
@@ -373,14 +375,24 @@ namespace Blogs.Infrastructure.Services.Admin
                 if (!userInfo.HasValue)
                 {
                     //首次读取如果缓存未命中则查询数据库
-                    var user = await _dbContext.Queryable<SysUser>().Where(it => it.Id.ToString() == userTokenModel.Id).FirstAsync();
+                    var user = await _dbContext.Queryable<SysUser>()
+                   .Includes(u => u.Department)
+                   .Includes(u => u.UserRoles)
+                   .Where(it => it.Id.ToString() == userTokenModel.Id)
+                    .FirstAsync();
+
+                    var userRoles = await _dbContext.Queryable<SysUserRoleRelation>()
+                        .Where(it => it.UserId.ToString() == userTokenModel.Id)
+                        .Select(it => it.RoleId)
+                        .ToListAsync();
                     var handler = new JwtSecurityTokenHandler();
                     var jwtToken = handler.ReadJwtToken(token);
-
+                    var userRole = string.Join(",", user.UserRoles.Select(it => it.RoleId));
                     var userModel = new JwtUserModel
                     {
                         UserId = user.Id.ToString(),
-                        Role = "admin",
+                        Roles = userRole,
+                        Platform = "admin",
                         UserName = user.UserName,
                         Email = user.Email,
                         Description = user.Description

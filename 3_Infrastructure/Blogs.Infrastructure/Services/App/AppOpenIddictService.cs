@@ -382,11 +382,10 @@ namespace Blogs.Infrastructure.Services.App
                     
                     var handler = new JwtSecurityTokenHandler();
                     var jwtToken = handler.ReadJwtToken(token);
-
                     var userModel = new JwtUserModel
                     {
                         UserId = user.Id.ToString(),
-                        Role = "user",
+                        Roles = "user",
                         UserName = user.Account,
                         Email = user.Email
                     };

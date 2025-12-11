@@ -59,7 +59,7 @@ namespace Blogs.WebApi.Controllers.Admin
                 else
                 {
                     _logger.LogWarning("{Account}登录失败, 原因: {Message}", request.Account, result.message);
-                    return Unauthorized(new { message = result.message });
+                    return Ok(new { message = result.message });
                 }
             }
             catch (Exception ex)
