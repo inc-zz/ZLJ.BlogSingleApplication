@@ -414,7 +414,7 @@ export const getMyArticles = async (pageIndex = 1, pageSize = 20, where = '') =>
       .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
       .join('&');
     
-    const fullUrl = `${baseUrl}/api/app/Article/list?${queryString}`;
+    const fullUrl = `${baseUrl}/api/app/Article/myArticles?${queryString}`;
     
     const token = localStorage.getItem('blogs_token');
     const headers = {

@@ -11,13 +11,12 @@ using System.Threading.Tasks;
 
 namespace Blogs.AppServices.Commands.Blogs.AppUser
 {
-    public class CreateAppUserCommand : AppUserCommand
+    public class CreateBlogAppUserCommand : AppUserCommand
     {
-
         /// <summary>
         /// 初始化新增用户
         /// </summary>
-        public CreateAppUserCommand(AddAppUserRequest param)
+        public CreateBlogAppUserCommand(AddAppUserRequest param)
         {
             Id = new IdWorkerUtils().NextId();
             Account = param.UserName;

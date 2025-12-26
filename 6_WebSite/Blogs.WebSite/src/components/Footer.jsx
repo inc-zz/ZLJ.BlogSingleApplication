@@ -5,10 +5,9 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const friendlyLinks = [
-    { name: 'React', url: 'https://react.dev' },
-    { name: 'Vite', url: 'https://vitejs.dev' },
-    { name: 'MDN Web Docs', url: 'https://developer.mozilla.org' },
-    { name: 'GitHub', url: 'https://github.com' },
+    { name: 'About Me', url: 'https://zhenglijun.com' },
+    { name: 'Admin', url: 'https://admin.zhenglijun.com' },
+    { name: 'GitHub', url: 'https://github.com.com/inc-zz' },
   ];
 
   const contactInfo = {

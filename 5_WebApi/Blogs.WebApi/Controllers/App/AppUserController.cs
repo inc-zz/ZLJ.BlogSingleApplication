@@ -15,6 +15,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Blogs.WebApi.Controllers.App
 {
@@ -82,10 +83,8 @@ namespace Blogs.WebApi.Controllers.App
         [AllowAnonymous]
         public async Task<ActionResult> RegisterAsync([FromBody] AddAppUserRequest request)
         {
-            var command = new CreateAppUserCommand(request);
-
+            var command = new CreateBlogAppUserCommand(request);
             var result = await _mediator.Send(command);
-
             if (result)
             {
                 return Ok(ResultObject.Success("处理成功"));
@@ -123,6 +122,18 @@ namespace Blogs.WebApi.Controllers.App
                 Id = CurrentAppUser.Instance.UserId
             };
             var result = await _mediator.Send(query);
+            return new OkObjectResult(result);
+        }
+
+        /// <summary>
+        /// 个人主页信息
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpGet("user/homepage")]
+        public async Task<ActionResult> GetUserHomePageAsync([FromQuery] GetUserHomePageQuery request)
+        {
+            var result = await _mediator.Send(request);
             return new OkObjectResult(result);
         }
 

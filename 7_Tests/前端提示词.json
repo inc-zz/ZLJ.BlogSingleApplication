@@ -1396,4 +1396,17 @@ App用户相关接口
   "code": 200,
   "traceId": null
 }
-6、
+6、重置密码：
+	接口地址：
+	请求方式：
+	请求参数：
+{
+  "id": 29219497415184,
+  "password": "123123"
+}
+	返回格式：	{
+  "success": true,
+  "message": "处理成功",
+  "code": 200,
+  "traceId": null
+}

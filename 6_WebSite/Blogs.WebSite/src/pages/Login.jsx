@@ -128,7 +128,7 @@ const Login = () => {
       <div className="login-card">
         <div className="login-header">
           <h1>欢迎登录</h1>
-          <p>知识分享平台</p>
+          <p>知识库系统</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">

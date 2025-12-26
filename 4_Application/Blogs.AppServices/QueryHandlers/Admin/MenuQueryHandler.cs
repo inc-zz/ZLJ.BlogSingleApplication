@@ -161,7 +161,6 @@ namespace Blogs.AppServices.QueryHandlers.Admin
             {
                 return tree;
             }
-
             var parentMenus = menus.Where(x => x.ParentId == parentId)
                 .OrderBy(x => x.Sort)
                 .ToList()

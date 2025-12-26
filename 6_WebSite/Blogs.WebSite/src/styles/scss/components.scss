@@ -5,22 +5,19 @@
 
 /* ==================== ARTICLE CARD ==================== */
 .article-card {
-  background: var(-color-primary-dark);
+  background: var(--color-bg-paper);
   border-radius: var(--radius-md);
-  padding: var(--spacing-md);
+  padding: 14px 16px;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: all var(--transition-normal);
-  border: 1px solid transparent;
+  border: 1px solid var(--color-border-light);
+  margin-bottom: 12px;
 
   &:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
     border-color: var(--color-accent);
-
-    .author-avatar {
-      border-color: var(--color-accent);
-    }
 
     .tech-badge {
       background: var(--color-accent);
@@ -33,7 +30,6 @@
     }
 
     .article-tag {
-      font-size:14px;
       background: rgba(255, 152, 0, 0.1);
       color: var(--color-accent);
     }
@@ -43,25 +39,37 @@
     }
   }
 
-  /* Header - Left-Right Layout */
+  /* Header - Category badge in top-right */
   &-header {
     display: flex;
-    gap: var(--spacing-md);
+    justify-content: flex-end;
+    margin-bottom: 8px;
+    min-height: 20px;
+  }
+
+  .category-badge-wrapper {
+    display: flex;
     align-items: flex-start;
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-md);
+  }
+
+  /* Body - Compact title and summary */
+  &-body {
+    margin-bottom: 10px;
+  }
+
+  /* Footer - Tags left, User info right */
+  &-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--color-border-light);
   }
 
-  /* Body */
-  &-body {
-    margin-bottom: var(--spacing-md);
-  }
-
-  /* Footer */
-  &-footer {
-    padding-top: var(--spacing-sm);
-    border-top: 1px solid var(--color-border-light);
+  /* Stats bar at bottom */
+  .article-stats-bar {
+    padding-top: 8px;
   }
 }
 
@@ -87,6 +95,27 @@
     }
   }
 
+  /* Small avatar for compact layout */
+  &-avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-border-light);
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        border-color: var(--color-accent);
+        transform: scale(1.05);
+        box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+      }
+    }
+  }
+
   &-info {
     flex: 1;
     min-width: 0;
@@ -100,6 +129,14 @@
     align-items: center;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
+  }
+
+  /* Compact meta for bottom layout */
+  &-meta-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-end;
   }
 
   &-name {
@@ -119,14 +156,29 @@
   }
 }
 
+/* Article author info wrapper */
+.article-author-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .publish-date {
   color: var(--color-text-light);
-  font-size: 12px;
+  font-size: 11px;
 
   &::before {
-    content: '•';
-    margin: 0 var(--spacing-xs);
-    color: var(--color-text-light);
+    content: '';
+    margin: 0;
+  }
+
+  .author-meta & {
+    &::before {
+      content: '•';
+      margin: 0 var(--spacing-xs);
+      color: var(--color-text-light);
+    }
   }
 }
 
@@ -152,9 +204,9 @@
 .article {
   &-title {
     color: var(--color-secondary);
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 600;
-    margin: 0 0 var(--spacing-sm) 0;
+    margin: 0 0 6px 0;
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -165,9 +217,9 @@
 
   &-summary {
     color: var(--color-text-secondary);
-    font-size: 14px;
-    line-height: 1.6;
-    margin: 0 0 var(--spacing-sm) 0;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -177,18 +229,20 @@
   &-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-sm);
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
   }
 
   &-tag {
-    padding: 3px 10px;
+    padding: 2px 8px;
     background: var(--color-bg-grey);
     color: var(--color-text-secondary);
     border-radius: var(--radius-sm);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     transition: all var(--transition-fast);
+    white-space: nowrap;
   }
 
   &-stats {
@@ -203,12 +257,12 @@
   align-items: center;
   gap: 4px;
   color: var(--color-text-light);
-  font-size: 14px;
+  font-size: 12px;
   transition: color var(--transition-fast);
 }
 
 .stat-icon {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 /* ==================== SLIDER CAPTCHA ==================== */
@@ -666,10 +720,34 @@
 /* ==================== RESPONSIVE - COMPONENTS ==================== */
 @media (max-width: 768px) {
   .article-card {
-    padding: var(--spacing-md);
+    padding: 12px 14px;
+    margin-bottom: 10px;
 
     &-header {
-      gap: var(--spacing-sm);
+      margin-bottom: 6px;
+    }
+
+    &-body {
+      margin-bottom: 8px;
+    }
+
+    &-footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding-bottom: 6px;
+    }
+
+    .article-tags {
+      width: 100%;
+    }
+
+    .article-author-info {
+      align-self: flex-end;
+    }
+
+    .article-stats-bar {
+      padding-top: 6px;
     }
   }
 
@@ -679,13 +757,18 @@
       height: 42px;
     }
 
+    &-avatar-small {
+      width: 28px;
+      height: 28px;
+    }
+
     &-name {
-      font-size: 14px;
+      font-size: 13px;
     }
   }
 
   .publish-date {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .tech-badge {
@@ -695,16 +778,16 @@
 
   .article {
     &-title {
-      font-size: 16px;
-    }
-
-    &-summary {
       font-size: 14px;
     }
 
+    &-summary {
+      font-size: 12px;
+    }
+
     &-tag {
-      padding: 2px 8px;
-      font-size: 11px;
+      padding: 2px 6px;
+      font-size: 10px;
     }
 
     &-stats {
@@ -713,11 +796,11 @@
   }
 
   .stat-item {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .stat-icon {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .modal-content {
@@ -728,7 +811,7 @@
 
 @media (max-width: 480px) {
   .article-card {
-    padding: var(--spacing-md);
+    padding: 10px 12px;
   }
 
   .author-avatar {

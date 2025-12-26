@@ -35,8 +35,8 @@ const UserProfile = () => {
                      ['React', 'Vue', 'TypeScript', 'Webpack'],
           stats: {
             articles: 12,
-            followers: 256,
-            totalViews: 15234,
+            followers: 1007,
+            totalViews: 996,
             totalLikes: 1523
           }
         };

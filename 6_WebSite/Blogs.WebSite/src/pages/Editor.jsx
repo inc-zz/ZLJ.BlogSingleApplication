@@ -271,7 +271,7 @@ const Editor = () => {
   const formatCode = () => insertText('```\n', '\n```');
   
   // 图片上传函数
-    const handleImageUpload = async (file) => {
+  const handleImageUpload = async (file) => {
     try {
         // 创建 FormData
         const formData = new FormData();
@@ -288,7 +288,6 @@ const Editor = () => {
         console.log('图片上传响应:', response);
         if (response.data && response.data.success && response.data.data) {
             const fileUrl = response.data.data.fileUrl;
-            
             // 在光标位置插入图片 Markdown 语法
             insertText(`![image](${fileUrl})`);
             
@@ -360,6 +359,26 @@ const Editor = () => {
     }
   };
   
+  // 处理粘贴事件（图片自动上传）
+  const handlePaste = async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    
+    // 检查是否有图片
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        e.preventDefault(); // 阻止默认粘贴行为
+        
+        const file = item.getAsFile();
+        if (file) {
+          await handleImageUpload(file);
+        }
+        break;
+      }
+    }
+  };
+  
   // 打开链接插入模态框
   const insertLink = () => {
     setLinkUrl('');
@@ -378,6 +397,76 @@ const Editor = () => {
     } else {
       message.warning('请输入链接URL');
     }
+  };
+  
+  // 安全渲染Markdown并保留HTML注释和自定义标签
+  const sanitizeAndRenderMarkdown = (markdown) => {
+    // 临时保存代码块、HTML注释和自定义标签
+    const codeBlocks = [];
+    const htmlComments = [];
+    const customTags = [];
+    let processedContent = markdown;
+    
+    // 1. 首先保护代码块（最高优先级，避免代码块内的标签被解析）
+    processedContent = processedContent.replace(/```([\s\S]*?)```/g, (match) => {
+      const placeholder = `___CODE_BLOCK_${codeBlocks.length}___`;
+      codeBlocks.push(match);
+      return placeholder;
+    });
+    
+    // 2. 保存HTML注释
+    processedContent = processedContent.replace(/<!--([\s\S]*?)-->/g, (match) => {
+      const placeholder = `___HTML_COMMENT_${htmlComments.length}___`;
+      htmlComments.push(match);
+      return placeholder;
+    });
+    
+    // 3. 保存自定义标签（如 <GroupItem>...</GroupItem>）
+    processedContent = processedContent.replace(/<([A-Z][a-zA-Z0-9]*)([^>]*)>([\s\S]*?)<\/\1>/g, (match) => {
+      const placeholder = `___CUSTOM_TAG_${customTags.length}___`;
+      customTags.push(match);
+      return placeholder;
+    });
+    
+    // 4. 渲染Markdown
+    let html = processedContent
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/<u>(.+?)<\/u>/g, '<u>$1</u>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+      .replace(/\n/g, '<br />');
+    
+    // 5. 恢复代码块（转换为HTML）
+    codeBlocks.forEach((codeBlock, index) => {
+      // 提取代码内容（去除```标记）
+      const codeContent = codeBlock.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
+      // 转义HTML特殊字符，防止代码块内的标签被浏览器解析
+      const escapedCode = codeContent
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+      html = html.replace(`___CODE_BLOCK_${index}___`, `<pre><code>${escapedCode}</code></pre>`);
+    });
+    
+    // 6. 恢复HTML注释
+    htmlComments.forEach((comment, index) => {
+      html = html.replace(`___HTML_COMMENT_${index}___`, comment);
+    });
+    
+    // 7. 恢复自定义标签
+    customTags.forEach((tag, index) => {
+      html = html.replace(`___CUSTOM_TAG_${index}___`, tag);
+    });
+    
+    return html;
   };
 
   const handleAddTag = (e) => {
@@ -682,27 +771,16 @@ const Editor = () => {
                 <textarea
                   ref={textareaRef}
                   className="content-editor"
-                  placeholder="开始编写你的文章...\n\n支持 Markdown 语法:\n- **加粗** *斜体*\n- # 标题\n- - 列表\n- ```代码块```\n- ![image](url) 图片\n- [text](url) 链接"
+                  placeholder="开始编写你的文章...\n\n支持 Markdown 语法:\n- **加粗** *斜体*\n- # 标题\n- - 列表\n- \`\`\`代码块\`\`\`\n- ![image](url) 图片\n- [text](url) 链接\n\n💡 提示: 支持直接粘贴图片自动上传"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
+                  onPaste={handlePaste}
                   rows="20"
                 />
               </>
             ) : (
               <div className="content-preview" dangerouslySetInnerHTML={{ 
-                __html: content
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                  .replace(/<u>(.+?)<\/u>/g, '<u>$1</u>')
-                  .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-                  .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-                  .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-                  .replace(/^- (.+)$/gm, '<li>$1</li>')
-                  .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-                  .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-                  .replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1" />')
-                  .replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-                  .replace(/\n/g, '<br />')
+                __html: sanitizeAndRenderMarkdown(content)
               }} />
             )}
           </div>
@@ -784,7 +862,7 @@ const hello = () => {
             
             <div className="example-section">
               <h4>链接和图片</h4>
-              <pre><code>[Link Text](https://example.com)
+              <pre><code>[Link Text](https://zhenglijun.com)
 ![Alt Text](image-url.jpg)</code></pre>
             </div>
             

@@ -50,7 +50,7 @@ const Profile = () => {
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [loadingArticles, setLoadingArticles] = useState(false);
   const [totalArticles, setTotalArticles] = useState(0);
-  const [pageIndex, setPageIndex] = useState(1);
+  const [pageIndex] = useState(1);
   const [pageSize] = useState(20);
   const [searchKeyword, setSearchKeyword] = useState('');
 
@@ -67,8 +67,7 @@ const Profile = () => {
         setMyArticles(response.items);
         setTotalArticles(response.total);
         console.log('Articles set to state:', response.items);
-      } else {
-        console.error('获取文章列表失败:', response.message);
+      } else { 
         message.error('获取文章列表失败');
       }
     } catch (error) {

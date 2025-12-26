@@ -16,6 +16,8 @@ namespace Blogs.AppServices.Queries.App
 
         public int? CategoryId {  get; set; }  
 
+        public string? CreatedBy { get; set; }
+
         public int? TagId { get; set; } 
 
     }

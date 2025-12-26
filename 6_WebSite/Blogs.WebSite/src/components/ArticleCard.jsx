@@ -17,33 +17,42 @@ const ArticleCard = ({ article }) => {
     navigate(`/user/${username}`);
   };
 
-  // Get user's tech stack based on article tech stack
-  const getUserTechStack = () => {
-    const techStackMap = {
-      'server': ['Docker', 'Nginx', 'Linux'],
-      'backend': ['C#', 'Spring', 'Node.js'],
-      'database': ['MySQL', 'Redis', 'MongoDB'],
-      'testing': ['Jest', 'Mocha', 'Cypress'],
-      'frontend': ['React', 'Vue', 'TypeScript']
-    };
-    return techStackMap[article.techStack] || ['Full Stack'];
-  };
-
-  const userTechStack = getUserTechStack();
-
   return (
     <div className="article-card" onClick={handleCardClick}>
-      {/* Left-Right Layout: Avatar on left, user info on right */}
+      {/* Header: Category badge in top-right */}
       <div className="article-card-header">
-        <img 
-          src={article.authorAvatar} 
-          alt={article.author} 
-          className="author-avatar clickable"
-          onClick={handleUserClick}
-          title="查看用户主页"
-        />
-        <div className="author-info">
-          <div className="author-meta">
+        <div className="category-badge-wrapper">
+          <span className="tech-badge">
+            {article.categoryName}
+          </span>
+        </div>
+      </div>
+
+      {/* Body: Title and Summary */}
+      <div className="article-card-body">
+        <h3 className="article-title">{article.title}</h3>
+        <p className="article-summary">{article.summary}</p>
+      </div>
+
+      {/* Footer: Tags on left, User info on right */}
+      <div className="article-card-footer">
+        <div className="article-tags">
+          {article.tags.slice(0, 3).map((tag, index) => (
+            <span key={index} className="article-tag">
+              {tag}
+            </span>
+          ))}
+        </div>
+        
+        <div className="article-author-info">
+          <img 
+            src={article.authorAvatar} 
+            alt={article.author} 
+            className="author-avatar-small clickable"
+            onClick={handleUserClick}
+            title="查看用户主页"
+          />
+          <div className="author-meta-compact">
             <span 
               className="author-name clickable" 
               onClick={handleUserClick}
@@ -53,28 +62,11 @@ const ArticleCard = ({ article }) => {
             </span>
             <span className="publish-date">{article.createdAt}</span>
           </div>
-          <div className="user-tech-stack">
-              <span className="tech-badge">
-                {article.categoryName}
-              </span>
-          </div>
         </div>
       </div>
 
-      <div className="article-card-body">
-        <h3 className="article-title">{article.title}</h3>
-        <p className="article-summary">{article.summary}</p>
-        
-        <div className="article-tags">
-          {article.tags.map((tag, index) => (
-            <span key={index} className="article-tag">
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="article-card-footer">
+      {/* Stats bar */}
+      <div className="article-stats-bar">
         <div className="article-stats">
           <span className="stat-item">
             <FaEye className="stat-icon" />

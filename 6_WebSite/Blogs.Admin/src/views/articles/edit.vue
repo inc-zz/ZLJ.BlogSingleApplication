@@ -100,10 +100,12 @@
         <el-form-item label="文章内容" prop="content">
           <div class="editor-wrapper">
             <QuillEditor
+              ref="quillEditorRef"
               v-model:content="form.content"
-              content-type="html"
+              content-type="text"
               theme="snow"
               :toolbar="toolbarOptions"
+              @ready="onEditorReady"
             />
           </div>
         </el-form-item>
@@ -134,11 +136,12 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
-import { getArticleDetail, saveArticle, getArticleCategories, type ArticleFormData, type ArticleCategory } from '@/api/article'
+import { getArticleDetail, saveArticle, getArticleCategories, uploadArticleImage, type ArticleFormData, type ArticleCategory } from '@/api/article'
 
 const router = useRouter()
 const route = useRoute()
 const formRef = ref<FormInstance>()
+const quillEditorRef = ref()
 const loading = ref(false)
 const submitLoading = ref(false)
 const showPreview = ref(false)
@@ -192,6 +195,61 @@ const loadCategories = async () => {
 // 处理标签变化
 const handleTagsChange = (tags: string[]) => {
   form.tags = tags.join(',')
+}
+
+// 编辑器准备完成
+const onEditorReady = (quill: any) => {
+  // 监听粘贴事件
+  const editor = quill.root
+  editor.addEventListener('paste', async (e: ClipboardEvent) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+
+    // 查找图片项
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      if (item && item.type.indexOf('image') !== -1) {
+        e.preventDefault() // 阻止默认粘贴行为
+        
+        const file = item.getAsFile()
+        if (file) {
+          await handleImageUpload(file, quill)
+        }
+        break
+      }
+    }
+  })
+}
+
+// 处理图片上传
+const handleImageUpload = async (file: File, quill: any) => {
+  try {
+    // 显示上传提示
+    ElMessage.info('图片上传中...')
+    
+    // 调用上传接口
+    const response = await uploadArticleImage(file)
+    
+    if (response.success && response.fileUrl) {
+      // 获取当前光标位置
+      const range = quill.getSelection(true)
+      const index = range ? range.index : quill.getLength()
+      
+      // 在光标位置插入图片 Markdown 格式
+      const imageMarkdown = `![image](${response.fileUrl})`
+      quill.insertText(index, imageMarkdown, 'user')
+      
+      // 移动光标到图片后面
+      quill.setSelection(index + imageMarkdown.length)
+      
+      ElMessage.success('图片上传成功')
+    } else {
+      ElMessage.error('图片上传失败')
+    }
+  } catch (error) {
+    console.error('图片上传失败:', error)
+    ElMessage.error('图片上传失败')
+  }
 }
 
 const loadData = async () => {

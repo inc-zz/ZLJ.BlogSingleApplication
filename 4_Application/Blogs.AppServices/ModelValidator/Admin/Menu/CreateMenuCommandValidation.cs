@@ -17,11 +17,8 @@ namespace Blogs.AppServices.ModelValidator.Admin.Menu
         /// </summary>
         public CreateMenuCommandValidation()
         {
-            //ValidateTenant();
             ValidateName();
-            //ValidateCode();
-            //ValidateButton();
-            //ValidateUrl();
+            ValidateCode();
         }
 
     }

@@ -181,6 +181,7 @@ namespace Blogs.AppServices.QueryHandlers.App
               .WhereIF(request.CategoryId > 0, it => it.CategoryId == request.CategoryId)
               .WhereIF(!string.IsNullOrWhiteSpace(request.SearchTerm), wt => wt.Title.Contains(request.SearchTerm)
               || wt.Summary.Contains(request.SearchTerm) || wt.CreatedBy == request.SearchTerm)
+              .WhereIF(!string.IsNullOrWhiteSpace(request.CreatedBy), it => it.CreatedBy == request.CreatedBy)
               .OrderByDescending(o => o.CreatedAt)
               .Select(it => new ArticleDto
               {

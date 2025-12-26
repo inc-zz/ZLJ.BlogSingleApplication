@@ -202,7 +202,7 @@ const Register = () => {
       <div className="register-card">
         <div className="register-header">
           <h1>注册账号</h1>
-          <p>加入技术博客平台，开启知识分享之旅</p>
+          <p>加入知识分享，开启学习之旅</p>
         </div>
 
         <form onSubmit={handleSubmit} className="register-form">

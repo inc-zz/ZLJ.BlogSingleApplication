@@ -1,5 +1,6 @@
 ﻿using Blogs.AppServices.Commands.Admin.AppUser;
 using Blogs.AppServices.Commands.Admin.SysUser;
+using Blogs.AppServices.Commands.Blogs.AppUser;
 using Blogs.AppServices.Commands.Blogs.User;
 using Blogs.Core.Entity.Blogs;
 using Blogs.Core.Enums;
@@ -16,6 +17,7 @@ namespace Blogs.AppServices.CommandHandlers.App
     /// </summary>
     public class AppUserCommandHandler : AppCommandHandler,
         IRequestHandler<CreateAppUserCommand, bool>,
+        IRequestHandler<CreateBlogAppUserCommand, bool>,
         IRequestHandler<UpdateAppUserCommand, bool>,
         IRequestHandler<ChangeAppUserStatusCommand, bool>,
         IRequestHandler<ResetAppUserPasswordCommand, bool> 
@@ -60,6 +62,44 @@ namespace Blogs.AppServices.CommandHandlers.App
 
                 //创建人信息
                 user.CreatedAt = DateTime.Now;
+                user.CreatedBy = CurrentUser.Instance.UserInfo.UserName;
+                Console.WriteLine("------------------------------------------------------------");
+                Console.WriteLine(JsonConvert.SerializeObject(user));
+                Console.WriteLine("------------------------------------------------------------");
+
+                var isTrue = await _userRepository.InsertAsync(user);
+                if (isTrue)
+                    return await Task.FromResult(true);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
+            return await Task.FromResult(false);
+        }
+
+        /// <summary>
+        /// 注册账号
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<bool> Handle(CreateBlogAppUserCommand command, CancellationToken cancellationToken)
+        {
+            if (!command.IsValid())
+            {
+                NotifyValidationErrors(command);
+                return await Task.FromResult(false);
+            }
+            try
+            {
+                var user = command.Adapt<BlogsUser>();
+                user.Id = new IdWorkerUtils().NextId();
+
+                //创建人信息
+                user.CreatedAt = DateTime.Now;
+                user.CreatedBy = "";
                 Console.WriteLine("------------------------------------------------------------");
                 Console.WriteLine(JsonConvert.SerializeObject(user));
                 Console.WriteLine("------------------------------------------------------------");

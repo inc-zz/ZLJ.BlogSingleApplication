@@ -1,4 +1,5 @@
-﻿using Blogs.AppServices.Requests.Admin;
+﻿using Blogs.AppServices.ModelValidator.Admin.Menu;
+using Blogs.AppServices.Requests.Admin;
 using Blogs.Core.Enums;
 using NCD.Common;
 using System;
@@ -34,15 +35,8 @@ namespace Blogs.AppServices.Commands.Admin.SysMenu
         /// <returns></returns>
         public override bool IsValid()
         {
-            //数据库验证需要提升到应用层
-            //ValidationResult = new CreateMenuCommandValidation().Validate(this);
-            //if (DbContext.Queryable<SysMenu>().Any(x => x.Name == this.Name && x.TenantId != this.Id))
-            //{   
-            //    ValidationResult.Errors.Add(new FluentValidation.Results.ValidationFailure("", $"菜单名称{this.Name}重复!"));
-            //}
-            //return ValidationResult.IsValid;
-            return true;
+            ValidationResult = new CreateMenuCommandValidation().Validate(this);
+            return ValidationResult.IsValid;
         }
-
     }
 }

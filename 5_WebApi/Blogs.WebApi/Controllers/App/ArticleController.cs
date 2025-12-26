@@ -138,7 +138,7 @@ namespace Blogs.WebApi.Controllers.App
         }
 
         /// <summary>
-        /// 获取文章列表（支持分类筛选）
+        /// 获取首页文章列表（支持分类筛选）
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -152,12 +152,13 @@ namespace Blogs.WebApi.Controllers.App
                 CategoryId = param.CategoryId,
                 TagId = param.TagId,
                 SearchTerm = param.Where,
-                SortBy = param.SortBy
+                SortBy = param.SortBy,
+                CreatedBy = param.UserName
             };
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
         }
-        
+       
         /// <summary>
         /// 我的文章列表
         /// </summary>

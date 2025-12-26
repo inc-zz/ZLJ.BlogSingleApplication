@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import Articles from './pages/Articles';
 import ArticleDetail from './pages/ArticleDetail';
 import Editor from './pages/Editor';
 import Profile from './pages/Profile';
@@ -47,6 +48,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/articles" element={<Articles />} />
               <Route path="/" element={<Home />} />
               <Route path="/article/:id" element={<ArticleDetail />} />
               {/* Public user profile - visitor view */}
