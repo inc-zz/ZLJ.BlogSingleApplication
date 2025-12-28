@@ -163,6 +163,55 @@ export const getTags = async (topicCount = 30) => {
 };
 
 /**
+ * 获取用户主页信息
+ * @param {string} userName - 用户名
+ * @returns {Promise<ResultObject>}
+ */
+export const getUserHomepage = async (userName) => {
+  try {
+    const response = await http.get('/AppUser/user/homepage', { userName });
+    return response.data;
+  } catch (error) {
+    console.error('获取用户主页失败:', error);
+    return {
+      success: false,
+      message: '获取用户主页失败',
+      code: 500,
+      data: null
+    };
+  }
+};
+
+/**
+ * 获取用户文章列表
+ * @param {string} userName - 用户名
+ * @param {number} pageIndex - 页码
+ * @param {number} pageSize - 每页数量
+ * @returns {Promise<ResultObject>}
+ */
+export const getUserArticles = async (userName, pageIndex = 1, pageSize = 20) => {
+  try {
+    const response = await http.get('/Article/list', {
+      userName,
+      PageIndex: pageIndex,
+      PageSize: pageSize
+    });
+    return response.data;
+  } catch (error) {
+    console.error('获取用户文章列表失败:', error);
+    return {
+      success: false,
+      message: '获取用户文章列表失败',
+      code: 500,
+      pageIndex,
+      pageSize,
+      total: 0,
+      items: []
+    };
+  }
+};
+
+/**
  * 发布文章
  * @param {Object} articleData - 文章数据
  * @param {string} articleData.title - 文章标题

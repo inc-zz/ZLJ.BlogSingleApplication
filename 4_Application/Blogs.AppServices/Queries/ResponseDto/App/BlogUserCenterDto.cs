@@ -12,7 +12,10 @@ namespace Blogs.AppServices.Queries.ResponseDto.App
 
         public string Summary { get; set; }
 
-        public DateTime? CreateAt { get; set; }
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
 
         public string Tags { get; set; }
 

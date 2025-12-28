@@ -31,20 +31,33 @@ namespace Blogs.AppServices.QueryHandlers.App
         /// <exception cref="NotImplementedException"></exception>
         public async Task<ResultObject<BlogsUserDto>> Handle(GetAppUserInfoQuery request, CancellationToken cancellationToken)
         {
-            var userInfo = await DbContext.Queryable<BlogsUser>()
-                 .Where(u => u.Id == request.Id)
-                 .FirstAsync();
-
-            var userData = userInfo.Adapt<BlogsUserDto>();
-            userData.Status = userInfo.IsDeleted == 1 ? 0 : 1;
-            userData.StatusName = userData.Status == 0 ? "禁用" : "启用";
-            return new ResultObject<BlogsUserDto>
+            try
             {
-                code = 200,
-                message = "查询成功",
-                data = userData,
-                success = true
-            };
+
+                var userInfo = await DbContext.Queryable<BlogsUser>()
+                     .Where(u => u.Id == request.Id)
+                     .FirstAsync();
+                var userData = userInfo.Adapt<BlogsUserDto>();
+                userData.Status = userInfo.IsDeleted == 1 ? 0 : 1;
+                userData.StatusName = userData.Status == 0 ? "禁用" : "启用";
+                return new ResultObject<BlogsUserDto>
+                {
+                    code = 200,
+                    message = "查询成功",
+                    data = userData,
+                    success = true
+                };
+            }
+            catch (Exception)
+            {
+                return new ResultObject<BlogsUserDto>
+                {
+                    code = 200,
+                    message = "查询成功",
+                    data = new BlogsUserDto(),
+                    success = true
+                };
+            }
         }
 
         /// <summary>
@@ -76,7 +89,7 @@ namespace Blogs.AppServices.QueryHandlers.App
 
             var articleTotle = userArticleList.Count;
             var likeTotal = userArticleList.Sum(a => a.LikeCount);
-            var viewTotal = userArticleList.Sum(a => a.ViewCount);  
+            var viewTotal = userArticleList.Sum(a => a.ViewCount);
             userData.LikeCount = likeTotal;
             userData.ViewCount = viewTotal;
             userData.ArticleCount = articleTotle;

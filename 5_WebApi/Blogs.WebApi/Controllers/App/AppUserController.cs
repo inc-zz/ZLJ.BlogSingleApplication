@@ -1,6 +1,4 @@
-﻿using Azure.Core;
-using Blogs.AppServices.Commands.Admin.SysUser;
-using Blogs.AppServices.Commands.Blogs.AppUser;
+﻿using Blogs.AppServices.Commands.Blogs.AppUser;
 using Blogs.AppServices.Commands.Blogs.User;
 using Blogs.AppServices.Queries.App;
 using Blogs.AppServices.Requests.Admin;
@@ -14,8 +12,7 @@ using Blogs.WebApi.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.IdentityModel.Tokens; 
 
 namespace Blogs.WebApi.Controllers.App
 {
