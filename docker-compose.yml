@@ -19,6 +19,8 @@ services:
       - mysql
       - redis
     restart: unless-stopped
+    volumes:
+      - /opt/docker/data/blog_webapi_uploads:/app/Uploads
     networks:
       - app-network
 
