@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\1_Shared\Blogs.Common\Blogs.Common.csproj" />
     <ProjectReference Include="..\..\4_Application\Blogs.AppServices\Blogs.AppServices.csproj" />
   </ItemGroup>
   <!--证书  -->

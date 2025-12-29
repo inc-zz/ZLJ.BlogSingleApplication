@@ -28,8 +28,61 @@ class Http {
     this.requestInterceptors = [];
     this.responseInterceptors = [];
     
+    // 请求去重：保存正在进行中的请求
+    this.pendingRequests = new Map();
+    
     // 添加默认拦截器
     this.setupDefaultInterceptors();
+  }
+
+  /**
+   * 生成请求的唯一标识符
+   * 根据 URL + method + params 生成 key
+   */
+  generateRequestKey(config) {
+    const { url, method = 'GET', body } = config;
+    
+    // 对于 GET请求，使用 URL 作为 key（已包含 params）
+    if (method.toUpperCase() === 'GET') {
+      return `${method}:${url}`;
+    }
+    
+    // 对于 POST/PUT/PATCH等请求，将 body 也纳入 key
+    const bodyStr = body instanceof FormData 
+      ? 'FormData' // FormData 不能序列化，使用固定标识
+      : JSON.stringify(body || {});
+    
+    return `${method}:${url}:${bodyStr}`;
+  }
+
+  /**
+   * 添加请求到待处理列表
+   */
+  addPendingRequest(config) {
+    const requestKey = this.generateRequestKey(config);
+    
+    // 如果已经存在相同请求，返回它的 Promise
+    if (this.pendingRequests.has(requestKey)) {
+      console.warn('🚫 Duplicate request prevented:', requestKey);
+      return this.pendingRequests.get(requestKey);
+    }
+    
+    return null;
+  }
+
+  /**
+   * 移除待处理请求
+   */
+  removePendingRequest(config) {
+    const requestKey = this.generateRequestKey(config);
+    this.pendingRequests.delete(requestKey);
+  }
+
+  /**
+   * 清除所有待处理请求
+   */
+  clearPendingRequests() {
+    this.pendingRequests.clear();
   }
 
   /**
@@ -181,9 +234,54 @@ class Http {
    */
   async request(config) {
     try {
+      // 检查是否有重复请求
+      const existingRequest = this.addPendingRequest(config);
+      if (existingRequest) {
+        // 返回已存在的请求 Promise
+        return existingRequest;
+      }
+      
       // 执行请求拦截器
       const processedConfig = await this.executeRequestInterceptors(config);
       
+      // 创建请求 Promise 并存储
+      const requestKey = this.generateRequestKey(processedConfig);
+      const requestPromise = this.executeRequest(processedConfig);
+      
+      // 将请求 Promise 存储到 pendingRequests
+      this.pendingRequests.set(requestKey, requestPromise);
+      
+      // 请求完成后，从 pendingRequests 中移除
+      requestPromise
+        .finally(() => {
+          this.removePendingRequest(processedConfig);
+        });
+      
+      return requestPromise;
+      
+    } catch (error) {
+      // 确保错误时也移除请求
+      this.removePendingRequest(config);
+      
+      // 执行响应拦截器的错误处理
+      for (const interceptor of this.responseInterceptors) {
+        if (interceptor.onRejected) {
+          try {
+            return await interceptor.onRejected(error);
+          } catch {
+            // 继续抛出错误
+          }
+        }
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * 执行实际请求（从 request 中抽离出来）
+   */
+  async executeRequest(processedConfig) {
+    try {
       // 构建完整URL
       const url = processedConfig.url.startsWith('http') 
         ? processedConfig.url 
@@ -233,7 +331,7 @@ class Http {
         if (interceptor.onRejected) {
           try {
             return await interceptor.onRejected(error);
-          } catch (e) {
+          } catch {
             // 继续抛出错误
           }
         }
@@ -314,3 +412,11 @@ const http = new Http();
 // 导出实例和类
 export default http;
 export { Http };
+
+/**
+ * 导出工具方法：清除所有待处理请求
+ * 可用于路由变化时取消所有请求
+ */
+export const clearAllPendingRequests = () => {
+  http.clearPendingRequests();
+};

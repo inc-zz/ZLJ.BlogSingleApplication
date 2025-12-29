@@ -1,4 +1,5 @@
-﻿using Blogs.Domain;
+﻿using Blogs.Common;
+using Blogs.Domain;
 using Blogs.Domain.IRepositorys.Blogs;
 using Blogs.Infrastructure;
 using Blogs.Infrastructure.Context;
@@ -27,7 +28,7 @@ namespace Blogs.WebApi.Controllers
         /// <param name="logger"></param>
         /// <param name="appUserRepository"></param>
         /// <param name="configuration"></param>
-        public TestController(ILogger<TestController> logger,IAppUserRepository appUserRepository, IConfiguration configuration )
+        public TestController(ILogger<TestController> logger, IAppUserRepository appUserRepository, IConfiguration configuration)
         {
             _logger = logger;
             _appUserRepository = appUserRepository;
@@ -47,6 +48,23 @@ namespace Blogs.WebApi.Controllers
             return id.ToString();
         }
 
+        /// <summary>
+        /// 图片加水印测试
+        /// </summary>
+        /// <param name="inputPath"></param>
+        /// <param name="outputPath"></param>
+        [HttpPost("imageWatermarkTest")]
+        public async Task ImageWatermarkTest(string inputPath, string outputPath)
+        {
+            var watermarkService = new ImageWatermarkHelper();
+
+            using var inputStream = System.IO.File.OpenRead(inputPath);
+            using var outputStream = System.IO.File.Create(outputPath);
+            await watermarkService.AddRandomWatermarksAsync(
+               inputStream,
+               outputStream,
+               "水印测试",4,70,200,-45);
+        }
         /// <summary>
         /// Put Logger
         /// </summary>

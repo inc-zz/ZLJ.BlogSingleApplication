@@ -15,7 +15,14 @@ namespace Blogs.AppServices.Commands.Blogs.Article
         public CreateArticleCommand(CreateArticleRequest param)
         {
             var userName = param.GetCreateBy();
-            this.SetArticleInfo(param.Id, param.Title, param.Summary, param.Content, param.Tags, param.CategoryId, null, userName);
+            this.SetArticleInfo(param.Id,
+                param.Title, 
+                param.Summary,
+                param.Content, 
+                param.Tags, 
+                param.CategoryId, 
+                param.CoverImage, 
+                userName);
         }
 
         public override bool IsValid()

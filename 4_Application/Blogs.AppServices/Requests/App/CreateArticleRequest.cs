@@ -16,6 +16,8 @@ namespace Blogs.AppServices.Requests.App
         public string? Summary { get; set; }
         public long? CategoryId { get; set; }
 
+        public string? CoverImage { get; set; }
+
         public string? Tags { get; set; }
 
         public string? Content { get; set; }

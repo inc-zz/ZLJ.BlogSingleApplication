@@ -129,11 +129,12 @@ namespace Blogs.Domain.Entity.Blogs
         /// <param name="tags"></param>
         /// <param name="content"></param>
         /// <param name="userName"></param>
-        public void SetArticleInfo(long id,long? categoryId, string title,string summary, string tags,string content,string userName)
+        public void SetArticleInfo(long id,long? categoryId, string title,string CoverImage, string summary, string tags,string content,string userName)
         {
             this.Id = id;
             this.CategoryId = categoryId;
             this.Title = title;
+            this.CoverImage = CoverImage;
             this.Content = content;
             this.Summary = summary;
             this.Status = ArticleStatusEnum.Draft;

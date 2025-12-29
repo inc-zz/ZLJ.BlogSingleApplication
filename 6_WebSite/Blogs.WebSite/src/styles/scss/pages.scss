@@ -985,6 +985,121 @@
   }
 }
 
+/* Cover Image Upload Styles */
+.cover-image-upload {
+  margin-top: 8px;
+}
+
+.cover-image-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border: 2px dashed var(--color-border-light);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-default);
+  transition: all var(--transition-normal);
+  
+  &:hover {
+    border-color: var(--color-accent);
+    background: rgba(255, 152, 0, 0.05);
+  }
+}
+
+.btn-upload-cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  
+  &:hover:not(:disabled) {
+    background: #e68900;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.upload-hint {
+  margin-top: 12px;
+  color: var(--color-text-light);
+  font-size: 12px;
+  text-align: center;
+}
+
+.cover-image-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  .preview-image {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border-light);
+  }
+}
+
+.cover-image-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-change-cover,
+.btn-remove-cover {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-change-cover {
+  background: var(--color-accent);
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: #e68900;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.btn-remove-cover {
+  background: var(--color-bg-grey);
+  color: var(--color-text-secondary);
+  
+  &:hover:not(:disabled) {
+    background: #e74c3c;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
 .skills-section {
   display: flex;
   flex-direction: column;

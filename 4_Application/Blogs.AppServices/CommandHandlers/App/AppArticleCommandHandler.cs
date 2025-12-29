@@ -44,7 +44,6 @@ namespace Blogs.AppServices.CommandHandlers.App
             }
             try
             {
-
                 var article = command.Adapt<BlogsArticle>();
                 if (command.Id > 0)
                 {

@@ -50,7 +50,7 @@ namespace Blogs.Infrastructure.Repositorys.Blogs
             {
                 throw new Exception("文章不存在");
             }
-            articleInfo.SetArticleInfo(article.Id, article.CategoryId, article.Title, article.Summary, article.Tags, article.Content, article.ModifiedBy);
+            articleInfo.SetArticleInfo(article.Id, article.CategoryId, article.Title, article.CoverImage, article.Summary, article.Tags, article.Content, article.ModifiedBy);
             var result = await Context.Updateable(articleInfo).ExecuteCommandAsync();
             return result > 0;
         }

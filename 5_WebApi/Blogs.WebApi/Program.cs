@@ -454,7 +454,8 @@ app.UseStaticFiles();
 app.UseStaticFileMappings(
    ("Uploads", "ArticleFiles"),
    ("Uploads", "UserPhoto"),
-   ("Uploads", "WebsiteImage")
+   ("Uploads", "WebsiteImage"),
+   ("Uploads", "CoverImage")
 );
 
 // Configure the HTTP request pipeline.

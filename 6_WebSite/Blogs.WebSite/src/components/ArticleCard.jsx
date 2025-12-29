@@ -19,67 +19,70 @@ const ArticleCard = ({ article }) => {
 
   return (
     <div className="article-card" onClick={handleCardClick}>
-      {/* Header: Category badge in top-right */}
-      <div className="article-card-header">
-        <div className="category-badge-wrapper">
-          <span className="tech-badge">
-            {article.categoryName}
-          </span>
+      {/* Cover Image - Left side if available */}
+      {article.coverImage && (
+        <div className="article-cover-image">
+          <img src={article.coverImage} alt={article.title} />
         </div>
-      </div>
+      )}
+      
+      {/* Main content wrapper */}
+      <div className="article-card-content">
 
-      {/* Body: Title and Summary */}
-      <div className="article-card-body">
-        <h3 className="article-title">{article.title}</h3>
-        <p className="article-summary">{article.summary}</p>
-      </div>
-
-      {/* Footer: Tags on left, User info on right */}
-      <div className="article-card-footer">
-        <div className="article-tags">
-          {article.tags.slice(0, 3).map((tag, index) => (
-            <span key={index} className="article-tag">
-              {tag}
-            </span>
-          ))}
+        {/* Body: Title and Summary */}
+        <div className="article-card-body">
+          <h3 className="article-title">{article.title}</h3>
+          <p className="article-summary">{article.summary}</p>
         </div>
-        
-        <div className="article-author-info">
-          <img 
-            src={article.authorAvatar} 
-            alt={article.author} 
-            className="author-avatar-small clickable"
-            onClick={handleUserClick}
-            title="查看用户主页"
-          />
-          <div className="author-meta-compact">
-            <span 
-              className="author-name clickable" 
+
+        {/* Footer: Tags on left, User info on right */}
+        <div className="article-card-footer">
+          <div className="article-tags">
+            {article.tags.slice(0, 3).map((tag, index) => (
+              <span key={index} className="article-tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+          
+          <div className="article-author-info">
+            <img 
+              src={article.authorAvatar} 
+              alt={article.author} 
+              className="author-avatar-small clickable"
               onClick={handleUserClick}
               title="查看用户主页"
-            >
-              {article.author}
-            </span>
-            <span className="publish-date">{article.createdAt}</span>
+            />
+            <div className="author-meta-compact">
+              <span 
+                className="author-name clickable" 
+                onClick={handleUserClick}
+                title="查看用户主页"
+              >
+                {article.author}
+                
+              </span>
+             <span className="publish-date">{article.createdAt}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats bar */}
-      <div className="article-stats-bar">
-        <div className="article-stats">
-          <span className="stat-item">
-            <FaEye className="stat-icon" />
-            {article.views}
-          </span>
-          <span className="stat-item">
-            <FaHeart className="stat-icon" />
-            {article.likes}
-          </span>
-          <span className="stat-item">
-            <FaComment className="stat-icon" />
-            {article.comments}
-          </span>
+        {/* Stats bar */}
+        <div className="article-stats-bar">
+          <div className="article-stats">
+            <span className="stat-item">
+              <FaEye className="stat-icon" />
+              {article.views}
+            </span>
+            <span className="stat-item">
+              <FaHeart className="stat-icon" />
+              {article.likes}
+            </span>
+            <span className="stat-item">
+              <FaComment className="stat-icon" />
+              {article.comments}
+            </span>
+          </div>
         </div>
       </div>
     </div>

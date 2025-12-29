@@ -19,7 +19,6 @@
 .tech-nav-wrapper {
   background: var(--color-bg-paper);
   box-shadow: none;
-  border-bottom: 1px solid var(--color-border-light);
   position: sticky;
   top: 60px;
   z-index: 100;
@@ -1585,7 +1584,6 @@
   .article-title {
     margin-bottom:2px;
     font-size:18px;
-    color: #000;
   }
   .article-card{
     border:none !important;

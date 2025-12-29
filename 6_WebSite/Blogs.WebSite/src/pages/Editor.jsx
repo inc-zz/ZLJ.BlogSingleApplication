@@ -145,6 +145,8 @@ const Editor = () => {
   const [linkText, setLinkText] = useState('');
   const [categories, setCategories] = useState([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [coverImage, setCoverImage] = useState(''); // Cover image URL
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
 
   useEffect(() => {
     // 等待认证状态加载完成
@@ -217,6 +219,11 @@ const Editor = () => {
               setTags(tagsArray);
             }
             
+            // 设置封面图片
+            if (articleData.coverImage) {
+              setCoverImage(articleData.coverImage);
+            }
+            
             message.success('文章加载成功');
           } else {
             message.error('加载文章失败');
@@ -269,6 +276,50 @@ const Editor = () => {
     setContent(newText);
   };
   const formatCode = () => insertText('```\n', '\n```');
+  
+  // 封面图片上传函数
+  const handleCoverImageUpload = async (file) => {
+    if (!file) return;
+    
+    setIsUploadingCover(true);
+    
+    try {
+      // 创建 FormData
+      const formData = new FormData();
+      formData.append('File', file);
+      formData.append('BusinessType', 'CoverImage');
+      
+      // 上传图片
+      message.loading({ content: '封面上传中...', key: 'uploadCover' });
+      
+      const response = await http.post('/AppFileStore/upload', formData);
+      
+      if (response.data && response.data.success && response.data.data) {
+        const fileUrl = response.data.data.fileUrl;
+        setCoverImage(fileUrl);
+        message.success({ content: '封面上传成功！', key: 'uploadCover' });
+        return true;
+      } else {
+        message.error({ content: response.data?.message || '封面上传失败', key: 'uploadCover' });
+        return false;
+      }
+    } catch (error) {
+      console.error('封面上传错误:', error);
+      
+      if (error.response) {
+        if (error.response.status === 415) {
+          message.error({ content: '服务器不支持该媒体类型，请联系管理员', key: 'uploadCover' });
+        } else {
+          message.error({ content: `上传失败: ${error.response.status}`, key: 'uploadCover' });
+        }
+      } else {
+        message.error({ content: '封面上传失败，请重试', key: 'uploadCover' });
+      }
+      return false;
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
   
   // 图片上传函数
   const handleImageUpload = async (file) => {
@@ -544,6 +595,7 @@ const Editor = () => {
         categoryId: selectedTechStack, // selectedTechStack 现在存储的是 categoryId
         tags: tags.join('，'), // 使用中文逗号分隔
         content: content.trim(),
+        coverImage: coverImage || '', // 添加封面图片
         isPublish: true
       };
       
@@ -712,6 +764,64 @@ const Editor = () => {
                     maxLength={20}
                   />
                 </form>
+              )}
+            </div>
+          </div>
+
+          {/* 封面图片上传 */}
+          <div className="form-group">
+            <label>文章封面（可选）</label>
+            <div className="cover-image-upload">
+              {coverImage ? (
+                <div className="cover-image-preview">
+                  <img src={coverImage} alt="封面预览" className="preview-image" />
+                  <div className="cover-image-actions">
+                    <button 
+                      type="button"
+                      className="btn-change-cover"
+                      onClick={() => document.getElementById('coverImageInput').click()}
+                      disabled={isUploadingCover}
+                    >
+                      {isUploadingCover ? '上传中...' : '更换封面'}
+                    </button>
+                    <button 
+                      type="button"
+                      className="btn-remove-cover"
+                      onClick={() => setCoverImage('')}
+                      disabled={isUploadingCover}
+                    >
+                      移除封面
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="cover-image-upload-area">
+                  <input
+                    id="coverImageInput"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file && file.type.startsWith('image/')) {
+                        handleCoverImageUpload(file);
+                      } else if (file) {
+                        message.warning('请选择图片文件');
+                      }
+                      e.target.value = ''; // Reset input
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                  <button 
+                    type="button"
+                    className="btn-upload-cover"
+                    onClick={() => document.getElementById('coverImageInput').click()}
+                    disabled={isUploadingCover}
+                  >
+                    <FaImage style={{ marginRight: '8px' }} />
+                    {isUploadingCover ? '上传中...' : '上传封面图片'}
+                  </button>
+                  <p className="upload-hint">建议尺寸：800x450px，支持 JPG、PNG 格式</p>
+                </div>
               )}
             </div>
           </div>

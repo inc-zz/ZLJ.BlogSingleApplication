@@ -11,7 +11,7 @@
    /* 主题色彩 - Light Mode */
   --color-primary: #FFFFFF;           /* 白色背景（最佳选择）*/
   --color-primary-dark: #F5F7FA;      /* 卡片背景，略带灰度 */
-  --color-secondary: #5b5d6e;         /* 棕色（标题/导航）*/  
+  --color-secondary: #000;         /* 棕色（标题/导航）*/  
   --color-secondary-light: #303F9F;   /* 中蓝（副标题/标签）*/
   --color-accent: #1148AE;            /* 紫色强调色（比淡紫更饱和）*/
   --color-accent-light: rgb(82, 106, 149);      /* hover 状态 */
