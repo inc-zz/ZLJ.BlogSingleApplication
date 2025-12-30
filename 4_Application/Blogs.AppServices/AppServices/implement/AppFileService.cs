@@ -72,8 +72,7 @@ namespace Blogs.AppServices.AppServices.implement
 
                 // 确保目录存在 
                 var saveFilePath = Path.Combine(AppConfig.Instance.FileStoreConfig.FileSavePath, directoryConfig.Url);
-                FilePathConfig.EnsureDirectoryExists(saveFilePath);
-
+               
                 // 生成存储文件名
                 var storedFileName = GenerateStoredFileName(file.FileName);
                 var filePath = Path.Combine(directoryConfig.Url, storedFileName);
