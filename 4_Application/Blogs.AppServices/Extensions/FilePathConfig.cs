@@ -5,37 +5,6 @@
     /// </summary>
     public static class FilePathConfig
     {
-        // 上传根目录（可配置）
-        public static string UploadRootPath { get; set; } = "wwwroot";
-
-        // 业务类型对应的子目录
-        public static Dictionary<string, string> BusinessTypeDirectories = new()
-        {
-            ["CoverImage"] = "Uploads/CoverImage",
-            ["ArticleFiles"] = "Uploads/ArticleFiles",
-            ["UserPhoto"] = "Uploads/UserPhoto",
-            ["WebsiteImage"] = "Uploads/WebsiteImage"
-        };
-
-        // 获取完整保存路径
-        public static string GetFullPath(string businessType)
-        {
-            if (BusinessTypeDirectories.TryGetValue(businessType, out var relativePath))
-            {
-                return Path.Combine(UploadRootPath, relativePath);
-            }
-            return Path.Combine(UploadRootPath, "Uploads", businessType);
-        }
-
-        // 获取URL访问路径
-        public static string GetUrlPath(string businessType, string fileName)
-        {
-            if (BusinessTypeDirectories.TryGetValue(businessType, out var relativePath))
-            {
-                return $"/{relativePath.Replace("\\", "/")}/{fileName}";
-            }
-            return $"/Uploads/{businessType}/{fileName}";
-        }
 
         /// <summary>
         /// 确保目录存在并且配置正确的权限

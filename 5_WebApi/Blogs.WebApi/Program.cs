@@ -411,6 +411,7 @@ builder.Services.AddCors(options =>
 
 #region 文件存储
 builder.Services.AddScoped<IAppFileService, AppFileService>();
+
 // 配置 Kestrel 服务器请求体大小限制（针对自宿主情况）
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
