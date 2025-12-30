@@ -15,7 +15,7 @@
       "launchBrowser": true,
       "launc    hUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Docker"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7235;http://localhost:5234"
