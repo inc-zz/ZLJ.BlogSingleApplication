@@ -1,4 +1,5 @@
 ﻿using Blogs.AppServices.AppServices.Interface;
+using Blogs.AppServices.Extensions;
 using Blogs.Core;
 using Blogs.Core.Config;
 using Blogs.Domain.Entity.Blogs;
@@ -39,7 +40,7 @@ namespace Blogs.AppServices.AppServices.implement
         }
 
         /// <summary>
-        /// 
+        /// 上传文件
         /// </summary>
         /// <param name="file"></param>
         /// <param name="businessType"></param>
@@ -69,12 +70,13 @@ namespace Blogs.AppServices.AppServices.implement
                     return new FileUploadResult { Success = false, Message = $"未找到业务类型 '{businessType}' 的目录配置" };
                 }
 
-                // 确保目录存在
-                EnsureDirectoryExists(directoryConfig.Content);
+                // 确保目录存在 
+                var saveFilePath = Path.Combine(AppConfig.Instance.FileStoreConfig.FileSavePath, directoryConfig.Url);
+                FilePathConfig.EnsureDirectoryExists(saveFilePath);
 
                 // 生成存储文件名
                 var storedFileName = GenerateStoredFileName(file.FileName);
-                var filePath = Path.Combine(directoryConfig.Content, storedFileName);
+                var filePath = Path.Combine(directoryConfig.Url, storedFileName);
                 var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
                 // 计算文件MD5（针对大文件使用流式处理）
@@ -101,13 +103,14 @@ namespace Blogs.AppServices.AppServices.implement
                 }
 
                 // 保存文件（区分大文件和小文件）
+                var savePath = Path.Combine(AppConfig.Instance.FileStoreConfig.FileSavePath, filePath);
                 if (file.Length > AppConfig.Instance.FileStoreConfig.LargeFileThreshold)
                 {
-                    await SaveLargeFileAsync(file, filePath);
+                    await SaveLargeFileAsync(file, savePath);
                 }
                 else
                 {
-                    await SaveSmallFileAsync(file, filePath);
+                    await SaveSmallFileAsync(file, savePath);
                 }
 
                 // 创建文件记录
@@ -153,6 +156,11 @@ namespace Blogs.AppServices.AppServices.implement
             return await _db.DbContext.Queryable<BlogsFileRecord>().Where(f => f.Id == fileId).FirstAsync();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
         public async Task<bool> DeleteFileAsync(long fileId)
         {
             var fileRecord = await GetFileRecordAsync(fileId);
@@ -169,7 +177,7 @@ namespace Blogs.AppServices.AppServices.implement
         }
 
         /// <summary>
-        /// 
+        /// 验证文件类型
         /// </summary>
         /// <param name="file"></param>
         /// <param name="businessType"></param>
@@ -215,8 +223,9 @@ namespace Blogs.AppServices.AppServices.implement
 
             return new FileUploadResult { Success = true };
         }
+
         /// <summary>
-        /// 
+        /// 验证文件格式
         /// </summary>
         /// <param name="contentType"></param>
         /// <param name="fileExtension"></param>
@@ -239,19 +248,7 @@ namespace Blogs.AppServices.AppServices.implement
             {
                 return validContentTypes.Contains(contentType.ToLowerInvariant());
             }
-
             return false;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
-        private void EnsureDirectoryExists(string path)
-        {
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
         }
 
         /// <summary>
@@ -266,6 +263,7 @@ namespace Blogs.AppServices.AppServices.implement
             var safeFileName = Regex.Replace(fileNameWithoutExtension, @"[^a-zA-Z0-9\u4e00-\u9fa5-]", "_");
             return $"{safeFileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -278,6 +276,7 @@ namespace Blogs.AppServices.AppServices.implement
             var hashBytes = await md5.ComputeHashAsync(stream);
             return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -291,7 +290,7 @@ namespace Blogs.AppServices.AppServices.implement
         }
 
         /// <summary>
-        /// 
+        /// 保存文件
         /// </summary>
         /// <param name="file"></param>
         /// <param name="filePath"></param>

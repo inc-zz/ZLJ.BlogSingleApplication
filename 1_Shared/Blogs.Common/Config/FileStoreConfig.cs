@@ -39,6 +39,10 @@ namespace Blogs.Common.Config
         /// 默认业务类型
         /// </summary>
         public string DefaultBusinessType { get; set; } = "blog-attachments";
+        /// <summary>
+        /// 文件保存路径
+        /// </summary>
+        public string FileSavePath { get; set; }
     }
 
     /// <summary>

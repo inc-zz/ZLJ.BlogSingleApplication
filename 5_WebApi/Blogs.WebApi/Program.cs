@@ -1,7 +1,4 @@
-﻿using OpenIddict.Validation.AspNetCore;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
-using Blogs.AppServices.AppServices.implement;
+﻿using Blogs.AppServices.AppServices.implement;
 using Blogs.AppServices.AppServices.Interface;
 using Blogs.AppServices.CommandHandlers.Admin;
 using Blogs.AppServices.QueryHandlers.Admin;
@@ -22,22 +19,26 @@ using Blogs.Infrastructure.Services.Admin;
 using Blogs.Infrastructure.Services.App;
 using Blogs.WebApi.Middleware;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using OpenIddict.Abstractions;
+using OpenIddict.Validation.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using StackExchange.Redis;
 using System.Reflection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -449,14 +450,17 @@ using (var scope = app.Services.CreateScope())
 }
 #endregion
 
-app.UseStaticFiles();
+//app.UseStaticFiles();
+
 // 添加自定义静态文件路径映射
-app.UseStaticFileMappings(
-   ("Uploads", "ArticleFiles"),
-   ("Uploads", "UserPhoto"),
-   ("Uploads", "WebsiteImage"),
-   ("Uploads", "CoverImage")
-);
+var currentDirectory = Directory.GetCurrentDirectory();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(currentDirectory, "Uploads")),
+    RequestPath = "/Uploads"
+});
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
