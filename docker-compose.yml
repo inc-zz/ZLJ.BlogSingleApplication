@@ -20,7 +20,7 @@ services:
       - redis
     restart: unless-stopped
     volumes:
-      - /opt/docker/data/blog_webapi/Uploads:/app/Uploads:ro
+      - /opt/docker/data/blog_webapi/Uploads:/app/Uploads
     networks:
       - app-network
 
