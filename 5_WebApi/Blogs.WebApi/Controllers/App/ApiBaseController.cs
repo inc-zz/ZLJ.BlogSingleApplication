@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Blogs.WebApi.BaseServices
+namespace Blogs.WebApi.Controllers.App
 {
     /// <summary>
-    /// 
+    /// 测试控制器
     /// </summary>
     [ApiController]
+    [Route("api/app/[controller]")]
     public class ApiBaseController<IServiceBase> : ControllerBase
     {
         protected IServiceBase _serviceBase;

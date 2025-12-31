@@ -36,7 +36,7 @@ namespace Blogs.WebApi.Controllers.Store
             try
             {
                 var userId = CurrentAppUser.Instance.UserId.ToString();
-                var file = request.File;
+                var file = request.File;    
                 var businessType = request.BusinessType;
                 var result = await _fileUploadService.UploadSingleFileAsync(file, businessType, "", userId);
 
