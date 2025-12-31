@@ -163,13 +163,13 @@ const zh = {
       title: '教育背景',
       description: '以下是我的教育背景，为我的技术生涯奠定了坚实的基础。',
       edu1: {
-        date: '2012-2016',
-        degree: '某学校',
+        date: '2011-2013',
+        degree: '民办学校',
         institution: '某大学',
         description: '在校期间主修计算机科学相关课程，包括数据结构、算法、数据库和网络编程等。参与多个课程项目，积累了丰富的实践经验。'
       },
       edu2: {
-        date: '2016-2018',
+        date: '2011-2013',
         degree: 'About my school',
         institution: 'A Graduate School',
         description: 'In-depth study of software engineering theory and practice, focusing on web application development and distributed system design. Completed master\'s thesis "Design and Implementation of E-commerce Platform Based on Microservices Architecture".'
@@ -227,30 +227,30 @@ const zh = {
             name: '企业知识分享平台',
             description: '一个功能强大的企业内部知识分享与博客系统，旨在集中存储、管理和分享企业知识资产。支持多层级权限管理，确保知识安全；提供全文搜索、标签分类、评论互动和版本控制等功能，便于员工快速查找和学习。同时，系统支持响应式布局，方便多终端访问，是企业知识沉淀、员工培训与团队协作的理想平台',
             image: '/assets/website1.jpg',
-            technologies: ['React', 'WebApi', 'Redis'],
-            date: '2023',
-            liveUrl: 'https://example.com',
-            githubUrl: 'https://github.com/example/project1'
+            technologies: ['React', 'DotNet8', 'DDD'],
+            date: '2024',
+            liveUrl: 'https://blog.zhenglijun.com.com',
+            githubUrl: 'https://github.com/inc-zz/ZLJ.BlogSingleApplication'
           },
           {
             id: 2,
             name: '权限管理平台',
             description: '本平台是一个基于前后端分离架构的权限管理系统，为企业项目开发提供高效起点。它集成了用户、角色、权限等核心基础服务，并内置了操作日志、性能监控与链路追踪等可观测性功能。平台提供清晰的API接口，模块化设计易于二次开发，能显著减少重复工作，帮助企业团队快速构建安全、稳定且可扩展的后台管理系统，有效降低开发成本，加速项目上线。',
             image: '/assets/website2.jpg', 
-            technologies: ['Dapr', 'AbpVnext', 'MySql'],
-            date: '2022',
-            liveUrl: 'https://example.com',
-            githubUrl: 'https://github.com/example/project2'
+            technologies: ['SqlSugar', 'AbpVnext', 'MySql'],
+            date: '2025',
+            liveUrl: 'https://admin.zhenglijun.com',
+            githubUrl: 'https://github.com/inc-zz'
           },
           {
             id: 3,
             name: '独立站电商微服务架构',
             description: '一个基于Dapr和.NET 8构建的企业级电商独立站微服务系统。采用Dapr分布式应用运行时，提供包括服务调用、状态管理、发布订阅、配置管理、分布式跟踪等构建块。系统集成Ocelot作为API网关，使用Dapr内置服务发现，Nacos作为配置中心，ELK日志中心，Skywallking链路追踪，Nexus包管理，Harbor镜像仓库，全程支持Docker容器化部署。为企业电商业务提供稳定可靠的技术支撑',
             image: '/assets/website3.jpg',
-            technologies: ['Vue3', 'DDD', 'CQRS'],
-            date: '2021',
-            liveUrl: 'https://example.com',
-            githubUrl: 'https://github.com/example/project3'
+            technologies: ['DotNet10', 'React', 'Dapr'],
+            date: '2026',
+            liveUrl: 'https://shop.zhenglijun.com',
+            githubUrl: 'https://github.com/inc-zz'
           }
         ]
     },
@@ -271,19 +271,19 @@ const zh = {
         datas:{
           frontend: {
             name: '前端技术',
-            items: ['Vue 3', 'TypeScript', 'Pinia', 'Element Plus', 'Vite']
+            items: ['Vue3', 'TypeScript', 'Layui', 'React']
           },
           backend: {
             name: '后端技术',
-            items: ['Node.js', 'Express', 'Redis', 'MongoDB', 'MySQL']
+            items: ['DotNet', 'Dapr', 'Redis', 'AbpVnext']  
           },
           devops: {
             name: '运维部署',
-            items: ['Docker', 'Nginx', 'Jenkins', 'AWS', 'PM2']
+            items: ['Docker', 'Nginx', 'Jenkins', 'K8s']
           },
           tools: {
-            name: '开发工具',
-            items: ['Git', 'Webpack', 'ESLint', 'Jest', 'Postman']
+            name: '数据库',
+            items: ['MySql', 'PgSql', 'MsSql', 'Sqlite']
           }
         }
       },

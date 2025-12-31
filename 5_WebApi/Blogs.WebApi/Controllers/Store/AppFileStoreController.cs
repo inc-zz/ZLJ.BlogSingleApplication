@@ -79,14 +79,14 @@ namespace Blogs.WebApi.Controllers.Store
             {
                 var currentDirectory = Directory.GetCurrentDirectory();
                 var uploadsPath = Path.Combine(currentDirectory, "Uploads");
-                var converImagePath = Path.Combine(uploadsPath, "ConverImage");
+                var coverImagePath = Path.Combine(uploadsPath, "CoverImage");
 
                 // 检查目录和文件
                 var uploadsExists = Directory.Exists(uploadsPath);
-                var converImageExists = Directory.Exists(converImagePath);
+                var coverImageExists = Directory.Exists(coverImagePath);
 
                 // 获取所有文件
-                var allFiles = Directory.GetFiles(converImagePath).Select(f => new
+                var allFiles = Directory.GetFiles(coverImagePath).Select(f => new
                 {
                     Name = Path.GetFileName(f),
                     Size = new FileInfo(f).Length,
@@ -94,7 +94,7 @@ namespace Blogs.WebApi.Controllers.Store
                 }).ToList();
 
                 // 检查特定文件
-                var targetFile = Path.Combine(converImagePath, "2_20251231002638684.png");
+                var targetFile = Path.Combine(coverImagePath, "2_20251231002638684.png");
                 var fileExists = System.IO.File.Exists(targetFile);
 
                 return Ok(new
@@ -109,10 +109,10 @@ namespace Blogs.WebApi.Controllers.Store
                             ? Directory.GetDirectories(uploadsPath)
                             : Array.Empty<string>()
                     },
-                    ConverImageDirectory = new
+                    coverImageDirectory = new
                     {
-                        Path = converImagePath,
-                        Exists = converImageExists
+                        Path = coverImagePath,
+                        Exists = coverImageExists
                     },
                     TargetFile = new
                     {
@@ -149,7 +149,7 @@ namespace Blogs.WebApi.Controllers.Store
         public IActionResult DownloadTest()
         {
             var currentDirectory = Directory.GetCurrentDirectory();
-            var testFile = Path.Combine(currentDirectory, "Uploads", "ConverImage", "2_20251231002638684.png");
+            var testFile = Path.Combine(currentDirectory, "Uploads", "coverImage", "2_20251231002638684.png");
 
             if (!System.IO.File.Exists(testFile))
             {

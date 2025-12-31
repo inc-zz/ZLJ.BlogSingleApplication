@@ -93,8 +93,8 @@ services:
       - app-network
 
 volumes:
-  mysql-data:
-  redis-data:
+  mysql-data: /opt/docker/data/mysql
+  redis-data: /opt/docker/data/redis
 
 networks:
   app-network:
