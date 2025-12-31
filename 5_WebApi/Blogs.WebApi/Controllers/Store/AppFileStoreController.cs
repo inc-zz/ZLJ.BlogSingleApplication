@@ -14,10 +14,13 @@ namespace Blogs.WebApi.Controllers.Store
     {
         private readonly IAppFileService _fileUploadService;
         private readonly ILogger<AppFileStoreController> _logger;
-
-        public AppFileStoreController(IAppFileService fileUploadService, ILogger<AppFileStoreController> logger)
+        private readonly IWebHostEnvironment _env;
+        public AppFileStoreController(IAppFileService fileUploadService,
+            IWebHostEnvironment env,
+            ILogger<AppFileStoreController> logger)
         {
             _fileUploadService = fileUploadService;
+            _env = env;
             _logger = logger;
         }
 
@@ -67,5 +70,95 @@ namespace Blogs.WebApi.Controllers.Store
                 });
             }
         }
+
+
+        [HttpGet("check-files")]
+        public IActionResult CheckFiles()
+        {
+            try
+            {
+                var currentDirectory = Directory.GetCurrentDirectory();
+                var uploadsPath = Path.Combine(currentDirectory, "Uploads");
+                var converImagePath = Path.Combine(uploadsPath, "ConverImage");
+
+                // 检查目录和文件
+                var uploadsExists = Directory.Exists(uploadsPath);
+                var converImageExists = Directory.Exists(converImagePath);
+
+                // 获取所有文件
+                var allFiles = Directory.GetFiles(converImagePath).Select(f => new
+                {
+                    Name = Path.GetFileName(f),
+                    Size = new FileInfo(f).Length,
+                    FullPath = f
+                }).ToList();
+
+                // 检查特定文件
+                var targetFile = Path.Combine(converImagePath, "2_20251231002638684.png");
+                var fileExists = System.IO.File.Exists(targetFile);
+
+                return Ok(new
+                {
+                    Success = true,
+                    CurrentDirectory = currentDirectory,
+                    UploadsDirectory = new
+                    {
+                        Path = uploadsPath,
+                        Exists = uploadsExists,
+                        Subdirectories = uploadsExists
+                            ? Directory.GetDirectories(uploadsPath)
+                            : Array.Empty<string>()
+                    },
+                    ConverImageDirectory = new
+                    {
+                        Path = converImagePath,
+                        Exists = converImageExists
+                    },
+                    TargetFile = new
+                    {
+                        Path = targetFile,
+                        Exists = fileExists,
+                        Size = fileExists ? new FileInfo(targetFile).Length : 0
+                    },
+                    AllFiles = allFiles,
+                    Environment = new
+                    {
+                        IsDevelopment = _env.IsDevelopment(),
+                        ContentRoot = _env.ContentRootPath,
+                        WebRoot = _env.WebRootPath
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "检查文件时发生错误");
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Error = ex.Message,
+                    Details = ex.StackTrace
+                });
+            }
+        }
+
+        /// <summary>
+        /// DownloadTest
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("download-test")]
+        public IActionResult DownloadTest()
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var testFile = Path.Combine(currentDirectory, "Uploads", "ConverImage", "2_20251231002638684.png");
+
+            if (!System.IO.File.Exists(testFile))
+            {
+                return NotFound(new { Message = "文件不存在", Path = testFile });
+            }
+
+            var fileBytes = System.IO.File.ReadAllBytes(testFile);
+            return File(fileBytes, "image/png", "test.png");
+        }
     }
+
 }
