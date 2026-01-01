@@ -110,7 +110,7 @@ public class UnifiedResponseMiddleware
         string responseContent,
         Stream originalBodyStream)
     {
-        _logger.LogDebug("返回原始响应，状态码: {StatusCode}", context.Response.StatusCode);
+        //_logger.LogDebug("返回原始响应，状态码: {StatusCode}", context.Response.StatusCode);
 
         // 直接将内存流内容写回原始流
         context.Response.Body = originalBodyStream;
