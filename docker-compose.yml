@@ -6,25 +6,41 @@ services:
     image: blogs-webapi:latest
     container_name: blogs-webapi
     expose:
-      - "8083"  
+      - "8083"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8083
-      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=blogsdb;User=root;Password=Zlj@123;SslMode=Preferred;
-      - Redis__Host=redis
-      - Redis__Port=6379
-      - Redis__InstanceName=blogs_cache
-      - Redis__Password=
+      # 数据库配置
+      - ConnectionStrings__MySqlConnectionWrite=Server=mysql;Port=3306;Database=blogsdb;User=root;Password=Zlj@123;SslMode=Preferred;
+      # Redis配置
+      - ConnectionStrings__RedisConnection=redis:6379,password=Zlj@123,defaultDatabase=0,abortConnect=false
+      # JWT配置
+      - JwtConfig__Issuer=blogs-api
+      - JwtConfig__Audience=blogs-client
+      - JwtConfig__SecurityKey=YourSuperSecretKeyHereChangeThisInProduction
+      # OpenIddict配置 
+      - OpenIddict__CertificatePath=/app/certs/encryption-certificate.pfx
+      # CORS配置
+      - CorsConfig=http://localhost:3000;http://localhost:3001;http://blogs-admin;http://blogs-website
     depends_on:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
     volumes:
-      - /opt/docker/data/blog_webapi/Uploads:/app/Uploads
+      - ./uploads:/app/Uploads
+      - ./logs:/app/Logs
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # blogs-admin和blogs-website保持不变...
   blogs-admin:
     build:
       context: ./6_WebSite/Blogs.Admin
@@ -32,7 +48,10 @@ services:
     image: blogs-admin:latest
     container_name: blogs-admin
     expose:
-      - "80"  
+      - "80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
     depends_on:
       webapi:
         condition: service_healthy
@@ -48,6 +67,9 @@ services:
     container_name: blogs-website
     expose:
       - "80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
     depends_on:
       webapi:
         condition: service_healthy
@@ -55,6 +77,7 @@ services:
     networks:
       - app-network
 
+  # mysql和redis保持不变...
   mysql:
     image: mysql:8.0
     container_name: blogs-mysql
@@ -65,8 +88,8 @@ services:
       - "3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d:ro 
-    command: 
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    command:
       - --default-authentication-plugin=mysql_native_password
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
@@ -84,7 +107,7 @@ services:
     container_name: blogs-redis
     expose:
       - "6379"
-    command: ["redis-server", "--bind", "0.0.0.0", "--requirepass", "Zlj@123"]  
+    command: ["redis-server", "--bind", "0.0.0.0", "--requirepass", "Zlj@123"]
     volumes:
       - redis-data:/data
     restart: unless-stopped
@@ -103,10 +126,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../nginx/conf.d:/etc/nginx/conf.d:ro
-      - ../certs:/etc/nginx/certs:ro
-      - ../nginx/html:/usr/share/nginx/html:ro
-      - ../nginx/logs:/var/log/nginx
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+      - ./nginx/logs:/var/log/nginx
     depends_on:
       - blogs-admin
       - blogs-website
@@ -116,8 +139,8 @@ services:
       - app-network
 
 volumes:
-  mysql-data: 
-  redis-data: 
+  mysql-data:
+  redis-data:
 
 networks:
   app-network:

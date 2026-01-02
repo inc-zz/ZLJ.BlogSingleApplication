@@ -36,7 +36,6 @@ using Serilog;
 using Serilog.Events;
 using StackExchange.Redis;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -45,6 +44,17 @@ var builder = WebApplication.CreateBuilder(args);
 // 配置初始化
 AppConfig.Init(builder.Services, builder.Configuration);
 
+// 获取环境变量
+var environment = builder.Environment.EnvironmentName;
+Console.WriteLine($"当前环境: {environment}");
+Console.WriteLine($"ContentRootPath: {builder.Environment.ContentRootPath}");
+
+// 加载环境特定的配置文件
+builder.Configuration
+    .SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -109,7 +119,7 @@ builder.Services.AddSwaggerGen(options =>
         return false;
     });
 
-    // 添加XML注释（两个文档共享）
+    // 添加XML注释
     var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
     var xmlFile = $"{assemblyName}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -117,10 +127,6 @@ builder.Services.AddSwaggerGen(options =>
     if (File.Exists(xmlPath))
     {
         options.IncludeXmlComments(xmlPath, true);
-    }
-    else
-    {
-        Console.WriteLine($"XML文档文件未找到: {xmlPath}");
     }
 });
 
@@ -130,41 +136,30 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddHttpContextAccessor();
 
 #region 注册Redis连接
-builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+var redisConnection = AppConfig.GetSettingString("ConnectionStrings:RedisConnection");
+if (!string.IsNullOrEmpty(redisConnection))
 {
-    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-    var configuration = AppConfig.GetSettingString("ConnectionStrings:RedisConnection");
-    return ConnectionMultiplexer.Connect(configuration);
-});
-#endregion
-
-#region JWT配置
-var jwtConfig = AppConfig.GetConfigModel<JwtConfig>("JwtConfig");
-Console.WriteLine(JsonConvert.SerializeObject(jwtConfig));
-
-// 注册JWT服务
-//builder.Services.AddScoped<IJwtService, JwtService>();
+    Console.WriteLine($"Redis连接字符串: {redisConnection}");
+    builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+        ConnectionMultiplexer.Connect(redisConnection));
+}
+else
+{
+    Console.WriteLine("警告: Redis连接字符串未配置");
+}
 #endregion
 
 #region 注册仓储
-//builder.Services.AddScoped<IUserRepository, UserRepository>();
-//builder.Services.AddScoped<IMenuRepository, MenuRepository>();
-//builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-//builder.Services.AddScoped<IPermissionsRepository, PermissionsRepository>();
-//builder.Services.AddScoped<ISysLogRepository, SysLogRepository>();
-//builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
-
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 
 var domainAssembly = typeof(IUserRepository).Assembly;
 var infrastructureAssembly = typeof(UserRepository).Assembly;
 
 builder.Services.Scan(scan => scan
-    .FromAssemblies(infrastructureAssembly) // 从实现层扫描
+    .FromAssemblies(infrastructureAssembly)
     .AddClasses(classes => classes.Where(t => t.Name.EndsWith("Repository")))
     .AsImplementedInterfaces()
     .WithScopedLifetime());
-
 #endregion
 
 #region 注册事件总线处理程序
@@ -172,42 +167,25 @@ builder.Services.AddSingleton<IMediatorHandler, MediatorHandler>();
 #endregion
 
 #region 批量注册所有Command和Query Handler
-// 方法1: 使用MediatR自动注册（推荐）
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(AdminUserQueryHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(AppUserCommandHandler).Assembly);
-    //cfg.RegisterServicesFromAssembly(typeof(RoleQueryHandler).Assembly);
 });
-
-#endregion
-
-#region 数据迁移-表结构生成
-
-// 初始化数据库上下文
-var dbContext = new SqlSugarDbContext();
-//dbContext.InitTables();
 #endregion
 
 #region 注册领域通知处理器
 builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 builder.Services.AddScoped<DomainNotificationHandler>();
-
-// 注册过滤器需要的服务
 builder.Services.AddScoped<GlobalExceptionFilter>();
 #endregion
 
-//builder.WebHost.UseUrls("http://0.0.0.0:8080");
-//builder.WebHost.UseUrls("https://0.0.0.0:8088");
-
-#region 集成OpenidDict
-
+#region 集成OpenIdDict
 
 // 注册自定义服务
 builder.Services.AddScoped<IOpenIddictService, OpenIddictService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
-
 builder.Services.AddScoped<IAppOpenIddictService, AppOpenIddictService>();
 builder.Services.AddScoped<IAppAuthService, AppAuthService>();
 
@@ -215,6 +193,12 @@ builder.Services.AddScoped<IAppAuthService, AppAuthService>();
 builder.Services.AddDbContext<OpenIddictDbContext>(options =>
 {
     var connectionString = AppConfig.GetSettingString("ConnectionStrings:MySqlConnectionWrite");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new InvalidOperationException("数据库连接字符串未配置");
+    }
+    Console.WriteLine($"数据库连接字符串: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
+
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
     // 启用更详细的错误信息和敏感数据记录（仅开发环境）
@@ -223,7 +207,6 @@ builder.Services.AddDbContext<OpenIddictDbContext>(options =>
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
-
 });
 
 // 配置OpenIddict
@@ -243,11 +226,7 @@ builder.Services.AddOpenIddict()
 
         // 设置令牌端点
         options.SetTokenEndpointUris("/connect/token");
-
-        // 设置授权端点（如果需要授权码流程）
         options.SetAuthorizationEndpointUris("/connect/authorize");
-
-        // 设置用户信息端点
         options.SetUserInfoEndpointUris("/connect/userinfo");
 
         // 注册范围
@@ -263,26 +242,48 @@ builder.Services.AddOpenIddict()
         // 加密和签名配置
         if (builder.Environment.IsDevelopment())
         {
-            Console.WriteLine("=====================开发环境：使用临时密钥===============");
-
-            // 开发环境：使用临时密钥
+            Console.WriteLine("开发环境：使用临时密钥");
             options.AddEphemeralEncryptionKey()
                    .AddEphemeralSigningKey();
         }
         else if (builder.Environment.IsProduction())
         {
+            Console.WriteLine("生产环境：配置证书");
 
-            // 推荐：使用 ContentRootPath（容器中是 /app）
-            var certificatePath = Path.Combine(builder.Environment.ContentRootPath, "encryption-certificate.pfx");
+            // 从配置读取证书路径
+            var certPath = builder.Configuration["OpenIddict:CertificatePath"] ??
+                          "/app/certs/encryption-certificate.pfx";
+            var certPassword = builder.Configuration["OpenIddict:CertificatePassword"];
 
-            // 无密码证书：传 null 更可靠
-            var certificate = new X509Certificate2(certificatePath, (string)null);
+            Console.WriteLine($"证书路径: {certPath}");
 
-            options.AddEncryptionCertificate(certificate);
-            options.AddSigningCertificate(certificate);
+            if (File.Exists(certPath))
+            {
+                try
+                {
+                    var certificate = new X509Certificate2(certPath, certPassword ?? string.Empty,
+                        X509KeyStorageFlags.EphemeralKeySet);
 
-            // 可选：打印验证信息
-            Console.WriteLine($"证书加载成功！主题: {certificate.Subject}");
+                    options.AddEncryptionCertificate(certificate);
+                    options.AddSigningCertificate(certificate);
+
+                    Console.WriteLine($"证书加载成功！主题: {certificate.Subject}");
+                    Console.WriteLine($"证书指纹: {certificate.Thumbprint}");
+                    Console.WriteLine($"证书有效期: {certificate.NotBefore:yyyy-MM-dd} 到 {certificate.NotAfter:yyyy-MM-dd}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"警告: 证书加载失败，使用临时密钥（生产环境不推荐）: {ex.Message}");
+                    options.AddEphemeralEncryptionKey()
+                           .AddEphemeralSigningKey();
+                }
+            }
+            else
+            {
+                Console.WriteLine($"警告: 证书文件不存在 ({certPath})，使用临时密钥（生产环境不推荐）");
+                options.AddEphemeralEncryptionKey()
+                       .AddEphemeralSigningKey();
+            }
         }
 
         // 配置令牌生命周期
@@ -309,38 +310,40 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    var jwtConfig = AppConfig.GetConfigModel<JwtConfig>("JwtConfig");
+    if (jwtConfig == null)
+    {
+        throw new InvalidOperationException("JWT配置未找到");
+    }
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
-        ValidAudience = builder.Configuration["JwtConfig:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:SecurityKey"]))
+        ValidIssuer = jwtConfig.Issuer,
+        ValidAudience = jwtConfig.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecurityKey))
     };
 
     options.Events = new JwtBearerEvents
     {
         OnTokenValidated = async context =>
         {
-            var _openiddictService = context.HttpContext.RequestServices.GetRequiredService<IOpenIddictService>();
-
-            Console.WriteLine("==================================================================");
-            Console.WriteLine("OnTokenValidated: " + context.SecurityToken);
+            var openIddictService = context.HttpContext.RequestServices.GetRequiredService<IOpenIddictService>();
 
             var token = context.HttpContext.Request.Headers["Authorization"]
-            .FirstOrDefault()?
-            .Replace("Bearer ", "");
-            //var token =  context.SecurityToken as JwtSecurityToken;
-            if (token == null)
+                .FirstOrDefault()?
+                .Replace("Bearer ", "");
+
+            if (string.IsNullOrEmpty(token))
             {
                 context.Fail("Token is not valid");
                 return;
             }
 
-            var exists = await _openiddictService.ValidateJwtToken(token);
-
+            var exists = await openIddictService.ValidateJwtToken(token);
             if (!exists)
             {
                 context.Fail("Token has been revoked");
@@ -348,7 +351,6 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
-
 
 // 配置授权
 builder.Services.AddAuthorization(options =>
@@ -360,141 +362,159 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
-// 配置 Redis
-var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
-if (!string.IsNullOrEmpty(redisConnectionString))
-{
-    builder.Services.AddSingleton<IConnectionMultiplexer>(
-        ConnectionMultiplexer.Connect(redisConnectionString));
-}
-
 #endregion
 
-
-
 #region 日志配置
-// 配置 Serilog
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug() // 设置全局最小日志级别
+    .MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-    .Enrich.FromLogContext() // 从日志上下文中丰富属性
-    .WriteTo.Console() // 同时输出到控制台
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
     .WriteTo.File(
-        path: "Logs/.txt", // 日志文件路径和名称模式
-        rollingInterval: RollingInterval.Day, // 按天分割文件
-        retainedFileCountLimit: 30, // 保留最近30天的日志文件
-        fileSizeLimitBytes: 10 * 1024 * 1024, // 单个文件最大10MB
-        rollOnFileSizeLimit: true, // 在文件达到大小限制后也滚动
+        path: "Logs/.txt",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        fileSizeLimitBytes: 10 * 1024 * 1024,
+        rollOnFileSizeLimit: true,
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-        encoding: System.Text.Encoding.UTF8
+        encoding: Encoding.UTF8
     )
     .CreateLogger();
+
 builder.Host.UseSerilog();
 #endregion
 
 #region CORS跨域配置
-builder.Services.AddCors(options =>
+var corsConfig = AppConfig.GetSection("CorsConfig")?.Value;
+if (!string.IsNullOrEmpty(corsConfig))
 {
-    options.AddPolicy("WebSiteCors", builder =>
+    var origins = corsConfig.Split(';', StringSplitOptions.RemoveEmptyEntries);
+    Console.WriteLine($"CORS允许的源: {string.Join(", ", origins)}");
+
+    builder.Services.AddCors(options =>
     {
-        var corsUrls = AppConfig.GetSection("CorsConfig").Value;
-        var origins = corsUrls.Split(';', StringSplitOptions.RemoveEmptyEntries);
-
-        builder.WithOrigins(origins)
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials(); // 如果前端需要发送cookies等凭证
+        options.AddPolicy("WebSiteCors", builder =>
+        {
+            builder.WithOrigins(origins)
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        });
     });
-});
-
+}
+else
+{
+    Console.WriteLine("警告: CORS配置未找到");
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("WebSiteCors", builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+    });
+}
 #endregion
 
 #region 文件存储
 builder.Services.AddScoped<IAppFileService, AppFileService>();
 
-// 配置 Kestrel 服务器请求体大小限制（针对自宿主情况）
+// 配置请求体大小限制
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = 1024 * 1024 * 1024; // 例如：设置为 1GB
+    options.Limits.MaxRequestBodySize = 1024 * 1024 * 1024; // 1GB
 });
-// 配置 IIS 服务器选项（针对部署到 IIS 的情况）
+
 builder.Services.Configure<IISServerOptions>(options =>
 {
-    options.MaxRequestBodySize = 1024 * 1024 * 1024; // 例如：设置为 1GB
+    options.MaxRequestBodySize = 1024 * 1024 * 1024;
 });
-// 配置表单选项，解除 Multipart  Body 长度限制
+
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = long.MaxValue; // 取消限制，或设置为一个很大的值
+    options.MultipartBodyLengthLimit = long.MaxValue;
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartHeadersLengthLimit = int.MaxValue;
 });
-
 #endregion
 
+// 添加健康检查
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-#region Openiddict初始化
-
-
-// 初始化CurrentUser静态类
+#region OpenIdDict初始化
 using (var scope = app.Services.CreateScope())
 {
-    //管理端
-    var openIddictService = scope.ServiceProvider.GetRequiredService<IOpenIddictService>();
-    CurrentUser.SetProvider(openIddictService);
+    try
+    {
+        // 确保数据库已创建
+        var dbContext = scope.ServiceProvider.GetRequiredService<OpenIddictDbContext>();
+        await dbContext.Database.EnsureCreatedAsync();
 
-    //App端
-    var appOpeniddictService = scope.ServiceProvider.GetRequiredService<IAppOpenIddictService>();
-    CurrentAppUser.SetProvider(appOpeniddictService);
+        // 初始化CurrentUser
+        var openIddictService = scope.ServiceProvider.GetRequiredService<IOpenIddictService>();
+        CurrentUser.SetProvider(openIddictService);
+
+        // 初始化AppUser
+        var appOpenIddictService = scope.ServiceProvider.GetRequiredService<IAppOpenIddictService>();
+        CurrentAppUser.SetProvider(appOpenIddictService);
+
+        Console.WriteLine("OpenIdDict初始化完成");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"OpenIdDict初始化失败: {ex.Message}");
+        // 根据您的需求决定是否抛出异常
+    }
 }
 #endregion
 
-//app.UseStaticFiles();
-
 // 添加自定义静态文件路径映射
-var currentDirectory = Directory.GetCurrentDirectory();
+var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+    Console.WriteLine($"创建上传目录: {uploadsPath}");
+}
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(currentDirectory, "Uploads")),
+    FileProvider = new PhysicalFileProvider(uploadsPath),
     RequestPath = "/Uploads"
 });
 
-
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
+// 开发环境启用Swagger
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
-    //app.UseSwaggerUI();
     app.UseSwaggerUI(options =>
     {
-        // App接口文档
         options.SwaggerEndpoint("/swagger/app/swagger.json", "App API v1");
-
-        // Admin接口文档  
         options.SwaggerEndpoint("/swagger/admin/swagger.json", "Admin API v1");
-
-        // 可选：设置默认文档
         options.RoutePrefix = "swagger";
     });
-//}
+}
 
-//启用CORS
+// 启用CORS
 app.UseCors("WebSiteCors");
-//app.UseHttpsRedirection();
 
-//启用认证中间件
+// 启用认证和授权中间件
 app.UseAuthentication();
 app.UseAuthorization();
 
-//注册统一响应处理中间件（应该在所有中间件之后，Endpoint之前）
+// 注册统一响应处理中间件
 app.UseMiddleware<UnifiedResponseMiddleware>();
-
 
 app.MapControllers();
 
 // 映射健康检查终结点
 app.MapHealthChecks("/health");
+
+// 映射OpenIddict端点
+//app.MapOpenIddict();
+
+Console.WriteLine($"应用程序启动成功，监听端口: {builder.Configuration["ASPNETCORE_URLS"]}");
+
 app.Run();
