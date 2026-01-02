@@ -10,17 +10,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8083
-      # 数据库配置
       - ConnectionStrings__MySqlConnectionWrite=Server=mysql;Port=3306;Database=blogsdb;User=root;Password=Zlj@123;SslMode=Preferred;
-      # Redis配置
       - ConnectionStrings__RedisConnection=redis:6379,password=Zlj@123,defaultDatabase=0,abortConnect=false
-      # JWT配置
       - JwtConfig__Issuer=blogs-api
       - JwtConfig__Audience=blogs-client
       - JwtConfig__SecurityKey=YourSuperSecretKeyHereChangeThisInProduction
-      # OpenIddict配置 
       - OpenIddict__CertificatePath=/app/certs/encryption-certificate.pfx
-      # CORS配置
       - CorsConfig=http://localhost:3000;http://localhost:3001;http://blogs-admin;http://blogs-website
     depends_on:
       mysql:
@@ -40,7 +35,6 @@ services:
       retries: 3
       start_period: 60s
 
-  # blogs-admin和blogs-website保持不变...
   blogs-admin:
     build:
       context: ./6_WebSite/Blogs.Admin
@@ -77,7 +71,6 @@ services:
     networks:
       - app-network
 
-  # mysql和redis保持不变...
   mysql:
     image: mysql:8.0
     container_name: blogs-mysql
