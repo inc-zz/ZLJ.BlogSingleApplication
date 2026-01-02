@@ -39,8 +39,6 @@ services:
     container_name: blogs-admin
     expose:
       - "80"  
-    environment:
-      - VITE_API_BASE_URL=https://api.zhenglijun.com  
     depends_on:
       webapi:
         condition: service_healthy
@@ -56,8 +54,6 @@ services:
     container_name: blogs-website
     expose:
       - "80"
-    environment:
-      - VITE_API_BASE_URL=https://api.zhenglijun.com
     depends_on:
       webapi:
         condition: service_healthy
