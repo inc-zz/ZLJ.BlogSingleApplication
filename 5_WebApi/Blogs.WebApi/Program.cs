@@ -464,8 +464,8 @@ app.UseStaticFiles(new StaticFileOptions
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     //app.UseSwaggerUI();
     app.UseSwaggerUI(options =>
@@ -479,7 +479,7 @@ if (app.Environment.IsDevelopment())
         // 可选：设置默认文档
         options.RoutePrefix = "swagger";
     });
-}
+//}
 
 //启用CORS
 app.UseCors("WebSiteCors");

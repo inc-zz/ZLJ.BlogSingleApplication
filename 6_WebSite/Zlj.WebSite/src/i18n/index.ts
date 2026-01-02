@@ -229,7 +229,7 @@ const zh = {
             image: '/assets/website1.jpg',
             technologies: ['React', 'DotNet8', 'DDD'],
             date: '2024',
-            liveUrl: 'https://blog.zhenglijun.com.com',
+            liveUrl: 'https://blog.zhenglijun.com',
             githubUrl: 'https://github.com/inc-zz/ZLJ.BlogSingleApplication'
           },
           {
