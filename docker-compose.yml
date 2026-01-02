@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     image: blogs-webapi:latest
     container_name: blogs-webapi
-    ports:
-      - "8083:8083"
+    expose:
+      - "8083"  
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8083
@@ -16,13 +16,20 @@ services:
       - Redis__InstanceName=blogs_cache
       - Redis__Password=
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
     volumes:
       - /opt/docker/data/blog_webapi/Uploads:/app/Uploads
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   blogs-admin:
     build:
@@ -30,8 +37,13 @@ services:
       dockerfile: Dockerfile
     image: blogs-admin:latest
     container_name: blogs-admin
+    expose:
+      - "80"  
+    environment:
+      - VITE_API_BASE_URL=https://api.zhenglijun.com  
     depends_on:
-      - webapi
+      webapi:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
@@ -42,8 +54,13 @@ services:
       dockerfile: Dockerfile
     image: blogs-website:latest
     container_name: blogs-website
+    expose:
+      - "80"
+    environment:
+      - VITE_API_BASE_URL=https://api.zhenglijun.com
     depends_on:
-      - webapi
+      webapi:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
@@ -54,26 +71,40 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: Zlj@123
       MYSQL_DATABASE: blogsdb
-    ports:
-      - "3308:3306"
+    expose:
+      - "3306"
     volumes:
       - mysql-data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro 
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pZlj@123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: blogs-redis
-    command: ["redis-server", "--bind", "0.0.0.0"]
-    ports:
-      - "6377:6379"
+    expose:
+      - "6379"
+    command: ["redis-server", "--bind", "0.0.0.0", "--requirepass", "Zlj@123"]  
     volumes:
       - redis-data:/data
     restart: unless-stopped
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nginx:
     image: nginx:alpine
@@ -82,12 +113,14 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /var/lib/jenkins/workspace/nginx/conf.d:/etc/nginx/conf.d:ro
-      - /var/lib/jenkins/workspace/certs:/etc/nginx/certs:ro
-      - /var/lib/jenkins/workspace/nginx/html:/usr/share/nginx/html:ro
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../certs:/etc/nginx/certs:ro
+      - ../nginx/html:/usr/share/nginx/html:ro
+      - ../nginx/logs:/var/log/nginx
     depends_on:
       - blogs-admin
       - blogs-website
+      - webapi
     restart: unless-stopped
     networks:
       - app-network
@@ -98,4 +131,4 @@ volumes:
 
 networks:
   app-network:
-    external: true
+    driver: bridge
