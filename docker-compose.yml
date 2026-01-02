@@ -5,113 +5,71 @@ services:
       dockerfile: Dockerfile
     image: blogs-webapi:latest
     container_name: blogs-webapi
-    expose:
-      - "8083"
+    ports:
+      - "8083:8083"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8083
-      - ConnectionStrings__MySqlConnectionWrite=Server=mysql;Port=3306;Database=blogsdb;User=root;Password=Zlj@123;SslMode=Preferred;
-      - ConnectionStrings__RedisConnection=redis:6379,password=Zlj@123,defaultDatabase=0,abortConnect=false
-      - JwtConfig__Issuer=blogs-api
-      - JwtConfig__Audience=blogs-client
-      - JwtConfig__SecurityKey=YourSuperSecretKeyHereChangeThisInProduction
-      - OpenIddict__CertificatePath=/app/certs/encryption-certificate.pfx
-      - CorsConfig=http://localhost:3000;http://localhost:3001;http://blogs-admin;http://blogs-website
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=blogsdb;User=root;Password=Zlj@123;SslMode=Preferred;
+      - Redis__Host=redis
+      - Redis__Port=6379
+      - Redis__InstanceName=blogs_cache
+      - Redis__Password=
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - mysql
+      - redis
     restart: unless-stopped
     volumes:
-      - ./uploads:/app/Uploads
-      - ./logs:/app/Logs
+      - /opt/docker/data/blog_webapi/Uploads:/app/Uploads
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
   blogs-admin:
     build:
       context: ./6_WebSite/Blogs.Admin
       dockerfile: Dockerfile
     image: blogs-admin:latest
     container_name: blogs-admin
-    expose:
-      - "80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
     depends_on:
-      webapi:
-        condition: service_healthy
+      - webapi
     restart: unless-stopped
     networks:
       - app-network
-
   blogs-website:
     build:
       context: ./6_WebSite/Blogs.WebSite
       dockerfile: Dockerfile
     image: blogs-website:latest
     container_name: blogs-website
-    expose:
-      - "80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
     depends_on:
-      webapi:
-        condition: service_healthy
+      - webapi
     restart: unless-stopped
     networks:
       - app-network
-
   mysql:
     image: mysql:8.0
     container_name: blogs-mysql
     environment:
       MYSQL_ROOT_PASSWORD: Zlj@123
       MYSQL_DATABASE: blogsdb
-    expose:
-      - "3306"
+    ports:
+      - "3308:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d:ro
-    command:
-      - --default-authentication-plugin=mysql_native_password
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
+    command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pZlj@123"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7-alpine
     container_name: blogs-redis
-    expose:
-      - "6379"
-    command: ["redis-server", "--bind", "0.0.0.0", "--requirepass", "Zlj@123"]
+    command: ["redis-server", "--bind", "0.0.0.0"]
+    ports:
+      - "6377:6379"
     volumes:
       - redis-data:/data
     restart: unless-stopped
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   nginx:
     image: nginx:alpine
     container_name: blogs-nginx
@@ -119,22 +77,19 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./certs:/etc/nginx/certs:ro
-      - ./nginx/html:/usr/share/nginx/html:ro
-      - ./nginx/logs:/var/log/nginx
+      # nginx÷§ È≈‰÷√
+      - /var/lib/jenkins/workspace/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /var/lib/jenkins/workspace/certs:/etc/nginx/certs:ro
+      - /var/lib/jenkins/workspace/nginx/html:/usr/share/nginx/html:ro
     depends_on:
       - blogs-admin
       - blogs-website
-      - webapi
     restart: unless-stopped
     networks:
       - app-network
-
 volumes:
   mysql-data:
   redis-data:
-
 networks:
   app-network:
-    driver: bridge
+    external: true
