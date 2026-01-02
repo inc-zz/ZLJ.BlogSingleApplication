@@ -492,8 +492,9 @@ app.UseAuthorization();
 //注册统一响应处理中间件（应该在所有中间件之后，Endpoint之前）
 app.UseMiddleware<UnifiedResponseMiddleware>();
 
-// 映射健康检查终结点
-app.MapHealthChecks("/health");
 
 app.MapControllers();
+
+// 映射健康检查终结点
+app.MapHealthChecks("/health");
 app.Run();
