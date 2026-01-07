@@ -6,7 +6,7 @@ services:
     image: blogs-webapi:latest
     container_name: blogs-webapi
     expose:
-      - "8083"  
+      - "8083"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8083
@@ -22,7 +22,7 @@ services:
         condition: service_started
     restart: unless-stopped
     volumes:
-      - /opt/docker/data/blog_webapi/Uploads:/app/Uploads
+      - ./5_WebApi/wwwroot/Uploads:/app/wwwroot/Uploads
     networks:
       - app-network
     healthcheck:
@@ -39,7 +39,7 @@ services:
     image: blogs-admin:latest
     container_name: blogs-admin
     expose:
-      - "80"  
+      - "80"
     depends_on:
       webapi:
         condition: service_healthy
@@ -72,8 +72,8 @@ services:
       - "3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d:ro 
-    command: 
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    command:
       - --default-authentication-plugin=mysql_native_password
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
@@ -86,12 +86,13 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+  
   redis:
     image: redis:7-alpine
     container_name: blogs-redis
     expose:
       - "6379"
-    command: ["redis-server", "--bind", "0.0.0.0", "--requirepass", "Zlj@123"]  
+    command: ["redis-server", "--bind", "0.0.0.0", "--requirepass", "Zlj@123"]
     volumes:
       - redis-data:/data
     restart: unless-stopped
@@ -110,10 +111,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../nginx/conf.d:/etc/nginx/conf.d:ro
-      - ../certs:/etc/nginx/certs:ro
-      - ../nginx/html:/usr/share/nginx/html:ro
-      - ../nginx/logs:/var/log/nginx
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./5_WebApi/wwwroot/Uploads:/opt/docker/data/blog_webapi/Uploads:ro
+      - ./5_WebApi/Uploads:/opt/docker/data/blog_webapi/Uploads:ro
     depends_on:
       - blogs-admin
       - blogs-website
@@ -123,8 +126,8 @@ services:
       - app-network
 
 volumes:
-  mysql-data: 
-  redis-data: 
+  mysql-data:
+  redis-data:
 
 networks:
   app-network:
