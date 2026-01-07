@@ -25,6 +25,13 @@ services:
       - /opt/docker/data/blog_webapi/Uploads:/app/Uploads
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   blogs-admin:
     build:
       context: ./6_WebSite/Blogs.Admin
