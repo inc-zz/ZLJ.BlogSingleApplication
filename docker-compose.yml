@@ -111,10 +111,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./certs:/etc/nginx/certs:ro
-      - ./nginx/html:/usr/share/nginx/html:ro
-      - ./nginx/logs:/var/log/nginx
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../certs:/etc/nginx/certs:ro
+      - ../nginx/html:/usr/share/nginx/html:ro
+      - ../nginx/logs:/var/log/nginx
       - ./5_WebApi/Uploads:/opt/docker/data/blog_webapi/Uploads:ro
     depends_on:
       - blogs-admin
