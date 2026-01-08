@@ -30,5 +30,11 @@ RUN dotnet publish "./Blogs.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/publi
 # 此阶段在生产中使用，或在常规模式下从 VS 运行时使用(在不使用调试配置时为默认值)
 FROM base AS final
 WORKDIR /app
+
+# 安装 curl（用于健康检查）
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Blogs.WebApi.dll"]
