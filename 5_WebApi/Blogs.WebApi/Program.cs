@@ -496,6 +496,8 @@ app.UseSwaggerUI(options =>
 });
 //}
 
+app.UseRouting();
+
 // 启用CORS
 app.UseCors("WebSiteCors");
 
