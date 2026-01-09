@@ -401,6 +401,7 @@ if (!string.IsNullOrEmpty(corsConfig))
                    .AllowCredentials();
         });
     });
+    Console.WriteLine("已开启CORS");
 }
 else
 {
@@ -461,12 +462,10 @@ using (var scope = app.Services.CreateScope())
         var appOpenIddictService = scope.ServiceProvider.GetRequiredService<IAppOpenIddictService>();
         CurrentAppUser.SetProvider(appOpenIddictService);
 
-        Console.WriteLine("OpenIdDict初始化完成");
     }
     catch (Exception ex)
     {
         Console.WriteLine($"OpenIdDict初始化失败: {ex.Message}");
-        // 根据您的需求决定是否抛出异常
     }
 }
 #endregion
@@ -513,8 +512,6 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 // 映射OpenIddict端点
-//app.MapOpenIddict();
-
-Console.WriteLine($"应用程序启动成功，监听端口: {builder.Configuration["ASPNETCORE_URLS"]}");
+//app.MapOpenIddict(); 
 
 app.Run();
