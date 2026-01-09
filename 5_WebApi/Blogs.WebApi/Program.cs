@@ -486,16 +486,16 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 // 开发环境启用Swagger
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
+//{
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/app/swagger.json", "App API v1");
-        options.SwaggerEndpoint("/swagger/admin/swagger.json", "Admin API v1");
-        options.RoutePrefix = "swagger";
-    });
-}
+    options.SwaggerEndpoint("/swagger/app/swagger.json", "App API v1");
+    options.SwaggerEndpoint("/swagger/admin/swagger.json", "Admin API v1");
+    options.RoutePrefix = "swagger";
+});
+//}
 
 // 启用CORS
 app.UseCors("WebSiteCors");
