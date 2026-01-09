@@ -32,6 +32,7 @@ FROM base AS final
 WORKDIR /app
 
 # 安装 curl（用于健康检查）
+USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
