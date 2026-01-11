@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     image: blogs-webapi:latest
     container_name: blogs-webapi
-    expose:
-      - "8083"
+    ports:
+      - "8083:8083"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8083
@@ -68,8 +68,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: Zlj@123
       MYSQL_DATABASE: blogsdb
-    expose:
-      - "3306"
+    ports:
+      - "3308:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d:ro
@@ -90,8 +90,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: blogs-redis
-    expose:
-      - "6379"
+    ports:
+      - "6377:6379"
     command: ["redis-server", "--bind", "0.0.0.0", "--requirepass", "Zlj@123"]
     volumes:
       - redis-data:/data
