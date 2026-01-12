@@ -197,11 +197,8 @@ builder.Services.AddDbContext<OpenIddictDbContext>(options =>
     {
         throw new InvalidOperationException("数据库连接字符串未配置");
     }
-    Console.WriteLine($"数据库连接字符串: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
-
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
-    // 启用更详细的错误信息和敏感数据记录（仅开发环境）
     if (builder.Environment.IsDevelopment())
     {
         options.EnableSensitiveDataLogging();
