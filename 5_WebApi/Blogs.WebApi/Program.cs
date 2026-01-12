@@ -475,6 +475,17 @@ var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 if (!Directory.Exists(uploadsPath))
 {
     Directory.CreateDirectory(uploadsPath);
+    //测试，预先创建一些子目录
+    var subDirs = new[] { "ArticleFiles", "UserPhoto", "WebsiteImage", "CoverImage" };
+    foreach (var dir in subDirs)
+    {
+        var fullPath = Path.Combine(uploadsPath, dir);
+        if (!Directory.Exists(fullPath))
+        {
+            Directory.CreateDirectory(fullPath);
+            Console.WriteLine($"创建子目录: {fullPath}");
+        }
+    }
     Console.WriteLine($"创建上传目录: {uploadsPath}");
 }
 
@@ -485,16 +496,16 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 // 开发环境启用Swagger
-//if (app.Environment.IsDevelopment())
-//{
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.SwaggerEndpoint("/swagger/app/swagger.json", "App API v1");
-    options.SwaggerEndpoint("/swagger/admin/swagger.json", "Admin API v1");
-    options.RoutePrefix = "swagger";
-});
-//}
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/app/swagger.json", "App API v1");
+        options.SwaggerEndpoint("/swagger/admin/swagger.json", "Admin API v1");
+        options.RoutePrefix = "swagger";
+    });
+}
 
 app.UseRouting();
 
