@@ -22,7 +22,7 @@ services:
         condition: service_started
     restart: unless-stopped
     volumes:
-      - /opt/docker/data/blog_webapi/Uploads: /app/wwwroot/Uploads
+      - /opt/docker/data/blog_webapi/Uploads:/app/wwwroot/Uploads
     networks:
       - app-network
     healthcheck:

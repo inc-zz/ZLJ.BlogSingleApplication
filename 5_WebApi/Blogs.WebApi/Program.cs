@@ -493,8 +493,8 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 // 开发环境启用Swagger
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
@@ -502,7 +502,7 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/swagger/admin/swagger.json", "Admin API v1");
         options.RoutePrefix = "swagger";
     });
-}
+//}
 
 app.UseRouting();
 
