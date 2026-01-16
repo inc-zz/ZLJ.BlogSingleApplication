@@ -16,7 +16,7 @@ namespace Blogs.WebApi.Controllers.App
     /// <summary>
     /// 前端-文章模块
     /// </summary>
-    [Route("api/app/[controller]")]
+    [Route("api/app/[controller]")] 
     [ApiController]
     public class ArticleController : ControllerBase
     {

@@ -18,7 +18,7 @@ namespace Blogs.WebApi.Controllers.App
     {
         private readonly ILogger<ArticleCommentController> _logger;
         private readonly IMediator _mediator; //查询调用处理器
-        private readonly DomainNotificationHandler _notificationHandler; //领域通知处理器
+        private readonly DomainNotificationHandler _notificationHandler; 
         public ArticleCommentController(ILogger<ArticleCommentController> logger, IMediator mediator,
             INotificationHandler<DomainNotification> notifications)
         {
