@@ -18,10 +18,10 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="文章标题/简介">
+        <el-form-item label="条件搜索">
           <el-input 
             v-model="searchForm.Where" 
-            placeholder="请输入标题或简介" 
+            placeholder="标题/简介/创建人" 
             clearable 
             style="width: 250px"
           />

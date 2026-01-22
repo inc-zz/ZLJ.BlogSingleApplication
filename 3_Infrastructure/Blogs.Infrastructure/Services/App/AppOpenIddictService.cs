@@ -2,6 +2,7 @@
 using Blogs.Core.Entity.Blogs;
 using Blogs.Core.Models;
 using Blogs.Domain;
+using Blogs.Domain.Entity.Admin;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -306,8 +307,7 @@ namespace Blogs.Infrastructure.Services.App
                 UserId = userId,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                UserName = principal.FindFirstValue(ClaimTypes.Name) ?? "",
-                Role = principal.FindFirstValue(ClaimTypes.Role) ?? "user"
+                UserName = principal.FindFirstValue(ClaimTypes.Name) ?? ""
             };
 
             // 使用 JSON 序列化确保类型安全
@@ -385,7 +385,6 @@ namespace Blogs.Infrastructure.Services.App
                     var userModel = new JwtUserModel
                     {
                         UserId = user.Id.ToString(),
-                        Roles = "user",
                         UserName = user.Account,
                         Email = user.Email
                     };

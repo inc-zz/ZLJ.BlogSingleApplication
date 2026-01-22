@@ -17,7 +17,9 @@
     "@vueup/vue-quill": "^1.2.0",
     "axios": "^1.13.1",
     "date-fns": "^4.1.0",
+    "dompurify": "^3.3.1",
     "element-plus": "^2.11.5",
+    "marked": "^17.0.1",
     "mockjs": "^1.1.0",
     "pinia": "^3.0.3",
     "quill": "^2.0.3",
@@ -26,6 +28,7 @@
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "@types/mockjs": "^1.0.10",
     "@types/node": "^24.9.2",
     "@typescript-eslint/eslint-plugin": "^8.46.2",

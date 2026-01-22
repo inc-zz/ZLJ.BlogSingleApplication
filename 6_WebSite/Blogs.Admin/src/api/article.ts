@@ -42,6 +42,7 @@ export interface ArticleFormData {
   categoryId: number
   tags: string
   content: string
+  coverImage?: string
   isPublish: boolean
 }
 

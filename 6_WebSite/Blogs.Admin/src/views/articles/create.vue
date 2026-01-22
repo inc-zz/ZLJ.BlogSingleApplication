@@ -37,7 +37,7 @@
           </el-tag>
         </div>
         <p class="summary">{{ form.summary }}</p>
-        <div class="content" v-html="form.content"></div>
+        <div class="content markdown-body" v-html="renderedMarkdown"></div>
       </div>
       
       <!-- 编辑模式 -->
@@ -97,6 +97,27 @@
           />
         </el-form-item>
         
+        <el-form-item label="封面图片" prop="coverImage">
+          <div class="cover-upload-container">
+            <el-upload
+              class="cover-uploader"
+              :show-file-list="false"
+              :http-request="handleCoverUpload"
+              :before-upload="beforeCoverUpload"
+              accept="image/*"
+            >
+              <img v-if="form.coverImage" :src="form.coverImage" class="cover-image" />
+              <el-icon v-else class="cover-uploader-icon"><Plus /></el-icon>
+            </el-upload>
+            <div class="cover-tips">
+              <span>建议尺寸：800x450，支持 JPG、PNG 格式，大小不超过 2MB</span>
+              <el-button v-if="form.coverImage" link type="danger" @click="handleRemoveCover">
+                移除封面
+              </el-button>
+            </div>
+          </div>
+        </el-form-item>
+        
         <el-form-item label="文章内容" prop="content">
           <div class="editor-wrapper">
             <QuillEditor
@@ -131,12 +152,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules, type UploadRequestOptions } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { saveArticle, getArticleCategories, uploadArticleImage, type ArticleFormData, type ArticleCategory } from '@/api/article'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 const router = useRouter()
 const formRef = ref<FormInstance>()
@@ -148,6 +172,18 @@ const selectedTags = ref<string[]>([])
 
 // 预设标签选项
 const tagOptions = ['NetCore', 'Vue', 'React', 'JavaScript', 'Java', 'Go', '其他']
+
+// 渲染 Markdown 内容
+const renderedMarkdown = computed(() => {
+  if (!form.content) return ''
+  try {
+    const html = marked.parse(form.content) as string
+    return DOMPurify.sanitize(html)
+  } catch (error) {
+    console.error('Markdown 渲染失败:', error)
+    return form.content
+  }
+})
 
 // 富文本编辑器工具栏配置
 const toolbarOptions = [
@@ -170,6 +206,7 @@ const form = reactive<ArticleFormData>({
   content: '',
   categoryId: 0,
   tags: '',
+  coverImage: '',
   isPublish: false,
 })
 
@@ -195,8 +232,51 @@ const handleTagsChange = (tags: string[]) => {
   form.tags = tags.join(',')
 }
 
+// 封面图片上传前校验
+const beforeCoverUpload = (file: File) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件！')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过 2MB！')
+    return false
+  }
+  return true
+}
+
+// 处理封面图片上传
+const handleCoverUpload = async (options: UploadRequestOptions) => {
+  try {
+    ElMessage.info('封面图片上传中...')
+    const response = await uploadArticleImage(options.file as File)
+    
+    if (response.success && response.fileUrl) {
+      form.coverImage = response.fileUrl
+      ElMessage.success('封面图片上传成功')
+    } else {
+      ElMessage.error('封面图片上传失败')
+    }
+  } catch (error) {
+    console.error('封面图片上传失败:', error)
+    ElMessage.error('封面图片上传失败')
+  }
+}
+
+// 移除封面图片
+const handleRemoveCover = () => {
+  form.coverImage = ''
+  ElMessage.success('已移除封面图片')
+}
+
 // 编辑器准备完成
 const onEditorReady = (quill: any) => {
+  // 保存当前滚动位置
+  let savedScrollPosition = 0
+  
   // 监听粘贴事件
   const editor = quill.root
   editor.addEventListener('paste', async (e: ClipboardEvent) => {
@@ -209,9 +289,17 @@ const onEditorReady = (quill: any) => {
       if (item && item.type.indexOf('image') !== -1) {
         e.preventDefault() // 阻止默认粘贴行为
         
+        // 保存粘贴前的滚动位置
+        savedScrollPosition = editor.scrollTop
+        
         const file = item.getAsFile()
         if (file) {
           await handleImageUpload(file, quill)
+          
+          // 恢复滚动位置
+          setTimeout(() => {
+            editor.scrollTop = savedScrollPosition
+          }, 0)
         }
         break
       }
@@ -253,19 +341,43 @@ const handleImageUpload = async (file: File, quill: any) => {
 const handleSubmit = async () => {
   if (!formRef.value) return
 
-  await formRef.value.validate(async (valid) => {
-    if (valid) {
-      loading.value = true
-      try {
-        await saveArticle(form)
-        ElMessage.success(form.isPublish ? '文章发布成功' : '草稿保存成功')
-        router.push('/content/articles')
-      } catch (error) {
-        console.error('保存失败:', error)
-        ElMessage.error('保存失败')
-      } finally {
-        loading.value = false
+  await formRef.value.validate(async (valid, fields) => {
+    if (!valid) {
+      // 收集所有错误信息
+      const errorMessages: string[] = []
+      if (fields) {
+        Object.keys(fields).forEach(key => {
+          const fieldErrors = fields[key]
+          if (fieldErrors && fieldErrors.length > 0) {
+            const firstError = fieldErrors[0]
+            errorMessages.push(firstError?.message || '')
+          }
+        })
       }
+      
+      // 使用 MessageBox 显示错误
+      await ElMessageBox.alert(
+        errorMessages.join('<br/>'),
+        '表单验证失败',
+        {
+          dangerouslyUseHTMLString: true,
+          type: 'warning',
+          confirmButtonText: '确定'
+        }
+      )
+      return
+    }
+    
+    loading.value = true
+    try {
+      await saveArticle(form)
+      ElMessage.success(form.isPublish ? '文章发布成功' : '草稿保存成功')
+      router.push('/content/articles')
+    } catch (error) {
+      console.error('保存失败:', error)
+      ElMessage.error('保存失败')
+    } finally {
+      loading.value = false
     }
   })
 }
@@ -317,6 +429,8 @@ onMounted(() => {
       font-size: 15px;
       line-height: 1.8;
       color: #303133;
+      white-space: pre-wrap;
+      word-wrap: break-word;
       
       :deep(img) {
         max-width: 100%;
@@ -330,10 +444,56 @@ onMounted(() => {
         overflow-x: auto;
       }
       
+      :deep(code) {
+        background: #f6f8fa;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+      }
+      
+      :deep(pre code) {
+        background: transparent;
+        padding: 0;
+      }
+      
       :deep(blockquote) {
         border-left: 4px solid #dfe2e5;
         padding-left: 16px;
         color: #6a737d;
+        margin: 16px 0;
+      }
+      
+      :deep(h1), :deep(h2), :deep(h3), :deep(h4), :deep(h5), :deep(h6) {
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        line-height: 1.25;
+      }
+      
+      :deep(p) {
+        margin-bottom: 16px;
+      }
+      
+      :deep(ul), :deep(ol) {
+        padding-left: 2em;
+        margin-bottom: 16px;
+      }
+      
+      :deep(table) {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 16px;
+      }
+      
+      :deep(table th),
+      :deep(table td) {
+        border: 1px solid #dfe2e5;
+        padding: 6px 13px;
+      }
+      
+      :deep(table th) {
+        background: #f6f8fa;
+        font-weight: 600;
       }
     }
   }
@@ -378,6 +538,50 @@ onMounted(() => {
           font-style: normal;
         }
       }
+    }
+  }
+  
+  // 封面图片上传样式
+  .cover-upload-container {
+    .cover-uploader {
+      :deep(.el-upload) {
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.3s;
+        width: 400px;
+        height: 225px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        &:hover {
+          border-color: #409eff;
+        }
+      }
+    }
+    
+    .cover-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .cover-uploader-icon {
+      font-size: 28px;
+      color: #8c939d;
+    }
+    
+    .cover-tips {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #909399;
     }
   }
 }

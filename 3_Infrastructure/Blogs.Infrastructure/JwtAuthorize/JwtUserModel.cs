@@ -25,7 +25,7 @@ namespace Blogs.Domain
         /// <summary>
         /// 用户角色
         /// </summary>
-        public string? Roles { get; set; }
+        public List<string>? RoleIds { get; set; }
         /// <summary>
         /// 平台
         /// </summary>

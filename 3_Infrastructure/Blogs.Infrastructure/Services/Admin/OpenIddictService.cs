@@ -60,8 +60,9 @@ namespace Blogs.Infrastructure.Services.Admin
                 identity.AddClaim(OpenIddictConstants.Claims.Email, user.Email);
                 identity.AddClaim(OpenIddictConstants.Claims.Name, user.UserName);
                 identity.AddClaim(OpenIddictConstants.Claims.PreferredUsername, user.UserName);
-
                 // 添加角色声明
+                //var userRole = user.UserRoles.Select(it => it.RoleId).ToList();
+
                 identity.AddClaim(OpenIddictConstants.Claims.Role, "admin");
 
                 var principal = new ClaimsPrincipal(identity);
@@ -80,7 +81,7 @@ namespace Blogs.Infrastructure.Services.Admin
                 // 设置资源
                 principal.SetResources("resource_server");
 
-                // 生成访问令牌 - 使用 OpenIddict 7.0.0 的方式
+                // 生成访问令牌 
                 var accessToken = GenerateAccessTokenManually(principal, user);
 
                 // 刷新令牌
@@ -95,7 +96,8 @@ namespace Blogs.Infrastructure.Services.Admin
                 // 将令牌存储到 Redis
                 var userId = user.Id.ToString();
                 var userRole = string.Join(",", user.UserRoles.Select(it => it.RoleId));
-                await StoreTokensInRedisAsync(principal, userId, accessToken, refreshToken, userRole);
+
+                await StoreTokensInRedisAsync(principal, user, accessToken, refreshToken, userRole);
 
                 return TokenResult.Success(accessToken, refreshToken, DateTime.Now.AddHours(24));
             }
@@ -251,45 +253,36 @@ namespace Blogs.Infrastructure.Services.Admin
         /// <returns></returns>
         private string GenerateAccessTokenManually(ClaimsPrincipal principal, SysUser user)
         {
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_configuration["JwtConfig:SecurityKey"]);
-                var actualExpireMinutes = _jwtConfig.TokenExpires;
-                var now = DateTime.UtcNow;
-                var expires = now.AddMinutes(actualExpireMinutes);
+            var handler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["JwtConfig:SecurityKey"]);
+            var actualExpireMinutes = _jwtConfig.TokenExpires;
+            var now = DateTime.UtcNow;
+            var expires = now.AddMinutes(actualExpireMinutes);
 
-                var claims = new List<Claim>
+            var claims = new List<Claim>
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(now).ToString(), ClaimValueTypes.Integer64),
-                    // 后期扩展，根据用户多角色添加多个角色
                     new Claim("role", "admin")
                 };
 
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(claims),
-                    Expires = expires,
-                    Issuer = _configuration["JwtConfig:Issuer"],
-                    Audience = _configuration["JwtConfig:Audience"],
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(key),
-                        SecurityAlgorithms.HmacSha256Signature)
-                };
-
-                var token = handler.CreateToken(tokenDescriptor);
-                return handler.WriteToken(token);
-            }
-            catch (Exception e)
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // 建议记录异常日志（如使用ILogger），而非直接抛出
-                // _logger.LogError(e, "生成JWT令牌失败");
-                throw;
-            }
+                Subject = new ClaimsIdentity(claims),
+                Expires = expires,
+                Issuer = _configuration["JwtConfig:Issuer"],
+                Audience = _configuration["JwtConfig:Audience"],
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = handler.CreateToken(tokenDescriptor);
+            return handler.WriteToken(token);
+
         }
 
         /// <summary>
@@ -299,16 +292,18 @@ namespace Blogs.Infrastructure.Services.Admin
         /// <param name="accessToken"></param>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        private async Task StoreTokensInRedisAsync(ClaimsPrincipal principal, string userId, string accessToken, string refreshToken, string userRole)
+        private async Task StoreTokensInRedisAsync(ClaimsPrincipal principal, SysUser user, string accessToken, string refreshToken, string userRole)
         {
             // 构建数据对象
+            var userRoles = user.UserRoles.Select(ur => ur.RoleId.ToString()).ToList();
+            var userId = user.Id.ToString();
             var userData = new UserTokenData
             {
                 UserId = userId,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 UserName = principal.FindFirstValue(ClaimTypes.Name) ?? "",
-                Role = userRole
+                RoleIds = userRoles
             };
 
             // 使用 JSON 序列化确保类型安全
@@ -381,17 +376,14 @@ namespace Blogs.Infrastructure.Services.Admin
                    .Where(it => it.Id.ToString() == userTokenModel.Id)
                     .FirstAsync();
 
-                    var userRoles = await _dbContext.Queryable<SysUserRoleRelation>()
-                        .Where(it => it.UserId.ToString() == userTokenModel.Id)
-                        .Select(it => it.RoleId)
-                        .ToListAsync();
                     var handler = new JwtSecurityTokenHandler();
                     var jwtToken = handler.ReadJwtToken(token);
-                    var userRole = string.Join(",", user.UserRoles.Select(it => it.RoleId));
+                    var userRoles = user.UserRoles.Select(ur => ur.RoleId.ToString()).ToList(); 
+
                     var userModel = new JwtUserModel
                     {
                         UserId = user.Id.ToString(),
-                        Roles = userRole,
+                        RoleIds = userRoles,
                         Platform = "admin",
                         UserName = user.UserName,
                         Email = user.Email,

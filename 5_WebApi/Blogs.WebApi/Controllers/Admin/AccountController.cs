@@ -46,9 +46,7 @@ namespace Blogs.WebApi.Controllers.Admin
         {
             try
             {
-                // 创建登录命令
                 UserLoginCommand command = new UserLoginCommand(request.Account, request.Password);
-                // 发送命令并获取结果
                 var result = await _mediator.Send<ResultObject>(command);
                 if (result.IsSuccess())
                 {

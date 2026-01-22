@@ -57,21 +57,18 @@ namespace Blogs.AppServices.CommandHandlers
             {
                 NotifyValidationErrors(command);
                 var errorMessage1 = command.ValidationResult.Errors.Select(e => e.ErrorMessage);
-                //发送登录失败通知
-
-                return ResultObject.Error("登录失败，参数错误");
+                _logger.LogWarning("登录验证失败: {Errors}", string.Join(", ", errorMessage1));           
+                return ResultObject.Error("登录失败，请重试");
             }
 
-            // 获取用户信息
             var user = await _userRepository.GetByUserNameAsync(command.UserName);
             if (user == null)
             {
                 errorMessage = "用户名或密码错误";
-
+                _logger.LogWarning("登录失败，用户不存在: {UserName}", command.UserName);
                 return ResultObject.Error("登录失败，用户名或密码错误");
             }
 
-            // 检查用户是否被锁定
             if (user.IsDeleted)
             {
                 errorMessage = "用户已被锁定，请稍后再试";
@@ -100,7 +97,6 @@ namespace Blogs.AppServices.CommandHandlers
                 return ResultObject.Error(errorMessage);
             }
 
-            // 检查密码是否过期
             if (await _authService.CheckPasswordExpiredAsync(user.Id))
             {
                 errorMessage = "密码已过期，请修改密码";
@@ -124,7 +120,6 @@ namespace Blogs.AppServices.CommandHandlers
                 RefreshToken = tokenResult.RefreshToken,
                 ExpiresIn = tokenResult.Expiration
             };
-
 
             var userDepartment = new Dictionary<string, string>();
             userDepartment.Add(user.Department.Id.ToString(), user.Department.Name);

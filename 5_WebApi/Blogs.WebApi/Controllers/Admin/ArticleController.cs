@@ -97,8 +97,13 @@ namespace Blogs.WebApi.Controllers.Admin
         [HttpDelete]
         public async Task<ActionResult> DeleteArticleAsync([FromBody] IdParam param)
         {
-            await Task.CompletedTask;
-            return Ok(ResultObject.Success("删除成功！"));
+            var command = new DeleteArticleCommand(param.Id);
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(ResultObject.Success("删除成功！"));
+            }
+            return Ok(ResultObject.Success("删除失败！"));
         }
 
         /// <summary>

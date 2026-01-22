@@ -70,8 +70,8 @@ namespace Blogs.WebApi.Controllers.Admin
         [HttpGet("menus")]
         public async Task<ActionResult> GetRoleMenuAsync()
         {
-            var roleIds = CurrentUser.Instance.UserInfo.Roles;
-            var query = new GetRoleMenuAuthQuery(roleIds);
+            var roleIds = CurrentUser.Instance.UserInfo.RoleIds;
+            var query = new GetRoleMenuAuthQuery(string.Join(",", roleIds));
             var result = await _mediator.Send(query);
             return Ok(result);
         }
