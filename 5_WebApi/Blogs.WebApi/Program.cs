@@ -20,18 +20,14 @@ using Blogs.Infrastructure.Services.App;
 using Blogs.WebApi.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using OpenIddict.Abstractions;
-using OpenIddict.Validation.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using StackExchange.Redis;
@@ -151,7 +147,6 @@ else
 
 #region 注册仓储
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
-
 var domainAssembly = typeof(IUserRepository).Assembly;
 var infrastructureAssembly = typeof(UserRepository).Assembly;
 
@@ -190,6 +185,7 @@ builder.Services.AddScoped<IAppOpenIddictService, AppOpenIddictService>();
 builder.Services.AddScoped<IAppAuthService, AppAuthService>();
 
 // 配置EF Core上下文
+builder.Services.AddScoped<SqlSugarDbContext>();
 builder.Services.AddDbContext<OpenIddictDbContext>(options =>
 {
     var connectionString = AppConfig.GetSettingString("ConnectionStrings:MySqlConnectionWrite");
@@ -363,21 +359,9 @@ builder.Services.AddAuthorization(options =>
 
 #region 日志配置
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
-    .WriteTo.File(
-        path: "Logs/.txt",
-        rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 30,
-        fileSizeLimitBytes: 10 * 1024 * 1024,
-        rollOnFileSizeLimit: true,
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-        encoding: Encoding.UTF8
-    )
     .CreateLogger();
-
 builder.Host.UseSerilog();
 #endregion
 
@@ -493,8 +477,8 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 // 开发环境启用Swagger
-//if (app.Environment.IsDevelopment())
-//{
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
@@ -502,7 +486,7 @@ app.UseStaticFiles(new StaticFileOptions
         options.SwaggerEndpoint("/swagger/admin/swagger.json", "Admin API v1");
         options.RoutePrefix = "swagger";
     });
-//}
+}
 
 app.UseRouting();
 

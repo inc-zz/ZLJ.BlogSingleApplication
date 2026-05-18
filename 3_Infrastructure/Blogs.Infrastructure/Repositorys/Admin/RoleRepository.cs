@@ -9,8 +9,10 @@ namespace Blogs.Infrastructure.Repositorys.Admin
     /// <summary>
     /// 角色仓储层
     /// </summary>
-    public class RoleRepository : SimpleClient<SysRole>, IRoleRepository
+    public class RoleRepository : BaseRepository<SysRole>, IRoleRepository
     {
-
+        public RoleRepository(SqlSugarDbContext dbContext) : base(dbContext)
+        {
+        }
     }
 }

@@ -46,7 +46,13 @@ namespace Blogs.AppServices.QueryHandlers.Admin
 
             return new PagedResult<BlogsCategoryDto>(categories, totalCount.Value, request.PageIndex, request.PageSize);
         }
-
+        /// <summary>
+        /// 获取分类
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<BlogsCategoryDto> Handle(GetBlogsCategoryByIdQuery request, CancellationToken cancellationToken)
         {
             var category = await DbContext.Queryable<BlogsCategory>()

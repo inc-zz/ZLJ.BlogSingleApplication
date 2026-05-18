@@ -9,6 +9,7 @@ namespace Blogs.Domain.IRepositorys.Admin
     /// </summary>
     public interface IUserRepository : IBaseRepository<SysUser>
     {
+
         /// <summary>
         /// 用户角色授权
         /// </summary>

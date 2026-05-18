@@ -8,9 +8,11 @@ namespace Blogs.Infrastructure.Repositorys.Admin
     /// <summary>
     /// 系统日志仓储层
     /// </summary>
-    public class SysLogRepository : SimpleClient<SysLog>, ISysLogRepository
+    public class SysLogRepository : BaseRepository<SysLog>, ISysLogRepository
     {
 
-
+        public SysLogRepository(SqlSugarDbContext dbContext) : base(dbContext)
+        {
+        }
     }
 }

@@ -14,10 +14,8 @@ namespace Blogs.Infrastructure.Repositorys
     /// </summary>
     public class BaseRepository<T> : SimpleClient<T>, IBaseRepository<T> where T : class, new()
     {
-        public BaseRepository()
+        public BaseRepository(SqlSugarDbContext dbContext) : base(dbContext.DbContext)
         {
-
         }
-       
     }
 }

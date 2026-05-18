@@ -12,18 +12,19 @@ namespace Blogs.Infrastructure.Repositorys.Admin
     /// <summary>
     /// 部门仓储接口
     /// </summary>
-    public class DepartmentRepository : SimpleClient<SysDepartment>, IDepartmentRepository
+    public class DepartmentRepository : BaseRepository<SysDepartment>, IDepartmentRepository
     {
-        private readonly SqlSugarClient dbContext;
-        public DepartmentRepository()
+        public DepartmentRepository(SqlSugarDbContext dbContext) : base(dbContext)
         {
-            dbContext = new SqlSugarDbContext().DbContext;
-
         }
 
+        /// <summary>
+        /// 获取部门信息
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<SysDepartment>> GetDepartmentTreeAsync()
         {
-            var list = await dbContext.Queryable<SysDepartment>()
+            var list = await Context.Queryable<SysDepartment>()
                 .Where(it => it.IsDeleted == 0)
                 .ToTreeAsync(it => it.Children, it => it.ParentId, 0);
             return list;

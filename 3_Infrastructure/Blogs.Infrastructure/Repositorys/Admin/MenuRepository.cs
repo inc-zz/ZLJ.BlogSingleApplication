@@ -9,8 +9,13 @@ namespace Blogs.Infrastructure.Repositorys.Admin
     /// <summary>
     /// 菜单操作
     /// </summary>
-    public class MenuRepository : SimpleClient<SysMenu>, IMenuRepository
+    public class MenuRepository : BaseRepository<SysMenu>, IMenuRepository
     {
+
+        public MenuRepository(SqlSugarDbContext dbContext) : base(dbContext)
+        {
+        }
+
         /// <summary>
         /// 获取菜单按钮权限
         /// </summary>

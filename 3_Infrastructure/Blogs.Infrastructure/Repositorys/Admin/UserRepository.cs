@@ -4,19 +4,18 @@ using Blogs.Core.Entity.Admin;
 using Blogs.Core.Models;
 using Blogs.Domain.Entity.Admin;
 using Blogs.Domain.IRepositorys.Admin;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blogs.Infrastructure.Repositorys.Admin
 {
     /// <summary>
     /// 用户仓储实现
     /// </summary>
-    public class UserRepository : SimpleClient<SysUser>, IUserRepository
+    public class UserRepository : BaseRepository<SysUser>, IUserRepository
     {
-        private readonly SqlSugarDbContext dbContext;
-        public UserRepository()
+        public UserRepository(SqlSugarDbContext dbContext) : base(dbContext)
         {
-            dbContext = new SqlSugarDbContext();
-            base.Context = dbContext.DbContext;
+
         }
 
         /// <summary>
@@ -27,7 +26,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
         /// <returns></returns>
         public async Task<bool> UserRoleAuth(SysUser adminUser,long roleId)
         {
-            var isAny = await base.Context.Queryable<SysUserRoleRelation>().Where(it => it.UserId == adminUser.Id
+            var isAny = await Context.Queryable<SysUserRoleRelation>().Where(it => it.UserId == adminUser.Id
             && it.RoleId == roleId).AnyAsync();
             if (!isAny)
             {
@@ -36,7 +35,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
                     RoleId = roleId,
                     UserId = adminUser.Id
                 };
-                var res = await base.Context.Insertable(userRole).ExecuteCommandAsync();
+                var res = await Context.Insertable(userRole).ExecuteCommandAsync();
                 isAny = res > 0;
             }
             return isAny;
@@ -67,7 +66,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
             var conn = base.Context.CurrentConnectionConfig.ConnectionString;
             try
             {
-                var user = await dbContext.DbContext.Queryable<SysUser>()
+                var user = await Context.Queryable<SysUser>()
                   .Includes(u => u.Department)
                   .Includes(u => u.UserRoles)
                   .Where(it => it.UserName == userName)
@@ -98,7 +97,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
         /// <returns></returns>
         public async Task<bool> ResetLoginFailedCountAsync(long userId)
         {
-            var res = await dbContext.DbContext.Updateable<SysUser>()
+            var res = await Context.Updateable<SysUser>()
                  .SetColumns(it => new SysUser { AccessFailedCount = 0 })
                  .Where(wt => wt.Id == userId).ExecuteCommandAsync();
             return res > 0;
@@ -113,7 +112,7 @@ namespace Blogs.Infrastructure.Repositorys.Admin
         /// <returns></returns>
         public async Task<bool> UpdateLastLoginInfoAsync(long userId, string ipAddress, DateTime loginTime)
         {
-            var res = await dbContext.DbContext.Updateable<SysUser>()
+            var res = await Context.Updateable<SysUser>()
                .SetColumns(it => new SysUser { LastLoginTime = loginTime })
                .Where(wt => wt.Id == userId).ExecuteCommandAsync();
             return res > 0;
