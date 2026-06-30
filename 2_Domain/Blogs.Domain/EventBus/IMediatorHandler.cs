@@ -13,7 +13,6 @@ namespace Blogs.Domain.EventBus
     /// </summary>
     public interface IMediatorHandler
     {
-         
         /// <summary>
         /// 发布事件
         /// </summary>
@@ -21,6 +20,5 @@ namespace Blogs.Domain.EventBus
         /// <param name="event"> 事件模型</param>
         /// <returns></returns>
         Task RaiseEvent<T>(T @event) where T : Event;
-
     }
 }

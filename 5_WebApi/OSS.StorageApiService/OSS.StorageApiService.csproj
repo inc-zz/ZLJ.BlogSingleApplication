@@ -1,0 +1,132 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="aliyun-net-sdk-core" Version="1.6.2" />
+    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.14.1" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.400.2" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.17.9" />
+    <PackageReference Include="Minio" Version="6.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
+  </ItemGroup>
+ 
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.AspNetCore.Mvc" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.Dapr" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.DistributedLocking.Dapr" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.Http.Client.Dapr" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.Mapperly" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.Swashbuckle" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.AspNetCore.Serilog" Version="10.0.1" />
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore.MySQL" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>compile; contentFiles; build; buildMultitargeting; buildTransitive; analyzers; native</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Localization\StorageApiService\*.json" />
+    <EmbeddedResource Include="Localization\StorageApiService\*.json" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('./openiddict.pfx')">
+    <None Remove="openiddict.pfx" />
+    <EmbeddedResource Include="openiddict.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Logs\**" />
+    <Content Remove="Logs\**" />
+    <EmbeddedResource Remove="Logs\**" />
+    <None Remove="Logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="$(UserProfile)\.nuget\packages\*\*\contentFiles\any\*\*.abppkg*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Localization\ApiService\sv.json" />
+    <Content Remove="Localization\ObjectStoreApi\ar.json" />
+    <Content Remove="Localization\ObjectStoreApi\cs.json" />
+    <Content Remove="Localization\ObjectStoreApi\de.json" />
+    <Content Remove="Localization\ObjectStoreApi\en-GB.json" />
+    <Content Remove="Localization\ObjectStoreApi\en.json" />
+    <Content Remove="Localization\ObjectStoreApi\es.json" />
+    <Content Remove="Localization\ObjectStoreApi\fi.json" />
+    <Content Remove="Localization\ObjectStoreApi\fr.json" />
+    <Content Remove="Localization\ObjectStoreApi\hi.json" />
+    <Content Remove="Localization\ObjectStoreApi\hr.json" />
+    <Content Remove="Localization\ObjectStoreApi\hu.json" />
+    <Content Remove="Localization\ObjectStoreApi\is.json" />
+    <Content Remove="Localization\ObjectStoreApi\it.json" />
+    <Content Remove="Localization\ObjectStoreApi\nl.json" />
+    <Content Remove="Localization\ObjectStoreApi\pl-PL.json" />
+    <Content Remove="Localization\ObjectStoreApi\pt-BR.json" />
+    <Content Remove="Localization\ObjectStoreApi\ro-RO.json" />
+    <Content Remove="Localization\ObjectStoreApi\ru.json" />
+    <Content Remove="Localization\ObjectStoreApi\sk.json" />
+    <Content Remove="Localization\ObjectStoreApi\sl.json" />
+    <Content Remove="Localization\ObjectStoreApi\sv.json" />
+    <Content Remove="Localization\ObjectStoreApi\tr.json" />
+    <Content Remove="Localization\ObjectStoreApi\vi.json" />
+    <Content Remove="Localization\ObjectStoreApi\zh-Hans.json" />
+    <Content Remove="Localization\ObjectStoreApi\zh-Hant.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\ApiService\sv.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\ar.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\cs.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\de.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\en-GB.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\en.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\es.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\fi.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\fr.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\hi.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\hr.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\hu.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\is.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\it.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\nl.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\pl-PL.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\pt-BR.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\ro-RO.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\ru.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\sk.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\sl.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\sv.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\tr.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\vi.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\zh-Hans.json" />
+    <EmbeddedResource Include="Localization\ObjectStoreApi\zh-Hant.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\01-frameworks\ZLJ.AbpFramework.Extensions\ZLJ.AbpFramework.Extensions.csproj" />
+    <ProjectReference Include="..\..\01-frameworks\ZLJ.AbpFramework\ZLJ.AbpFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+</Project>

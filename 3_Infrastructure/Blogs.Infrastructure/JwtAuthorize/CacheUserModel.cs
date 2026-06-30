@@ -26,6 +26,5 @@ namespace Blogs.Domain
         /// 是否超管
         /// </summary>
         public bool IsSuperAdmin { get; set; }
-
     }
 }

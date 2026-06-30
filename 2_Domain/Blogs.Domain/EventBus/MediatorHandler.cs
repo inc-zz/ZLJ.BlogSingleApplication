@@ -15,13 +15,9 @@ namespace Blogs.Domain.EventBus
     {
         private readonly IMediator _mediator;
         private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
-       
-        /**
-         当命令执行完成后，通过发布事件来通知系统中的其他模块
-         */
 
         /// <summary>
-        /// 
+        /// 当命令执行完成后，通过发布事件来通知系统中的其他模块
         /// </summary>
         /// <param name="mediator"></param>
         /// <param name="serviceFactory"></param> 

@@ -32,12 +32,14 @@ namespace Blogs.WebApi.Controllers.Admin
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="mediator"></param>
+        /// <param name="notifications"></param>
         public UserController(IMediator mediator, INotificationHandler<DomainNotification> notifications)
         {
             _mediator = mediator;
             _notificationHandler = notifications as DomainNotificationHandler;
         }
-           
+
         /// <summary>
         /// 管理员列表
         /// </summary>
@@ -45,7 +47,6 @@ namespace Blogs.WebApi.Controllers.Admin
         [HttpGet("list")]
         public async Task<ActionResult> GetAdminUserList([FromQuery] GetAdminListRequest param)
         {
-            // 创建查询对象
             var query = new GetUserListQuery
             {
                 PageIndex = param.PageIndex,
@@ -54,7 +55,6 @@ namespace Blogs.WebApi.Controllers.Admin
                 IsActive = param.Status,
                 SearchTerm = param.Where
             };
-
             // 通过中介者发送查询请求
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
@@ -71,8 +71,7 @@ namespace Blogs.WebApi.Controllers.Admin
             var query = new GetUserInfoQuery
             {
                 Id = param.Id
-            };
-            // 通过中介者发送查询请求
+            };  
             var result = await _mediator.Send(query);
             return new OkObjectResult(result);
         }
@@ -86,9 +85,7 @@ namespace Blogs.WebApi.Controllers.Admin
         public async Task<ActionResult> AddAdminUserAsync([FromBody] AddUserRequest request)
         {
             var command = new CreateUserCommand(request);
-
             var result = await _mediator.Send(command);
-
             if (result)
             {
                 return Ok(ResultObject.Success("处理成功"));
@@ -204,7 +201,7 @@ namespace Blogs.WebApi.Controllers.Admin
                 var notifications = _notificationHandler.GetNotifications();
                 return BadRequest(notifications);
             }
-        } 
+        }
 
         /// <summary>
         /// 批量设置用户角色

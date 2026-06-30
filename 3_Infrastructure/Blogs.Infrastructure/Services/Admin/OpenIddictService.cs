@@ -147,7 +147,6 @@ namespace Blogs.Infrastructure.Services.Admin
 
                 //检查访问令牌是否与当前请求令牌相同(防止多设备登录)
                 return userData.AccessToken == token;
-
             }
             catch
             {
@@ -176,7 +175,6 @@ namespace Blogs.Infrastructure.Services.Admin
                 var redisKey = $"user_tokens:{userId}";
                 // 从 Redis 中删除令牌
                 await _redisDb.KeyDeleteAsync(redisKey);
-
                 var refrshTokenKey = $"refresh_token:{refreshToken}";
                 await _redisDb.KeyDeleteAsync(refrshTokenKey);
 

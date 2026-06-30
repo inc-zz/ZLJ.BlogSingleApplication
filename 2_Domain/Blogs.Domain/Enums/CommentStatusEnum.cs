@@ -6,10 +6,22 @@ using System.Threading.Tasks;
 
 namespace Blogs.Domain.Enums
 {
+    /// <summary>
+    /// 评论状态
+    /// </summary>
     public enum CommentStatusEnum
     {
-        Pending = 0,    // 待审核
-        Approved = 1,   // 已通过
-        Rejected = 2    // 已拒绝
+        /// <summary>
+        /// 待审核
+        /// </summary>
+        Pending = 0,
+        /// <summary>
+        /// 已通过
+        /// </summary>
+        Approved,
+        /// <summary>
+        /// 已拒绝
+        /// </summary>
+        Rejected2
     }
 }

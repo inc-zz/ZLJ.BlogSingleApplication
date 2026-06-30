@@ -25,6 +25,5 @@ namespace Blogs.AppServices.Commands.Admin.SysUser
             ValidationResult = new UserLoginCommandValidation().Validate(this);
             return ValidationResult.IsValid;
         }
-
     }
 }

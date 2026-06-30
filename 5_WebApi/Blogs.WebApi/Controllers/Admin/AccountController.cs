@@ -50,8 +50,7 @@ namespace Blogs.WebApi.Controllers.Admin
                 var result = await _mediator.Send<ResultObject>(command);
                 if (result.IsSuccess())
                 {
-                    _logger.LogInformation("User {Account} logged in successfully", request.Account);
-
+                    _logger.LogInformation("用户 {Account} 登录成功", request.Account);
                     return Ok(result);
                 }
                 else
