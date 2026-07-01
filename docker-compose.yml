@@ -127,30 +127,9 @@ services:
     extra_hosts:
       # 让Nginx容器能访问宿主机127.0.0.1的Jenkins
       - "host.docker.internal:host-gateway"
-
-  jenkins:
-    image: jenkins/jenkins:lts-jdk17
-    container_name: blogs-jenkins
-    ports:
-      - "127.0.0.1:8080:8080"
-      - "127.0.0.1:50000:50000"
-    volumes:
-      - jenkins-data:/var/jenkins_home
-      - /opt/jenkins-scripts:/opt/jenkins-scripts:ro
-      - /var/run/docker.sock:/var/run/docker.sock 
-      - /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins:ro
-      - /usr/bin/docker:/usr/bin/docker:ro
-    user: root
-    restart: unless-stopped
-    networks:
-      - app-network
-    environment:
-      JENKINS_OPTS: "--httpListenAddress=0.0.0.0"
-
 volumes:
   mysql-data:
   redis-data:
-  jenkins-data:
 networks:
   app-network:
     driver: bridge

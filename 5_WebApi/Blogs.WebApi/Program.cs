@@ -245,7 +245,7 @@ builder.Services.AddOpenIddict()
 
             // 从配置读取证书路径
             var certPath = builder.Configuration["OpenIddict:CertificatePath"] ??
-                          "/app/certs/encryption-certificate.pfx";
+                          "/var/lib/jenkins/workspace/certs/webapi.pfx.key/encryption-certificate.pfx";
             var certPassword = builder.Configuration["OpenIddict:CertificatePassword"];
 
             Console.WriteLine($"证书路径: {certPath}");
