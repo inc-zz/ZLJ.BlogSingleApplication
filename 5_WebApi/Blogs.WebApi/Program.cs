@@ -239,45 +239,45 @@ builder.Services.AddOpenIddict()
             options.AddEphemeralEncryptionKey()
                    .AddEphemeralSigningKey();
         }
-        else if (builder.Environment.IsProduction())
-        {
-            Console.WriteLine("生产环境：配置证书");
+        //else if (builder.Environment.IsProduction())
+        //{
+        //    Console.WriteLine("生产环境：配置证书");
 
-            // 从配置读取证书路径
-            var certPath = builder.Configuration["OpenIddict:CertificatePath"] ??
-                          "/var/lib/jenkins/workspace/certs/webapi.pfx.key/encryption-certificate.pfx";
-            var certPassword = builder.Configuration["OpenIddict:CertificatePassword"];
+        //    //// 从配置读取证书路径
+        //    //var certPath = builder.Configuration["OpenIddict:CertificatePath"] ??
+        //    //              "/var/lib/jenkins/workspace/certs/webapi.pfx.key/encryption-certificate.pfx";
+        //    //var certPassword = builder.Configuration["OpenIddict:CertificatePassword"];
 
-            Console.WriteLine($"证书路径: {certPath}");
+        //    //Console.WriteLine($"证书路径: {certPath}");
 
-            if (File.Exists(certPath))
-            {
-                try
-                {
-                    var certificate = new X509Certificate2(certPath, certPassword ?? string.Empty,
-                        X509KeyStorageFlags.EphemeralKeySet);
+        //    //if (File.Exists(certPath))
+        //    //{
+        //    //    try
+        //    //    {
+        //    //        var certificate = new X509Certificate2(certPath, certPassword ?? string.Empty,
+        //    //            X509KeyStorageFlags.EphemeralKeySet);
 
-                    options.AddEncryptionCertificate(certificate);
-                    options.AddSigningCertificate(certificate);
+        //    //        options.AddEncryptionCertificate(certificate);
+        //    //        options.AddSigningCertificate(certificate);
 
-                    Console.WriteLine($"证书加载成功！主题: {certificate.Subject}");
-                    Console.WriteLine($"证书指纹: {certificate.Thumbprint}");
-                    Console.WriteLine($"证书有效期: {certificate.NotBefore:yyyy-MM-dd} 到 {certificate.NotAfter:yyyy-MM-dd}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"警告: 证书加载失败，使用临时密钥（生产环境不推荐）: {ex.Message}");
-                    options.AddEphemeralEncryptionKey()
-                           .AddEphemeralSigningKey();
-                }
-            }
-            else
-            {
-                Console.WriteLine($"警告: 证书文件不存在 ({certPath})，使用临时密钥（生产环境不推荐）");
-                options.AddEphemeralEncryptionKey()
-                       .AddEphemeralSigningKey();
-            }
-        }
+        //    //        Console.WriteLine($"证书加载成功！主题: {certificate.Subject}");
+        //    //        Console.WriteLine($"证书指纹: {certificate.Thumbprint}");
+        //    //        Console.WriteLine($"证书有效期: {certificate.NotBefore:yyyy-MM-dd} 到 {certificate.NotAfter:yyyy-MM-dd}");
+        //    //    }
+        //    //    catch (Exception ex)
+        //    //    {
+        //    //        Console.WriteLine($"警告: 证书加载失败，使用临时密钥（生产环境不推荐）: {ex.Message}");
+        //    //        options.AddEphemeralEncryptionKey()
+        //    //               .AddEphemeralSigningKey();
+        //    //    }
+        //    //}
+        //    //else
+        //    //{
+        //    //    Console.WriteLine($"警告: 证书文件不存在 ({certPath})，使用临时密钥（生产环境不推荐）");
+        //    //    options.AddEphemeralEncryptionKey()
+        //    //           .AddEphemeralSigningKey();
+        //    //}
+        //}
 
         // 配置令牌生命周期
         options.SetAccessTokenLifetime(TimeSpan.FromHours(1));
