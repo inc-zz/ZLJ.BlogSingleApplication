@@ -137,8 +137,7 @@ services:
     volumes:
       - jenkins-data:/var/jenkins_home
       - /opt/jenkins-scripts:/opt/jenkins-scripts:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      # - /usr/local/bin/docker-compose:/usr/local/bin/docker-compose:ro
+      - /var/run/docker.sock:/var/run/docker.sock 
       - /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins:ro
       - /usr/bin/docker:/usr/bin/docker:ro
     user: root
