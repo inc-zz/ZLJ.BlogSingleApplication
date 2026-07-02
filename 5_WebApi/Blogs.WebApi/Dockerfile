@@ -35,4 +35,10 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=publish /app/publish .
+
+# 复制证书文件到容器中
+RUN mkdir -p /app/certs
+COPY ["5_WebApi/Blogs.WebApi/encryption-certificate.pfx", "/app/certs/"]
+
+
 ENTRYPOINT ["dotnet", "Blogs.WebApi.dll"]
